@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "servers": [
+    {
+      "name": "Hypixel",
+      "match": ["hypixel.net", "*.hypixel.net"],
+      "disallow": ["freelook", "tiertags"],
+      "note": "Hypixel Allowed Modifications: no perspective changes (freelook); tier tags add third-party info about other players."
+    }
+  ]
+}

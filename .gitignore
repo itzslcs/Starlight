@@ -19,3 +19,7 @@ bench-out/
 .obsidian/
 Untitled.base
 .claude/settings.local.json
+
+# Stonecutter version nodes hold only build output here
+fabric/versions/
+legacy/.gradle/

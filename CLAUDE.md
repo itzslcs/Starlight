@@ -16,7 +16,19 @@ Multi-version Minecraft client mod: 18 jars (1.8.9 Forge; 1.21–1.21.11 and 26.
 build for Forge 1.8.9. `addons/`: plugin jars. `scripts/`: smoke/prod tests. `docs/`: all documentation.
 
 ## Commands
-(Filled in during Phase 1.)
+- `./gradlew buildAll`: every jar → `dist/` + `SHA256SUMS` (runs core tests; builds `legacy/` through its own wrapper).
+- `./gradlew :core:test`: unit tests.
+- `./gradlew :fabric:<mc>:build -Pkestrel.fabricTargets=<mc>`: one Fabric target (the property limits configuration to it).
+- `cd legacy && ./gradlew build`: 1.8.9 (needs `./gradlew :api:jar :core:jar` in the root first).
+- `scripts/smoke.sh <mc> [seconds]`: headless smoke (Xvfb + llvmpipe). Evidence goes to `smoke-out/<mc>/`.
+- Signatures, never from memory: javap against Loom's mapped jars in `~/.gradle/caches/fabric-loom/minecraftMaven/...`
+  (Mojang names) and `~/.gradle/caches/essential-loom/minecraftMaven/...` (MCP names for 1.8.9).
+
+## Conventions
+- Version-specific code only in `fabric/src` (Stonecutter `//? if` blocks) and `legacy/src`. Core has no MC imports.
+- Mixins: one-line bodies that call `KestrelFabric`/`Kestrel` static hooks. `required:false`, `defaultRequire:1`. No `@Overwrite`.
+- Every module: an entry in docs/RULES_MATRIX.md (RulesMatrixTest enforces it). GRAY ⇒ default off.
+- No per-frame allocation in HUD paths (reused call objects, cached strings).
 
 ## Environment facts
 - Prism (Flatpak) data: `~/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/`. Dawn (Flatpak) data: `~/.var/app/gg.dawn.Launcher/data/dawn/`.

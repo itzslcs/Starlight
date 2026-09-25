@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "minVersion": "0.7",
+  "package": "dev.kestrel.forge.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "MinecraftMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,409 @@
+package dev.kestrel.forge;
+
+import dev.kestrel.api.Logger;
+import dev.kestrel.api.render.ItemRef;
+import dev.kestrel.core.Keys;
+import dev.kestrel.core.Kestrel;
+import dev.kestrel.core.platform.ChatAccess;
+import dev.kestrel.core.platform.ModList;
+import dev.kestrel.core.platform.Platform;
+import dev.kestrel.core.platform.ScreenHost;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.GuiIngameMenu;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.settings.GameSettings;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
+import net.minecraft.util.ScreenShotHelper;
+import net.minecraft.world.WorldSettings;
+import net.minecraft.world.WorldType;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
+import org.apache.logging.log4j.LogManager;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+/** Platform for Forge 1.8.9 (MCP names). */
+public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, ModList {
+    private final Minecraft mc = Minecraft.getMinecraft();
+    private final org.apache.logging.log4j.Logger log = LogManager.getLogger("Kestrel");
+    private final ForgeItem[] armor = {new ForgeItem(), new ForgeItem(), new ForgeItem(), new ForgeItem()};
+    private final ForgeItem main = new ForgeItem(), off = new ForgeItem(), probe = new ForgeItem();
+    private int scaledW = 1, scaledH = 1, scale = 1;
+    private boolean wasInWorld;
+    private String lastServer;
+
+    private final Logger logger = new Logger() {
+        @Override
+        public void info(String msg) {
+            log.info(msg);
+        }
+
+        @Override
+        public void warn(String msg) {
+            log.warn(msg);
+        }
+
+        @Override
+        public void error(String msg, Throwable t) {
+            if (t == null) log.error(msg);
+            else log.error(msg, t);
+        }
+    };
+
+    /** ScaledResolution allocates; refresh once per tick/frame instead of per query. */
+    void refreshResolution() {
+        ScaledResolution r = new ScaledResolution(mc);
+        refreshResolution(r);
+    }
+
+    void refreshResolution(ScaledResolution r) {
+        scaledW = r.getScaledWidth();
+        scaledH = r.getScaledHeight();
+        scale = r.getScaleFactor();
+    }
+
+    void pollServer() {
+        boolean inWorld = inWorld();
+        String server = inWorld && mc.getCurrentServerData() != null ? mc.getCurrentServerData().serverIP : null;
+        if (inWorld && (!wasInWorld || !eq(server, lastServer))) {
+            if (wasInWorld) Kestrel.onServerLeave();
+            Kestrel.onServerJoin(server);
+        } else if (!inWorld && wasInWorld) {
+            Kestrel.onServerLeave();
+        }
+        wasInWorld = inWorld;
+        lastServer = server;
+    }
+
+    private static boolean eq(String a, String b) {
+        return a == null ? b == null : a.equals(b);
+    }
+
+    // ------------------------------------------------------------------ Game
+
+    @Override
+    public String minecraftVersion() {
+        return "1.8.9";
+    }
+
+    @Override
+    public String loader() {
+        return "forge";
+    }
+
+    @Override
+    public boolean inWorld() {
+        return mc.theWorld != null && mc.thePlayer != null;
+    }
+
+    @Override
+    public String playerName() {
+        return mc.getSession().getUsername();
+    }
+
+    @Override
+    public UUID playerUuid() {
+        UUID id = mc.getSession().getProfile().getId();
+        return id != null ? id : (mc.thePlayer != null ? mc.thePlayer.getUniqueID() : new UUID(0, 0));
+    }
+
+    @Override
+    public double x() {
+        return mc.thePlayer == null ? 0 : mc.thePlayer.posX;
+    }
+
+    @Override
+    public double y() {
+        return mc.thePlayer == null ? 0 : mc.thePlayer.posY;
+    }
+
+    @Override
+    public double z() {
+        return mc.thePlayer == null ? 0 : mc.thePlayer.posZ;
+    }
+
+    @Override
+    public float yaw() {
+        return mc.thePlayer == null ? 0 : mc.thePlayer.rotationYaw;
+    }
+
+    @Override
+    public float pitch() {
+        return mc.thePlayer == null ? 0 : mc.thePlayer.rotationPitch;
+    }
+
+    @Override
+    public int fps() {
+        return Minecraft.getDebugFPS();
+    }
+
+    @Override
+    public int ping() {
+        if (mc.thePlayer == null || mc.getNetHandler() == null) return -1;
+        NetworkPlayerInfo info = mc.getNetHandler().getPlayerInfo(mc.thePlayer.getUniqueID());
+        return info == null ? -1 : info.getResponseTime();
+    }
+
+    @Override
+    public String serverAddress() {
+        return mc.getCurrentServerData() == null ? null : mc.getCurrentServerData().serverIP;
+    }
+
+    @Override
+    public boolean singleplayer() {
+        return mc.isSingleplayer();
+    }
+
+    @Override
+    public ItemRef armor(int slot) {
+        return armor[slot & 3].set(mc.thePlayer == null ? null : mc.thePlayer.inventory.armorInventory[slot & 3]);
+    }
+
+    @Override
+    public ItemRef mainHand() {
+        return main.set(mc.thePlayer == null ? null : mc.thePlayer.getCurrentEquippedItem());
+    }
+
+    @Override
+    public ItemRef offHand() {
+        return off.set(null);
+    }
+
+    @Override
+    public int countItem(String itemId) {
+        if (mc.thePlayer == null) return 0;
+        int n = 0;
+        for (ItemStack s : mc.thePlayer.inventory.mainInventory) {
+            if (s != null && itemId.equals(probe.set(s).id())) n += s.stackSize;
+        }
+        return n;
+    }
+
+    @Override
+    public boolean isKeyDown(int key) {
+        if (Keys.isMouse(key)) return Mouse.isButtonDown(key - Keys.MOUSE_BASE);
+        int l = LwjglKeys.toLwjgl(key);
+        return l > 0 && Keyboard.isKeyDown(l);
+    }
+
+    @Override
+    public String keyName(int key) {
+        return Keys.name(key);
+    }
+
+    private KeyBinding mapping(Binding b) {
+        GameSettings o = mc.gameSettings;
+        switch (b) {
+            case FORWARD: return o.keyBindForward;
+            case LEFT: return o.keyBindLeft;
+            case BACK: return o.keyBindBack;
+            case RIGHT: return o.keyBindRight;
+            case JUMP: return o.keyBindJump;
+            case SNEAK: return o.keyBindSneak;
+            case SPRINT: return o.keyBindSprint;
+            case ATTACK: return o.keyBindAttack;
+            default: return o.keyBindUseItem;
+        }
+    }
+
+    @Override
+    public boolean bindingDown(Binding b) {
+        return mapping(b).isKeyDown();
+    }
+
+    @Override
+    public String bindingName(Binding b) {
+        int code = mapping(b).getKeyCode();
+        if (code < 0) {
+            int v = code + 100;
+            return v == 0 ? "LMB" : v == 1 ? "RMB" : v == 2 ? "MMB" : "M" + (v + 1);
+        }
+        String s = GameSettings.getKeyDisplayString(code);
+        return s.length() > 5 ? s.substring(0, 5) : s;
+    }
+
+    @Override
+    public int screenWidth() {
+        return scaledW;
+    }
+
+    @Override
+    public int screenHeight() {
+        return scaledH;
+    }
+
+    @Override
+    public boolean supports(String feature) {
+        return false; // no offhand, no shield, no menu blur on 1.8.9
+    }
+
+    // ------------------------------------------------------------------ Platform
+
+    @Override
+    public Logger logger() {
+        return logger;
+    }
+
+    @Override
+    public Path gameDir() {
+        return mc.mcDataDir.toPath();
+    }
+
+    @Override
+    public ScreenHost screens() {
+        return this;
+    }
+
+    @Override
+    public ChatAccess chat() {
+        return this;
+    }
+
+    @Override
+    public ModList mods() {
+        return this;
+    }
+
+    @Override
+    public boolean reducedDebugInfo() {
+        return (mc.thePlayer != null && mc.thePlayer.hasReducedDebug()) || mc.gameSettings.reducedDebugInfo;
+    }
+
+    @Override
+    public boolean hideGui() {
+        return mc.gameSettings.hideGUI;
+    }
+
+    @Override
+    public int perspective() {
+        return mc.gameSettings.thirdPersonView;
+    }
+
+    @Override
+    public String clipboard() {
+        return GuiScreen.getClipboardString();
+    }
+
+    @Override
+    public void setClipboard(String text) {
+        GuiScreen.setClipboardString(text);
+    }
+
+    @Override
+    public void vanillaBindings(BindingSink sink) {
+        for (KeyBinding kb : mc.gameSettings.keyBindings) {
+            int code = LwjglKeys.fromBinding(kb.getKeyCode());
+            if (code != Keys.NONE) sink.accept(I18n.format(kb.getKeyDescription()), code);
+        }
+    }
+
+    @Override
+    public void openFolder(Path dir) {
+        try {
+            java.nio.file.Files.createDirectories(dir);
+            org.lwjgl.Sys.openURL(dir.toUri().toString());
+        } catch (Exception e) {
+            log.warn("could not open " + dir + ": " + e);
+        }
+    }
+
+    @Override
+    public void screenshot(String name) {
+        IChatComponent msg = ScreenShotHelper.saveScreenshot(mc.mcDataDir, name + ".png", mc.displayWidth, mc.displayHeight, mc.getFramebuffer());
+        log.info("screenshot: " + (msg == null ? "?" : msg.getUnformattedText()));
+    }
+
+    @Override
+    public void quit() {
+        mc.shutdown();
+    }
+
+    @Override
+    public void openWorld(String folder, long seed) {
+        mc.launchIntegratedServer(folder, folder, new WorldSettings(seed, WorldSettings.GameType.CREATIVE, false, false, WorldType.DEFAULT));
+    }
+
+    // ------------------------------------------------------------------ ScreenHost
+
+    @Override
+    public void openGui() {
+        if (!(mc.currentScreen instanceof KestrelGuiScreen)) mc.displayGuiScreen(new KestrelGuiScreen(mc.currentScreen));
+    }
+
+    @Override
+    public void closeGui() {
+        if (mc.currentScreen instanceof KestrelGuiScreen) ((KestrelGuiScreen) mc.currentScreen).close();
+    }
+
+    @Override
+    public Kind current() {
+        GuiScreen s = mc.currentScreen;
+        if (s == null) return Kind.NONE;
+        if (s instanceof KestrelGuiScreen) return Kind.OURS;
+        if (s instanceof GuiMainMenu) return Kind.TITLE;
+        if (s instanceof GuiIngameMenu) return Kind.PAUSE;
+        if (s instanceof GuiChat) return Kind.CHAT;
+        if (s instanceof GuiContainer) return Kind.INVENTORY;
+        return Kind.OTHER;
+    }
+
+    @Override
+    public int width() {
+        return scaledW;
+    }
+
+    @Override
+    public int height() {
+        return scaledH;
+    }
+
+    @Override
+    public float guiScale() {
+        return scale;
+    }
+
+    // ------------------------------------------------------------------ ChatAccess
+
+    @Override
+    public void showLocal(String formatted) {
+        mc.ingameGUI.getChatGUI().printChatMessage(new ChatComponentText(formatted));
+    }
+
+    @Override
+    public void sendMessage(String message) {
+        if (mc.thePlayer != null) mc.thePlayer.sendChatMessage(message);
+    }
+
+    @Override
+    public void sendCommand(String command) {
+        if (mc.thePlayer != null) mc.thePlayer.sendChatMessage("/" + command);
+    }
+
+    // ------------------------------------------------------------------ ModList
+
+    @Override
+    public boolean isLoaded(String modId) {
+        return Loader.isModLoaded(modId);
+    }
+
+    @Override
+    public List<String> describe() {
+        List<String> out = new ArrayList<String>();
+        for (ModContainer c : Loader.instance().getActiveModList()) out.add(c.getModId() + " " + c.getVersion());
+        return out;
+    }
+}
