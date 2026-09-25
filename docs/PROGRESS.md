@@ -17,5 +17,11 @@
 - Smoke: 1.21.11 and 1.8.9 both **PASS** headless (title → GUI → HUD editor → world → GUI → 60 s → quit), 0 suspicious log records.
 - Perf (llvmpipe): HUD cost 1.21.11 76 µs/frame, 1.8.9 275 µs/frame (see debug-log.md). Real-GPU numbers are Phase 5.
 
-## Next: Phase 2
-Port to 1.21 … 1.21.10 (Stonecutter conditionals in fabric/src only).
+## Phase 2: 1.21 … 1.21.10 (done 2026-09-25)
+- API breaks located with javap diffs over Loom's mapped jars (not memory): 1.21.2 world creation/GameRules; 1.21.6
+  Matrix3x2fStack pose, Screenshot.grab signature, blur/background flow; 1.21.9 input event records, Window.handle();
+  1.21.11 Util/GameRules packages, ResourceLocation→Identifier.
+- All 12 1.21.x jars build; smoke PASS on every one (COMPAT_MATRIX). Smoke runs now use a detached git worktree snapshot
+  (`.worktrees/smoke`) so ongoing edits cannot break a running test (debug-log 2026-09-25).
+
+## Next: Phase 4 in progress (Phase 3 after it compiles on 1.21.x)
