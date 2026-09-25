@@ -41,6 +41,11 @@
 - All 18 jars build. The dev smoke passes on 17 of 18 ([COMPAT_MATRIX](COMPAT_MATRIX.md)); mixin audits are fully wired.
 - **Open:** 26.1.1 hangs in JVM exit after a passing run (2/2 runs; [debug-log](debug-log.md)).
 
+## Release status (2026-09-25)
+- **Modrinth:** draft project `kestrel` with all 18 jars as `0.1.0+mc<mc>` alpha versions (uploaded hashes match `dist/`).
+  It is not submitted for review yet: the owner checks the page (the name is still the D-001 placeholder) and submits.
+- **GitHub:** not pushed. The repo has no remote yet.
+
 ## Next
 - Isolate the 26.1.1 exit hang (steps in [debug-log](debug-log.md)).
 - Phase 5: benchmark harness first, then measured optimisations ([PLAN](PLAN.md)).
