@@ -24,7 +24,11 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+//? if >=1.21.11 {
 import net.minecraft.util.Util;
+//?} else {
+/*import net.minecraft.Util;
+*///?}
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
@@ -33,7 +37,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
-import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import org.lwjgl.glfw.GLFW;
@@ -198,11 +201,23 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
         return n;
     }
 
+    private long window() {
+        //? if >=1.21.9 {
+        return mc.getWindow().handle();
+        //?} else {
+        /*return mc.getWindow().getWindow();
+        *///?}
+    }
+
     @Override
     public boolean isKeyDown(int key) {
-        long h = mc.getWindow().handle();
-        if (Keys.isMouse(key)) return GLFW.glfwGetMouseButton(h, key - Keys.MOUSE_BASE) == GLFW.GLFW_PRESS;
-        return key > 0 && InputConstants.isKeyDown(mc.getWindow(), key);
+        if (Keys.isMouse(key)) return GLFW.glfwGetMouseButton(window(), key - Keys.MOUSE_BASE) == GLFW.GLFW_PRESS;
+        if (key <= 0) return false;
+        //? if >=1.21.9 {
+        return InputConstants.isKeyDown(mc.getWindow(), key);
+        //?} else {
+        /*return InputConstants.isKeyDown(window(), key);
+        *///?}
     }
 
     @Override
@@ -334,7 +349,11 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     @Override
     public void screenshot(String name) {
+        //? if >=1.21.6 {
         Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), 1, msg -> log.info("screenshot: {}", msg.getString()));
+        //?} else {
+        /*Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), msg -> log.info("screenshot: {}", msg.getString()));
+        *///?}
     }
 
     @Override
@@ -349,8 +368,15 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
             mc.createWorldOpenFlows().openWorld(folder, () -> mc.setScreen(parent));
             return;
         }
-        LevelSettings settings = new LevelSettings(folder, GameType.CREATIVE, false, Difficulty.PEACEFUL, true,
-                new GameRules(FeatureFlags.DEFAULT_FLAGS), WorldDataConfiguration.DEFAULT);
+        //? if >=1.21.11 {
+        net.minecraft.world.level.gamerules.GameRules rules = new net.minecraft.world.level.gamerules.GameRules(FeatureFlags.DEFAULT_FLAGS);
+        //?} elif >=1.21.2 {
+        /*net.minecraft.world.level.GameRules rules = new net.minecraft.world.level.GameRules(FeatureFlags.DEFAULT_FLAGS);
+        *///?} else {
+        /*net.minecraft.world.level.GameRules rules = new net.minecraft.world.level.GameRules();
+        *///?}
+        LevelSettings settings = new LevelSettings(folder, GameType.CREATIVE, false, Difficulty.PEACEFUL, true, rules,
+                WorldDataConfiguration.DEFAULT);
         mc.createWorldOpenFlows().createFreshLevel(folder, settings, new WorldOptions(seed, false, false),
                 WorldPresets::createNormalWorldDimensions, parent);
     }
@@ -391,7 +417,7 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     @Override
     public float guiScale() {
-        return mc.getWindow().getGuiScale();
+        return (float) mc.getWindow().getGuiScale();
     }
 
     // ------------------------------------------------------------------ ChatAccess

@@ -25,7 +25,9 @@ val allFabric = ((groovy.json.JsonSlurper().parse(file("versions.json")) as Map<
     .map { it["mc"] as String }
 val only = providers.gradleProperty("kestrel.fabricTargets").orNull
     ?.split(',')?.map(String::trim)?.filter(String::isNotEmpty).orEmpty()
-val fabricTargets = if (only.isEmpty()) allFabric else allFabric.filter { it in only }
+// Stonecutter requires its active version (fabric/stonecutter.gradle.kts) to stay registered, even when narrowed.
+val activeVersion = Regex("stonecutter active \"([^\"]+)\"").find(file("fabric/stonecutter.gradle.kts").readText())?.groupValues?.get(1)
+val fabricTargets = if (only.isEmpty()) allFabric else allFabric.filter { it in only || it == activeVersion }
 
 stonecutter {
     create(":fabric") {

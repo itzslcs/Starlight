@@ -23,3 +23,11 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
 - **Result (same smoke scenario):** 1.21.11 **219.6 → 75.6 µs/frame**; 1.8.9 354.3 → 275.4 µs/frame. What remains on
   1.8.9 is mostly vanilla `FontRenderer` immediate-mode glyph draws, which llvmpipe executes on the CPU. These numbers come
   from software GL; real-GPU numbers are Phase 5 (docs/PERF.md).
+
+## 2026-09-25 · smoke-all: every 1.21.x run failed in 3–8 s
+- **Repro:** `scripts/smoke-all.sh 1.21 … 1.21.10`. All exit=1, no game log.
+- **Evidence:** `smoke-out/1.21.4/gradle.log`: `stonecutter.gradle.kts line 3: Version '1.21.11' is not registered.`
+- **Cause:** smoke.sh narrows configuration with `-Pkestrel.fabricTargets=<mc>`, which dropped Stonecutter's *active*
+  version (1.21.11) from the tree.
+- **Fix:** settings.gradle.kts always keeps the active version (parsed from `fabric/stonecutter.gradle.kts`) registered.
+  Verified by re-running the loop (results below in COMPAT_MATRIX).

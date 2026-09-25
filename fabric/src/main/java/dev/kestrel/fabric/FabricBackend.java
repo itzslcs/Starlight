@@ -5,7 +5,6 @@ import dev.kestrel.core.render.RenderBackend;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import org.joml.Matrix3x2fStack;
 
 /**
  * RenderBackend over GuiGraphics. Core passes absolute GUI coordinates; sub-unit geometry is drawn in
@@ -21,7 +20,7 @@ public final class FabricBackend implements RenderBackend {
         this.g = graphics;
         Minecraft mc = Minecraft.getInstance();
         this.font = mc.font;
-        this.gs = mc.getWindow().getGuiScale();
+        this.gs = (float) mc.getWindow().getGuiScale();
         this.scissor = false;
         return this;
     }
@@ -36,20 +35,18 @@ public final class FabricBackend implements RenderBackend {
             g.fill((int) x1, (int) y1, (int) x2, (int) y2, argb);
             return;
         }
-        Matrix3x2fStack pose = g.pose();
-        pose.pushMatrix();
-        pose.scale(1f / gs, 1f / gs);
+        push();
+        scale(1f / gs);
         g.fill(Math.round(x1 * gs), Math.round(y1 * gs), Math.round(x2 * gs), Math.round(y2 * gs), argb);
-        pose.popMatrix();
+        pop();
     }
 
     @Override
     public void gradient(float x1, float y1, float x2, float y2, int topArgb, int bottomArgb) {
-        Matrix3x2fStack pose = g.pose();
-        pose.pushMatrix();
-        pose.scale(1f / gs, 1f / gs);
+        push();
+        scale(1f / gs);
         g.fillGradient(Math.round(x1 * gs), Math.round(y1 * gs), Math.round(x2 * gs), Math.round(y2 * gs), topArgb, bottomArgb);
-        pose.popMatrix();
+        pop();
     }
 
     @Override
@@ -58,12 +55,11 @@ public final class FabricBackend implements RenderBackend {
             g.drawString(font, text, (int) x, (int) y, argb, shadow);
             return;
         }
-        Matrix3x2fStack pose = g.pose();
-        pose.pushMatrix();
-        pose.translate(x, y);
-        pose.scale(scale, scale);
+        push();
+        translate(x, y);
+        scale(scale);
         g.drawString(font, text, 0, 0, argb, shadow);
-        pose.popMatrix();
+        pop();
     }
 
     @Override
@@ -80,13 +76,12 @@ public final class FabricBackend implements RenderBackend {
     public void item(ItemRef item, float x, float y, float scale) {
         if (!(item instanceof FabricItem)) return;
         FabricItem fi = (FabricItem) item;
-        Matrix3x2fStack pose = g.pose();
-        pose.pushMatrix();
-        pose.translate(x, y);
-        pose.scale(scale, scale);
+        push();
+        translate(x, y);
+        scale(scale);
         g.renderItem(fi.stack, 0, 0);
         g.renderItemDecorations(font, fi.stack, 0, 0);
-        pose.popMatrix();
+        pop();
     }
 
     @Override
@@ -106,5 +101,38 @@ public final class FabricBackend implements RenderBackend {
     @Override
     public float guiScale() {
         return gs;
+    }
+
+    // GUI pose: PoseStack up to 1.21.5, Matrix3x2fStack from 1.21.6 (deferred GUI render state).
+    private void push() {
+        //? if >=1.21.6 {
+        g.pose().pushMatrix();
+        //?} else {
+        /*g.pose().pushPose();
+        *///?}
+    }
+
+    private void pop() {
+        //? if >=1.21.6 {
+        g.pose().popMatrix();
+        //?} else {
+        /*g.pose().popPose();
+        *///?}
+    }
+
+    private void translate(float x, float y) {
+        //? if >=1.21.6 {
+        g.pose().translate(x, y);
+        //?} else {
+        /*g.pose().translate(x, y, 0f);
+        *///?}
+    }
+
+    private void scale(float s) {
+        //? if >=1.21.6 {
+        g.pose().scale(s, s);
+        //?} else {
+        /*g.pose().scale(s, s, 1f);
+        *///?}
     }
 }

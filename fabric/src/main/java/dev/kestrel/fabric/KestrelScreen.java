@@ -5,9 +5,11 @@ import dev.kestrel.core.Keys;
 import dev.kestrel.core.gui.GuiRoot;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+//? if >=1.21.9 {
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
+//?}
 import net.minecraft.network.chat.Component;
 
 /** Vanilla Screen hosting core's GuiRoot; input and rendering are forwarded in GUI units. */
@@ -33,7 +35,10 @@ public final class KestrelScreen extends Screen {
         }
     }
 
-    /** Vanilla calls this before render(); it blurs at most once per frame, so we only choose whether to. */
+    /**
+     * Blur/menu background only when the user wants it. From 1.21.6 vanilla calls this before render() (and blurs at most
+     * once per frame); up to 1.21.5 Screen.render() called it, so our render() does that itself below.
+     */
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float delta) {
         Kestrel k = Kestrel.get();
@@ -42,9 +47,12 @@ public final class KestrelScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
+        //? if <1.21.6
+        /*renderBackground(g, mouseX, mouseY, delta);*/
         root().render(backend.bind(g), width, height, mouseX, mouseY);
     }
 
+    //? if >=1.21.9 {
     @Override
     public boolean mouseClicked(MouseButtonEvent e, boolean doubleClick) {
         return root().mouseClicked((float) e.x(), (float) e.y(), e.button());
@@ -59,26 +67,58 @@ public final class KestrelScreen extends Screen {
     public boolean mouseDragged(MouseButtonEvent e, double dx, double dy) {
         return root().mouseDragged((float) e.x(), (float) e.y(), e.button());
     }
+    //?} else {
+    /*@Override
+    public boolean mouseClicked(double x, double y, int button) {
+        return root().mouseClicked((float) x, (float) y, button);
+    }
+
+    @Override
+    public boolean mouseReleased(double x, double y, int button) {
+        return root().mouseReleased((float) x, (float) y, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double x, double y, int button, double dx, double dy) {
+        return root().mouseDragged((float) x, (float) y, button);
+    }
+    *///?}
 
     @Override
     public boolean mouseScrolled(double x, double y, double h, double v) {
         return root().mouseScrolled((float) x, (float) y, v);
     }
 
+    //? if >=1.21.9 {
     @Override
     public boolean keyPressed(KeyEvent e) {
-        if (root().keyPressed(e.key(), e.modifiers())) return true;
-        if (e.key() == Keys.ESCAPE) {
-            onClose();
-            return true;
-        }
-        return false;
+        return key(e.key(), e.modifiers());
     }
 
     @Override
     public boolean charTyped(CharacterEvent e) {
         int cp = e.codepoint();
         return Character.isBmpCodePoint(cp) && root().charTyped((char) cp);
+    }
+    //?} else {
+    /*@Override
+    public boolean keyPressed(int key, int scancode, int modifiers) {
+        return key(key, modifiers);
+    }
+
+    @Override
+    public boolean charTyped(char c, int modifiers) {
+        return root().charTyped(c);
+    }
+    *///?}
+
+    private boolean key(int key, int mods) {
+        if (root().keyPressed(key, mods)) return true;
+        if (key == Keys.ESCAPE) {
+            onClose();
+            return true;
+        }
+        return false;
     }
 
     @Override
