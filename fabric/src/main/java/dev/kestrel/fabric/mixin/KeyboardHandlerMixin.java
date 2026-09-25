@@ -1,6 +1,7 @@
 package dev.kestrel.fabric.mixin;
 
 import dev.kestrel.core.Kestrel;
+import dev.kestrel.fabric.FabricCompat;
 import net.minecraft.client.KeyboardHandler;
 import net.minecraft.client.Minecraft;
 //? if >=1.21.9
@@ -16,7 +17,7 @@ public abstract class KeyboardHandlerMixin {
     @Inject(method = "keyPress", at = @At("HEAD"), cancellable = true)
     private void kestrel$key(long window, int action, KeyEvent event, CallbackInfo ci) {
         if (window != Minecraft.getInstance().getWindow().handle()) return;
-        if (Kestrel.onKey(event.key(), action, event.modifiers())) ci.cancel();
+        if (Kestrel.onKey(FabricCompat.key(event.key()), FabricCompat.action(action), FabricCompat.mods(event.modifiers()))) ci.cancel();
     }
     //?} else {
     /*@Inject(method = "keyPress", at = @At("HEAD"), cancellable = true)

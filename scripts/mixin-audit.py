@@ -22,18 +22,27 @@ if mc == "1.8.9":
             if "sources" not in j and "-srg-" not in j and "-intermediary-" not in j]
 else:
     nametag = "getNameTag" if V >= (1, 21, 2) else "renderNameTag"
-    checks = [("net.minecraft.client.gui.Gui", "render", "kestrel$hud"),
-              ("net.minecraft.client.gui.Gui", "renderCrosshair", "kestrel$crosshair"),
+    unobf = V >= (26, 1)  # 26.1: render -> extract, new homes for FOV, gamma and camera angles
+    hud = "net.minecraft.client.gui.Hud" if V >= (26, 2) else "net.minecraft.client.gui.Gui"
+    hands = "net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer" if V >= (26, 3) else "net.minecraft.client.renderer.ItemInHandRenderer"
+    swap = "net.minecraft.client.player.FirstPersonHandsAndItems" if V >= (26, 3) else "net.minecraft.client.renderer.ItemInHandRenderer"
+    fire = ([("net.minecraft.client.renderer.ScreenEffectRenderer", "lambda$submitFire$0", "kestrel$fireY"),
+             ("net.minecraft.client.renderer.ScreenEffectRenderer", "buildFireQuad", "kestrel$fireAlpha")] if V >= (26, 2) else
+            [("net.minecraft.client.renderer.ScreenEffectRenderer", "renderFire", "kestrel$fireAlpha")])
+    checks = [(hud, "extractRenderState" if unobf else "render", "kestrel$hud"),
+              (hud, "extractCrosshair" if unobf else "renderCrosshair", "kestrel$crosshair"),
               ("net.minecraft.client.Minecraft", "tick", "kestrel$tickStart"),
               ("net.minecraft.client.KeyboardHandler", "keyPress", "kestrel$key"),
               ("net.minecraft.client.MouseHandler", "onScroll", "kestrel$scroll"),
+              ("net.minecraft.client.renderer.LightmapRenderStateExtractor", "extract", "kestrel$gamma") if unobf else
               ("net.minecraft.client.renderer.LightTexture", "updateLightTexture", "kestrel$gamma"),
+              ("net.minecraft.client.Camera", "calculateFov", "kestrel$zoom") if unobf else
               ("net.minecraft.client.renderer.GameRenderer", "getFov", "kestrel$zoom"),
               ("net.minecraft.client.renderer.GameRenderer", "bobHurt", "kestrel$tilt"),
-              ("net.minecraft.client.renderer.ScreenEffectRenderer", "renderFire", "kestrel$fireAlpha"),
-              ("net.minecraft.client.renderer.ItemInHandRenderer", "tick", "kestrel$noDip"),
-              ("net.minecraft.client.renderer.ItemInHandRenderer", "renderArmWithItem", "kestrel$shieldDown"),
-              ("net.minecraft.client.Camera", "setup", "kestrel$pitch"),
+              *fire,
+              (swap, "tick", "kestrel$noDip"),
+              (hands, "submitArmWithItem" if V >= (26, 2) else "renderArmWithItem", "kestrel$shieldDown"),
+              ("net.minecraft.client.Camera", "alignWithEntity" if unobf else "setup", "kestrel$pitch"),
               ("net.minecraft.world.entity.Entity", "turn", "kestrel$turn"),
               ("net.minecraft.client.gui.components.ChatComponent", "addMessage", "kestrel$chat"),
               ("net.minecraft.client.renderer.entity.EntityRenderer", nametag, "kestrel$decorate"),
@@ -45,6 +54,8 @@ else:
     jars = [j for p in (f"{M}/minecraft-clientonly/{mc}-loom.mappings.*/*.jar", f"{M}/minecraft-common/{mc}-loom.mappings.*/*.jar",
                         f"{M}/minecraft-merged/{mc}/*.jar", f"{M}/minecraft-clientonly/{mc}/*.jar", f"{M}/minecraft-common/{mc}/*.jar")
             for j in glob.glob(p) if "sources" not in j]
+    if not jars:  # 26.x ships unobfuscated: Loom keeps the raw, already-named jar
+        jars = glob.glob(os.path.expanduser(f"~/.gradle/caches/fabric-loom/{mc}/minecraft-client.jar"))
 out_dir = os.path.join(run, ".mixin.out", "class")
 cp = out_dir + ":" + ":".join(jars)
 bad = 0

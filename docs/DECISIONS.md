@@ -1,16 +1,18 @@
 # Decisions log
 
+See also: [PLAN](PLAN.md), [ARCHITECTURE](ARCHITECTURE.md), [debug-log](debug-log.md) (evidence behind fixes), [THIRD_PARTY](THIRD_PARTY.md).
+
 Newest last. Each entry states the decision, why, and what would change it.
 
 ## D-001 Placeholder names (rename later)
 - CLIENT_NAME = **Kestrel**, MOD_ID = **kestrel**, BASE_PACKAGE = **dev.kestrel**, LICENSE = **MIT**.
 - Config/plugin dir: `<gameDir>/Kestrel/` (spec: `<gameDir>/[CLIENT_NAME]/plugins/`).
-- The display name, mod id and version live in `gradle.properties`, so renaming touches that file plus the
+- The display name, mod id and version live in [`gradle.properties`](../gradle.properties), so renaming touches that file plus the
   package directories. No existing Minecraft client uses this name as far as a quick search shows.
   It is still a placeholder.
 
 ## D-002 1.8.9 loader = Forge 1.8.9-11.15.1.2318
-Dawn/Feather's own 1.8.9 deployment is Forge 11.15.1.2318 with FMLTweaker and MixinTweaker (docs/FEATHER.md §2).
+Dawn/Feather's own 1.8.9 deployment is Forge 11.15.1.2318 with FMLTweaker and MixinTweaker ([FEATHER.md](FEATHER.md) §2).
 The user's Prism 1.8.9 instance uses the same Forge build. Dawn does not offer Legacy Fabric.
 
 ## D-003 Build layout
@@ -33,9 +35,9 @@ Side effect: mod assets are not loaded without Fabric API's resource loader, so 
 This follows the spec: names then line up with unobfuscated 26.x, which minimises Stonecutter conditionals.
 
 ## D-006 Mixin failure policy (to be verified empirically in Phase 1)
-- `kestrel.mixins.json` holds core hooks with `"required": false` and `defaultRequire: 1`. A failed hook is logged loudly,
+- [`kestrel.mixins.json`](../fabric/src/main/resources/kestrel.mixins.json) holds core hooks with `"required": false` and `defaultRequire: 1`. A failed hook is logged loudly,
   which the smoke test catches, but does not stop the game.
-- `kestrel.optional.mixins.json` holds feature mixins with `"required": false` and `defaultRequire: 0`, gated by an
+- [`kestrel.optional.mixins.json`](../fabric/src/main/resources/kestrel.optional.mixins.json) holds feature mixins with `"required": false` and `defaultRequire: 0`, gated by an
   `IMixinConfigPlugin` that checks loaded mods (e.g. skips our culling when Sodium/EntityCulling is present).
 - A runtime **hook watchdog** records which hooks have fired. If a core hook has not fired after the first world load,
   a toast and the About/Compat page report it.
@@ -103,6 +105,27 @@ nameplate decorations apply to it too.
 
 ## D-017 Prism Launcher (user request)
 Standard jars work in Prism (Fabric Loader component, or the Forge 11.15.1.2318 component for 1.8.9). `buildAll` also
-emits importable Prism instance zips (`dist/prism/Kestrel-<mc>.zip`) and `docs/PRISM.md`. Verification uses a
+emits importable Prism instance zips (`dist/prism/Kestrel-<mc>.zip`) and [`docs/PRISM.md`](PRISM.md). Verification uses a
 production-layout launch (remapped jar, real Fabric Loader/Forge, no Gradle dev runtime) because driving the user's
 Prism install would use their Microsoft accounts.
+
+## D-018 KeyCPS replaces the CPS counter (user request, 2026-09-25)
+The owner asked for Kestrel's CPS counter to be replaced by **KeyCPS** (modrinth.com/mod/keycps), their own
+keystrokes + CPS mod, and for it to appear in Kestrel's Mods GUI in place of KeyCPS's own settings screen. Authorship
+was checked: the local KeyCPS repository (`~/Desktop/KeyCPS`, 1.6.1) is committed by the owner's address. Its
+fabric.mod.json declares MIT while the Modrinth page lists All-Rights-Reserved. Either way, the copyright holder asked
+for this integration. If the standalone mod (id `keycps`) is also installed, Kestrel shows a startup notice to remove it,
+because two overlays would draw.
+- **Ported, not bundled.** [`KeyCpsModule`](../core/src/main/java/dev/kestrel/core/modules/KeyCpsModule.java) (core, Java 8) re-implements KeyCPS 1.6.1's HUD (layout, fade, space-bar line,
+  CPS inside the mouse keys, CPS warning, rainbow, always-LMB/RMB, per-key rates) and its counting ([`InputRates`](../core/src/main/java/dev/kestrel/core/modules/InputRates.java): per
+  binding, from input events, key repeat included) on Kestrel's platform API. Nesting the KeyCPS jar was rejected: it
+  needs Fabric API (Kestrel is Fabric-API-free), it has its own Right Shift settings screen and move screen (a second GUI
+  and a key clash), it would sit outside profiles, server rules and the HUD editor, and it does not exist for 1.8.9.
+- **Mapping of KeyCPS's UI:** module settings (Mods page) replace the settings screen; the HUD editor replaces "Move HUD"
+  and the scale slider and supplies text colour and shadow; the module toggle and Kestrel's keybinds replace "Toggle HUD".
+  Not ported: the first-join chat tip and the 14 translations (Kestrel's UI is English-only for now).
+- The old `cps` and `keystrokes` modules and `ClickTracker` were removed. KeyCPS draws keystrokes and CPS in one element,
+  and the first all-modules smoke run showed the old keystrokes element drawn on top of it.
+- The ported code is part of Kestrel and so falls under Kestrel's MIT licence. The standalone KeyCPS mod keeps its own
+  licence.
+- 1.8.9 limitation: LWJGL 2 sends no key-repeat events in game, so held keyboard keys count once there.

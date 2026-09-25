@@ -36,6 +36,9 @@ public interface Platform extends Game {
     /** Vanilla key bindings (name, GLFW code) for conflict display. */
     void vanillaBindings(BindingSink sink);
 
+    /** Canonical code currently bound to {@code b} (GLFW key or {@code Keys.mouse(button)}), or {@code Keys.NONE}. */
+    int bindingKey(Binding b);
+
     /** Opens a folder in the OS file manager (best effort). */
     void openFolder(Path dir);
 

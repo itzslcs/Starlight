@@ -1,5 +1,6 @@
 package dev.kestrel.core;
 
+import dev.kestrel.api.game.Game;
 import dev.kestrel.core.module.ModuleManager;
 import dev.kestrel.core.platform.ScreenHost;
 import dev.kestrel.core.plugin.PluginManager;
@@ -15,6 +16,7 @@ final class Smoke {
 
     private final Kestrel k;
     private int stage;
+    private String keyCps = "not run";
     private long ticks, stageTicks, worldTicks, inWorldTotal;
 
     Smoke(Kestrel k) {
@@ -86,6 +88,16 @@ final class Smoke {
                     Log.info("SMOKE: enabled " + n + " modules: " + k.modules.describeEnabled());
                 } else if (stageTicks == 20 || stageTicks == 22) {
                     k.platform.debugIncomingChat("Kestrel smoke chat line");
+                } else if (stageTicks == 198) {
+                    // KeyCPS end to end minus the input mixins (whose firing HookWatchdog reports separately): the
+                    // platform's binding lookup must map these to attack/use, and the screenshot shows the counts.
+                    long now = System.currentTimeMillis();
+                    for (int i = 0; i < 7; i++) k.rates.record(k.platform, Keys.mouse(0), now);
+                    for (int i = 0; i < 4; i++) k.rates.record(k.platform, Keys.mouse(1), now);
+                } else if (stageTicks == 199) {
+                    long now = System.currentTimeMillis();
+                    keyCps = "lmb=" + k.rates.rate(Game.Binding.ATTACK, now) + " rmb=" + k.rates.rate(Game.Binding.USE, now);
+                    if (!"lmb=7 rmb=4".equals(keyCps)) fail("KeyCPS counted " + keyCps + ", expected lmb=7 rmb=4");
                 } else if (stageTicks == 200) {
                     k.platform.screenshot("kestrel-smoke-4-all-modules");
                 } else if (stageTicks == 210) {
@@ -137,11 +149,40 @@ final class Smoke {
                 return;
             }
         }
-        Log.info("KESTREL SMOKE PASS hooks[" + k.hooks.describe() + "] plugins[" + plugins.toString().trim() + "] modules["
+        Log.info("KESTREL SMOKE PASS hooks[" + k.hooks.describe() + "] keycps[" + keyCps + "] plugins[" + plugins.toString().trim() + "] modules["
                 + k.modules.describeEnabled() + "] avgFrameMs=" + k.perf.avgFrameMs() + " ownUsPerFrame=" + k.perf.avgOwnUs());
         k.config.flush();
+        shutdownWatchdog();
         k.platform.quit();
         stage = 99;
+    }
+
+    /**
+     * A stuck shutdown would hold a smoke run until its 25-minute timeout with nothing to show for it (debug-log
+     * 2026-09-25, 26.1.1). After 30 s this dumps every Java thread to the log and stderr and halts with exit code 3,
+     * which smoke.sh reports as a failure.
+     */
+    private static void shutdownWatchdog() {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(30000);
+                } catch (InterruptedException e) {
+                    return;
+                }
+                StringBuilder sb = new StringBuilder("KESTREL SMOKE SHUTDOWN HANG: still running 30 s after quit. Threads:\n");
+                for (java.util.Map.Entry<Thread, StackTraceElement[]> e : Thread.getAllStackTraces().entrySet()) {
+                    sb.append('"').append(e.getKey().getName()).append("\" ").append(e.getKey().getState()).append('\n');
+                    for (StackTraceElement el : e.getValue()) sb.append("    at ").append(el).append('\n');
+                }
+                System.err.println(sb);
+                Log.error(sb.toString(), null);
+                Runtime.getRuntime().halt(3);
+            }
+        }, "Kestrel smoke shutdown watchdog");
+        t.setDaemon(true);
+        t.start();
     }
 
     private void fail(String why) {

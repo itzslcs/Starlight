@@ -4,19 +4,31 @@ import dev.kestrel.api.render.ItemRef;
 import dev.kestrel.core.render.RenderBackend;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+//? if >=26.1 {
+/*import net.minecraft.client.gui.GuiGraphicsExtractor;
+*///?} else {
 import net.minecraft.client.gui.GuiGraphics;
+//?}
 
 /**
  * RenderBackend over GuiGraphics. Core passes absolute GUI coordinates; sub-unit geometry is drawn in
  * physical-pixel space by scaling the pose by 1/guiScale. Bound to one GuiGraphics per pass.
  */
 public final class FabricBackend implements RenderBackend {
+    //? if >=26.1 {
+    /*private GuiGraphicsExtractor g;
+    *///?} else {
     private GuiGraphics g;
+    //?}
     private Font font;
     private float gs = 1;
     private boolean scissor;
 
+    //? if >=26.1 {
+    /*public FabricBackend bind(GuiGraphicsExtractor graphics) {
+    *///?} else {
     public FabricBackend bind(GuiGraphics graphics) {
+    //?}
         this.g = graphics;
         Minecraft mc = Minecraft.getInstance();
         this.font = mc.font;
@@ -52,13 +64,13 @@ public final class FabricBackend implements RenderBackend {
     @Override
     public void text(String text, float x, float y, float scale, int argb, boolean shadow) {
         if (scale == 1f && whole(x) && whole(y)) {
-            g.drawString(font, text, (int) x, (int) y, argb, shadow);
+            drawText(text, (int) x, (int) y, argb, shadow);
             return;
         }
         push();
         translate(x, y);
         scale(scale);
-        g.drawString(font, text, 0, 0, argb, shadow);
+        drawText(text, 0, 0, argb, shadow);
         pop();
     }
 
@@ -79,8 +91,13 @@ public final class FabricBackend implements RenderBackend {
         push();
         translate(x, y);
         scale(scale);
+        //? if >=26.1 {
+        /*g.item(fi.stack, 0, 0);
+        g.itemDecorations(font, fi.stack, 0, 0);
+        *///?} else {
         g.renderItem(fi.stack, 0, 0);
         g.renderItemDecorations(font, fi.stack, 0, 0);
+        //?}
         pop();
     }
 
@@ -101,6 +118,15 @@ public final class FabricBackend implements RenderBackend {
     @Override
     public float guiScale() {
         return gs;
+    }
+
+    /** drawString was renamed to text in 26.1 (GuiGraphics became GuiGraphicsExtractor). */
+    private void drawText(String text, int x, int y, int argb, boolean shadow) {
+        //? if >=26.1 {
+        /*g.text(font, text, x, y, argb, shadow);
+        *///?} else {
+        g.drawString(font, text, x, y, argb, shadow);
+        //?}
     }
 
     // GUI pose: PoseStack up to 1.21.5, Matrix3x2fStack from 1.21.6 (deferred GUI render state).

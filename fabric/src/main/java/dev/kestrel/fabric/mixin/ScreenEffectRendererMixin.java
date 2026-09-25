@@ -6,9 +6,24 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-/** Low fire: the overlay's vertical offset (-0.3) and alpha (0.9) are plain constants in every 1.21.x renderFire. */
+/**
+ * Low fire: the overlay's vertical offset (-0.3) and alpha are plain constants. Until 26.1 both sit in renderFire
+ * (alpha as float 0.9); from 26.2 the offset is in the submitFire lambda and the alpha is the packed colour
+ * 0xE5FFFFFF in buildFireQuad.
+ */
 @Mixin(ScreenEffectRenderer.class)
 public abstract class ScreenEffectRendererMixin {
+    //? if >=26.2 {
+    /*@ModifyConstant(method = "lambda$submitFire$0", constant = @Constant(floatValue = -0.3F))
+    private static float kestrel$fireY(float v) {
+        return v - Hooks.fireOffset;
+    }
+
+    @ModifyConstant(method = "buildFireQuad", constant = @Constant(intValue = 0xE5FFFFFF))
+    private static int kestrel$fireAlpha(int argb) {
+        return (Math.round(0xE5 * Hooks.fireOpacity) << 24) | (argb & 0xFFFFFF);
+    }
+    *///?} else {
     @ModifyConstant(method = "renderFire", constant = @Constant(floatValue = -0.3F))
     private static float kestrel$fireY(float v) {
         return v - Hooks.fireOffset;
@@ -18,4 +33,5 @@ public abstract class ScreenEffectRendererMixin {
     private static float kestrel$fireAlpha(float v) {
         return v * Hooks.fireOpacity;
     }
+    //?}
 }

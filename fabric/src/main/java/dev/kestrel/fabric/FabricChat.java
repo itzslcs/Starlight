@@ -7,12 +7,23 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /** Component <-> ChatLine glue for the chat mixin. Game thread only. */
 public final class FabricChat {
     public static boolean reentrant;
     private static final ChatLine LINE = new ChatLine();
+    /** The 16 legacy colours -> their '§' code. Built from vanilla's own mapping (26.2 dropped ChatFormatting.getByName/getChar). */
+    private static final Map<TextColor, Character> LEGACY_CODES = new HashMap<TextColor, Character>();
+
+    static {
+        for (ChatFormatting f : ChatFormatting.values()) {
+            TextColor c = TextColor.fromLegacyFormat(f);
+            if (c != null) LEGACY_CODES.put(c, f.toString().charAt(1)); // toString() is "§" + code
+        }
+    }
 
     private FabricChat() {}
 
@@ -36,10 +47,8 @@ public final class FabricChat {
         final StringBuilder sb = new StringBuilder();
         c.visit((style, text) -> {
             TextColor color = style.getColor();
-            if (color != null) {
-                ChatFormatting f = ChatFormatting.getByName(color.serialize());
-                if (f != null) sb.append('§').append(f.getChar());
-            }
+            Character code = color == null ? null : LEGACY_CODES.get(color);
+            if (code != null) sb.append('§').append(code.charValue());
             if (style.isBold()) sb.append("§l");
             if (style.isItalic()) sb.append("§o");
             if (style.isUnderlined()) sb.append("§n");

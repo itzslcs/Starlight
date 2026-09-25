@@ -53,7 +53,7 @@ public final class Kestrel {
     public final PerfStats perf = new PerfStats();
     public final HookWatchdog hooks = new HookWatchdog();
     public final Compat compat;
-    public final dev.kestrel.core.modules.ClickTracker clicks = new dev.kestrel.core.modules.ClickTracker();
+    public final dev.kestrel.core.modules.InputRates rates = new dev.kestrel.core.modules.InputRates();
     public final dev.kestrel.core.plugin.NameTagRegistry nameTags = new dev.kestrel.core.plugin.NameTagRegistry();
     public final dev.kestrel.core.plugin.PanelRegistry panels = new dev.kestrel.core.plugin.PanelRegistry();
     public final dev.kestrel.core.net.HttpClient http;
@@ -157,6 +157,9 @@ public final class Kestrel {
         loadServerRules();
         for (String n : config.notices) toast("Config restored", n, theme.warn);
         config.notices.clear();
+        if (compat.has("keycps")) {
+            toast("KeyCPS is built in", "Kestrel includes KeyCPS (Mods → KeyCPS). Remove the standalone KeyCPS mod to avoid two overlays.", theme.warn);
+        }
         if ("1".equals(System.getProperty("kestrel.smoke"))) smoke = new Smoke(this);
         started = true;
     }
@@ -325,7 +328,12 @@ public final class Kestrel {
         if (k == null) return false;
         k.hooks.key = true;
         try {
-            if (action == Keys.ACTION_PRESS && k.platform.screens().current() == ScreenHost.Kind.NONE) {
+            ScreenHost.Kind screen = k.platform.screens().current();
+            // KeyCPS counts presses and OS key-repeat in game (not while typing in a screen).
+            if ((action == Keys.ACTION_PRESS || action == Keys.ACTION_REPEAT) && screen == ScreenHost.Kind.NONE) {
+                k.rates.record(k.platform, key, System.currentTimeMillis());
+            }
+            if (action == Keys.ACTION_PRESS && screen == ScreenHost.Kind.NONE) {
                 if (key == k.client.openGui.key()) {
                     k.openGui();
                     return true;
@@ -341,15 +349,18 @@ public final class Kestrel {
         return false;
     }
 
-    /** Mouse button event while no screen is open. */
+    /** Mouse button event (any screen); modules only see presses while no screen is open. */
     public static void onMouseButton(int button, int action) {
         Kestrel k = instance;
         if (k == null) return;
         k.hooks.mouse = true;
         try {
-            if (action == Keys.ACTION_PRESS && k.platform.screens().current() == ScreenHost.Kind.NONE) {
-                k.clicks.press(button, System.currentTimeMillis());
-                int code = Keys.mouse(button);
+            if (action != Keys.ACTION_PRESS) return;
+            ScreenHost.Kind screen = k.platform.screens().current();
+            int code = Keys.mouse(button);
+            // Clicks count in game and in our own GUI (so the HUD editor preview shows your CPS), not in inventories.
+            if (screen == ScreenHost.Kind.NONE || screen == ScreenHost.Kind.OURS) k.rates.record(k.platform, code, System.currentTimeMillis());
+            if (screen == ScreenHost.Kind.NONE) {
                 if (code == k.client.openGui.key()) {
                     k.openGui();
                     return;

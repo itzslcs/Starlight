@@ -15,9 +15,11 @@ legacy/run/
 dist/
 smoke-out/
 bench-out/
-# User's local editor files (not part of the project)
+# User's local editor files (not part of the project): Obsidian settings, daily notes, canvases and bases at the root
 .obsidian/
-Untitled.base
+/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].md
+/*.canvas
+/*.base
 .claude/settings.local.json
 
 # Stonecutter version nodes hold only build output here

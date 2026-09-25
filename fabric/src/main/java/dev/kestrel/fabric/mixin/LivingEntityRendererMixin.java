@@ -1,6 +1,7 @@
 package dev.kestrel.fabric.mixin;
 
 import dev.kestrel.core.Hooks;
+import dev.kestrel.fabric.FabricCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,6 +22,6 @@ public abstract class LivingEntityRendererMixin {
     *///?}
         if (!Hooks.ownNametag) return;
         Minecraft mc = Minecraft.getInstance();
-        if (entity == mc.player && !mc.options.getCameraType().isFirstPerson() && !mc.options.hideGui) cir.setReturnValue(true);
+        if (entity == mc.player && !mc.options.getCameraType().isFirstPerson() && !FabricCompat.hideGui(mc)) cir.setReturnValue(true);
     }
 }

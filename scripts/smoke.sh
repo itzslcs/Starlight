@@ -83,14 +83,27 @@ bad = [r"KESTREL SMOKE FAIL", r"Mixin apply .*failed", r"InvalidInjectionExcepti
 allow = [r"Failed to fetch user properties", r"Realms", r"realms", r"Narrator", r"narrator", r"text2speech",
          r"libflite", r"OpenAL", r"Failed to fetch Realms",
          # Forge 1.8.9 dev runtime (no binary patches/signatures in dev) and its dead Twitch integration
-         r"binary patch set is missing", r"missing any signature data", r"twitch stream"]
+         r"binary patch set is missing", r"missing any signature data", r"twitch stream",
+         # the dev account has no token, so authlib's key-pair fetch gets a 401 (26.2+)
+         r"Failed to retrieve profile key pair"]
+# Minecraft logs a GLFW error as three records ("#### GL ERROR ####", "@ <where>", "<code>: <message>"). Xvfb has no
+# cursor theme, so only that one message (with its frame) is environment noise; any other GL error still fails.
+env = set()
+for i, (ln, head, cont) in enumerate(records):
+    if "X11: Standard cursor shape unavailable" in head and i >= 2 \
+            and "GL ERROR" in records[i - 2][1] and "@ " in records[i - 1][1]:
+        env.update((i - 2, i - 1, i))
 hits = []
-for ln, head, cont in records:
+for i, (ln, head, cont) in enumerate(records):
     body = "\n".join([head] + cont)
+    if i in env: continue
     if any(re.search(p, body, re.M) for p in bad) and not any(re.search(a, head) for a in allow):
         hits.append(f"{ln}: {head[:200]}" + (f"  [+{len(cont)} lines]" if cont else ""))
 fail = []
 if "KESTREL SMOKE PASS" not in text: fail.append("no PASS marker")
+# A clean PASS must also exit cleanly: a crash or hang after the marker (see the shutdown watchdog) is a failure.
+code = re.search(r"exit=(\d+)", open(res).read())
+if code and code.group(1) != "0": fail.append("process exit code " + code.group(1))
 if hits: fail.append(f"{len(hits)} suspicious log record(s)")
 audit_lines = open(audit_file).read().strip().splitlines()
 if audit != "0": fail.append("mixin audit: " + (audit_lines[-1] if audit_lines else "failed"))

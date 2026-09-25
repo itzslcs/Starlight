@@ -3,7 +3,7 @@ package dev.kestrel.core;
 import dev.kestrel.api.module.Module;
 import dev.kestrel.api.module.Rule;
 import dev.kestrel.core.modules.BuiltinModules;
-import dev.kestrel.core.modules.ClickTracker;
+import dev.kestrel.core.modules.InputRates;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -27,7 +27,7 @@ class RulesMatrixTest {
             if (c.length < 8) continue;
             rows.put(c[1].trim(), new String[]{c[5].trim(), c[6].trim()});
         }
-        for (Module m : BuiltinModules.create(new ClickTracker())) {
+        for (Module m : BuiltinModules.create(new InputRates())) {
             String[] row = rows.get(m.id());
             assertNotNull(row, m.id() + " missing from RULES_MATRIX.md");
             String verdict = m.rule() == Rule.ALLOWED ? "ALLOWED" : m.rule() == Rule.GRAY ? "GRAY" : "DISALLOWED@hypixel";

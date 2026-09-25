@@ -1,5 +1,7 @@
 # Debug log
 
+See also: [COMPAT_MATRIX](COMPAT_MATRIX.md), [PROGRESS](PROGRESS.md), and the debugging protocol in [CLAUDE.md](../CLAUDE.md).
+
 Every entry follows the protocol: reproduce, state a hypothesis (and what would refute it), isolate, then fix with evidence.
 
 ## 2026-09-25 · Smoke log "suspicious lines" on the first 1.21.11 run
@@ -29,11 +31,11 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
 - **Evidence:** `smoke-out/1.21.4/gradle.log`: `stonecutter.gradle.kts line 3: Version '1.21.11' is not registered.`
 - **Cause:** smoke.sh narrows configuration with `-Pkestrel.fabricTargets=<mc>`, which dropped Stonecutter's *active*
   version (1.21.11) from the tree.
-- **Fix:** settings.gradle.kts always keeps the active version (parsed from `fabric/stonecutter.gradle.kts`) registered.
-  Verified by re-running the loop (results below in COMPAT_MATRIX).
+- **Fix:** settings.gradle.kts always keeps the active version (parsed from [`fabric/stonecutter.gradle.kts`](../fabric/stonecutter.gradle.kts)) registered.
+  Verified by re-running the loop (results below in [COMPAT_MATRIX](COMPAT_MATRIX.md)).
 
 ## 2026-09-25 · Zoom (and any default-on module) failed in onEnable at startup
-- **Repro:** `PluginManagerTest` (boots a real Kestrel on a test platform); stderr: `module zoom failed in enable (1/5)`,
+- **Repro:** [`PluginManagerTest`](../core/src/test/java/dev/kestrel/core/PluginManagerTest.java) (boots a real Kestrel on a test platform); stderr: `module zoom failed in enable (1/5)`,
   `NullPointerException: Cannot read field "events" because "k" is null` at `ZoomModule.onEnable`.
 - **Hypothesis:** `Kestrel.init` published `instance` only after `start()`, but `start()` → `config.load()` enables
   default-on modules, whose `onEnable` calls `Kestrel.get()`. Refuted if the NPE persists with the instance published first.
@@ -42,3 +44,45 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
   the Phase 1 smoke runs did not cover it because Zoom did not exist yet.
 - **Also in that run (test bug, not product):** the test's jar builder packaged only `Main.class`, so a plugin using an
   anonymous class failed with `NoClassDefFoundError: paddon/Main$1`. The builder now packages every compiled class.
+
+## 2026-09-25 · 26.1: GameRendererMixin (damage tilt) not applied
+- **Repro:** `scripts/smoke.sh 26.1` (snapshot 634166b). Log: `Mixin apply for mod kestrel failed … GameRendererMixin …
+  kestrel$tilt … expected 1 invocation(s) but 0 succeeded` (surfaced by `-Dmixin.debug.countInjections`; in production
+  the optional mixin would have been skipped silently and Damage Tilt would do nothing).
+- **Hypothesis:** 26.1 moved option reads out of rendering into render-state extraction, so `bobHurt` no longer calls
+  `Options.damageTiltStrength().get()`. Refuted if javap shows that call in 26.1 `GameRenderer.bobHurt`.
+- **Evidence (javap -c, 26.1/26.2/26.3 client jars):** `bobHurt(CameraRenderState, PoseStack)` reads
+  `getfield OptionsRenderState.damageTiltStrength:D` (offset 141/141/131); the `Options.damageTiltStrength()` call now
+  sits in the extraction method that fills that field (`putfield … damageTiltStrength` at offset 221, 26.1).
+- **Fix:** for ≥26.1 the mixin modifies that GETFIELD in `bobHurt` (still visual only; the option is untouched).
+  Regression check: the smoke's mixin audit covers `GameRenderer.bobHurt -> kestrel$tilt` on every target.
+
+## 2026-09-25 · 26.1.1: client hung on exit after a passing smoke run (OPEN)
+- **Repro:** `smoke-all.sh 26.1 … 26.3` (snapshot 848598d). 26.1.1 printed `KESTREL SMOKE PASS` and `Stopping!`, then the JVM
+  stayed alive (last log line `All dimensions are saved`, 19:29:35). 26.1 on the same snapshot exited cleanly (exit=0).
+- **Evidence:** Kestrel's shutdown finished. It runs at `Minecraft.close()` HEAD, and `Kestrel/config.json` was written at
+  19:29:35.198. `/proc/<pid>/task/*` showed all 32 threads in `futex_do_wait`, including `Render thread`,
+  `Sound engine`, and PipeWire client threads `PWEventThread`/`module-rt`. There were no Kestrel threads and no
+  `Kestrel-Shutdown` hook thread. jstack could not attach, SIGQUIT printed no dump, SIGTERM was ignored (consistent
+  with a JVM already inside its exit path), and ptrace is blocked (yama), so there are no native stacks. SIGKILL ended it.
+- **Hypothesis (unconfirmed):** vanilla teardown blocks in `SoundManager.destroy()` on the OpenAL/PipeWire backend
+  under Xvfb. Refuted if a stack dump shows the render thread elsewhere, or if the hang reproduces with sound
+  disabled.
+- **Next:** the smoke now starts a shutdown watchdog after PASS (30 s → dump every Java thread to log/stderr, halt with
+  exit 3), and [`smoke.sh`](../scripts/smoke.sh) fails any run whose exit code is non-zero. Re-run 26.1.1 to reproduce and capture stacks.
+- **Reproduced (f82c0d6, 20:23):** 26.1.1 hung again after `KESTREL SMOKE PASS` and `Stopping!`, and `timeout 1500` ended it
+  (exit 124). That makes 2 of 2 runs on 26.1.1 and 0 on the other 17 targets. The watchdog printed **nothing**: its
+  `Thread.getAllStackTraces()` needs a safepoint, like jstack and SIGQUIT, so the VM itself appears to be stuck in its exit
+  sequence. The LWJGL build is not the difference (26.1, 26.1.1, 26.1.2 and 26.2 all report 3.4.1-snapshot).
+- **Next:** isolate Kestrel's share. (1) Leave the world first, then quit from the title screen. (2) Run the same flow with
+  every Kestrel module disabled. (3) Capture native stacks with a ptrace-capable run (e.g. launch under `gdb -batch`) if
+  both still hang.
+
+## 2026-09-25 · 26.2 smoke flagged 4 records after a PASS
+- **Repro:** [`smoke-all.sh`](../scripts/smoke-all.sh) on snapshot 848598d; 26.2 printed `KESTREL SMOKE PASS` (audit 20/20) but the checker found 4 records.
+- **Evidence:** (1-3) one GLFW error framed as `GL ERROR` / `@ Render` / `65547: X11: Standard cursor shape unavailable`
+  at stage 3, which is Xvfb lacking a cursor theme. (4) `Failed to retrieve profile key pair`, an authlib 401 on
+  `/player/certificates` for the token-less dev account, stack entirely in authlib/`AccountProfileKeyPairManager`.
+  Neither involves `dev.kestrel`.
+- **Fix:** the checker allowlists exactly that GLFW message together with its two frame records (any other GL error still
+  fails) and the key-pair 401. Replayed against the 26.2 log (now PASS) and 26.1 (still PASS).

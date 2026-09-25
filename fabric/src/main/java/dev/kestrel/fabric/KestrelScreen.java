@@ -3,7 +3,11 @@ package dev.kestrel.fabric;
 import dev.kestrel.core.Kestrel;
 import dev.kestrel.core.Keys;
 import dev.kestrel.core.gui.GuiRoot;
+//? if >=26.1 {
+/*import net.minecraft.client.gui.GuiGraphicsExtractor;
+*///?} else {
 import net.minecraft.client.gui.GuiGraphics;
+//?}
 import net.minecraft.client.gui.screens.Screen;
 //? if >=1.21.9 {
 import net.minecraft.client.input.CharacterEvent;
@@ -39,6 +43,18 @@ public final class KestrelScreen extends Screen {
      * Blur/menu background only when the user wants it. From 1.21.6 vanilla calls this before render() (and blurs at most
      * once per frame); up to 1.21.5 Screen.render() called it, so our render() does that itself below.
      */
+    //? if >=26.1 {
+    /*@Override
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+        Kestrel k = Kestrel.get();
+        if (k.client.blur.on() && !k.gui().isHudEditorOpen()) super.extractBackground(g, mouseX, mouseY, delta);
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
+        root().render(backend.bind(g), width, height, mouseX, mouseY);
+    }
+    *///?} else {
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float delta) {
         Kestrel k = Kestrel.get();
@@ -51,21 +67,22 @@ public final class KestrelScreen extends Screen {
         /*renderBackground(g, mouseX, mouseY, delta);*/
         root().render(backend.bind(g), width, height, mouseX, mouseY);
     }
+    //?}
 
     //? if >=1.21.9 {
     @Override
     public boolean mouseClicked(MouseButtonEvent e, boolean doubleClick) {
-        return root().mouseClicked((float) e.x(), (float) e.y(), e.button());
+        return root().mouseClicked((float) e.x(), (float) e.y(), FabricCompat.button(e.button()));
     }
 
     @Override
     public boolean mouseReleased(MouseButtonEvent e) {
-        return root().mouseReleased((float) e.x(), (float) e.y(), e.button());
+        return root().mouseReleased((float) e.x(), (float) e.y(), FabricCompat.button(e.button()));
     }
 
     @Override
     public boolean mouseDragged(MouseButtonEvent e, double dx, double dy) {
-        return root().mouseDragged((float) e.x(), (float) e.y(), e.button());
+        return root().mouseDragged((float) e.x(), (float) e.y(), FabricCompat.button(e.button()));
     }
     //?} else {
     /*@Override
@@ -92,7 +109,7 @@ public final class KestrelScreen extends Screen {
     //? if >=1.21.9 {
     @Override
     public boolean keyPressed(KeyEvent e) {
-        return key(e.key(), e.modifiers());
+        return key(FabricCompat.key(e.key()), FabricCompat.mods(e.modifiers()));
     }
 
     @Override
@@ -123,7 +140,7 @@ public final class KestrelScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
+        FabricCompat.setScreen(minecraft, parent);
     }
 
     @Override

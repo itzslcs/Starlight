@@ -267,6 +267,11 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
     }
 
     @Override
+    public int bindingKey(Binding b) {
+        return LwjglKeys.fromBinding(mapping(b).getKeyCode());
+    }
+
+    @Override
     public String bindingName(Binding b) {
         int code = mapping(b).getKeyCode();
         if (code < 0) {

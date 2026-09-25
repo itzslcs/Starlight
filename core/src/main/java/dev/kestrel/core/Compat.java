@@ -12,7 +12,7 @@ public final class Compat {
         "ferritecore", "modernfix", "dynamic_fps", "dawn", "feather", "essential", "optifabric", "modmenu",
         "freelook", "perspectivemod", "zoomify", "okzoomer", "fullbright", "hypixel_mod_api", "patcher",
         "oneconfig", "polyblur", "polycrosshair", "polynametag", "overflowanimations", "tiers", "tiertagger",
-        "featheropt", "chatting", "evergreenhud", "hytils-reborn", "keystrokesmod"
+        "featheropt", "chatting", "evergreenhud", "hytils-reborn", "keystrokesmod", "keycps"
     };
     private final Map<String, Boolean> flags = new LinkedHashMap<String, Boolean>();
 

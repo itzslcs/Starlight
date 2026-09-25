@@ -79,7 +79,17 @@ tasks.named<Jar>("jar") {
         coreJars.forEach { check(it.exists()) { "$it missing: run ./gradlew :core:jar in the repo root first (buildAll does this)" } }
     }
     from({ (coreJars + shade).map { zipTree(it) } }) {
-        exclude("META-INF/MANIFEST.MF", "META-INF/*.SF", "META-INF/*.RSA", "META-INF/*.DSA", "LICENSE.txt")
+        exclude("META-INF/MANIFEST.MF", "META-INF/*.SF", "META-INF/*.RSA", "META-INF/*.DSA", "LICENSE.txt",
+            // Mixin's annotation processor / obfuscation tooling is build-time only (and its service file would make
+            // javac run the processor for anyone compiling against this jar).
+            "org/spongepowered/tools/**", "META-INF/services/javax.annotation.processing.Processor",
+            "META-INF/services/org.spongepowered.tools.obfuscation.service.IObfuscationService")
+    }
+    // MIT notices travel with the code: ours, and Mixin's for the shaded copy (docs/THIRD_PARTY.md).
+    from(rootDir.resolve("../LICENSE")) { rename { "LICENSE_kestrel" } }
+    from({ shade.map { zipTree(it) } }) {
+        include("LICENSE.txt")
+        rename { "LICENSE_mixin" }
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest.attributes(

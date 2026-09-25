@@ -1,5 +1,7 @@
 # Rules matrix: every module vs. the Hypixel Allowed Modifications policy
 
+See also: [ARCHITECTURE](ARCHITECTURE.md) (how server rules suspend modules), [PLUGIN_API](PLUGIN_API.md) (plugin modules follow the same rules), [DECISIONS](DECISIONS.md).
+
 Policy source: https://support.hypixel.net/hc/en-us/articles/6472550754962 (fetched 2026-09-25 through the
 Zendesk API, article `updated_at 2025-02-24`). Its permitted categories:
 
@@ -16,19 +18,18 @@ It closes with: "If a modification does not fit clearly into any of the allowed 
 **Verdicts**
 - `ALLOWED`: clearly inside a category or a listed example. May ship default-on.
 - `GRAY`: not clearly inside a category. **Ships default-off**, and is switched off by *competitive-safe*.
-- `DISALLOWED@hypixel`: outside the policy on Hypixel. Default-off, and `serverrules.json` force-disables it on Hypixel.
+- `DISALLOWED@hypixel`: outside the policy on Hypixel. Default-off, and [`serverrules.json`](../core/src/main/resources/kestrel/serverrules.json) force-disables it on Hypixel.
 
 The engine reads each module's verdict from code (`Module.rule()`). This table is the human-readable source of
-truth, and a unit test (`RulesMatrixTest`) checks that every registered module appears here with the same verdict.
+truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/kestrel/core/RulesMatrixTest.java)) checks that every registered module appears here with the same verdict.
 
 | id | Module | Targets | Category | Verdict | Default | Notes |
 |---|---|---|---|---|---|---|
 | fps | FPS | all | HUD | ALLOWED | on | Own client performance, not game info |
-| cps | CPS (display only) | all | HUD | ALLOWED | on | Counts the player's own clicks. Never generates clicks |
+| keycps | KeyCPS (keystrokes + CPS, display only) | all | HUD | ALLOWED | on | The player's own inputs and click/key-repeat rate from real input events. Never generates input |
 | ping | Ping | all | HUD | ALLOWED | off | The player's own latency (the tab list already shows bars) |
 | coords | Coordinates | all | HUD | ALLOWED | off | Same as F3. **Hidden while the server sets reducedDebugInfo** |
 | direction | Direction | all | HUD | ALLOWED | off | Same as F3 facing |
-| keystrokes | Keystrokes | all | HUD | ALLOWED | on | The player's own inputs |
 | armor | Armor Status | all | HUD | ALLOWED | on | Listed example "Armor Status" |
 | effects | Potion Effects | all | HUD | ALLOWED | on | Listed example "Effect Status" |
 | item_counter | Item Counter | all | HUD | ALLOWED | off | Counts items already visible in your inventory |
@@ -52,7 +53,7 @@ truth, and a unit test (`RulesMatrixTest`) checks that every registered module a
 | old_animations | 1.8 Combat Visuals | 1.21+ | listed example (Animations) | ALLOWED | off | Animations only. Gameplay unchanged |
 | hypixel_location | Game Detection | 1.8.9 | none | GRAY | off | Prefers the official Hypixel Mod API (sends no chat). Falls back to throttled `/locraw` (an automated command) |
 | auto_gg | Auto GG / GL | 1.8.9 | none | GRAY | off | Automatically sends a chat message |
-| stats_overlay | Stat Overlay | 1.8.9 | none | GRAY | off | Also limited by the Hypixel API policy (DECISIONS D-010) |
+| stats_overlay | Stat Overlay | 1.8.9 | none | GRAY | off | Also limited by the Hypixel API policy ([DECISIONS](DECISIONS.md) D-010) |
 | nameplate_stats | Nameplate Stats | 1.8.9 | none | GRAY | off | Extra info about other players |
 | bedwars_tracker | Bedwars Trackers | 1.8.9 | HUD? | GRAY | off | Built only from scoreboard and chat, but timers are derived info |
 | hypixel_chat | Hypixel Chat | 1.8.9 | AESTHETIC | ALLOWED | off | Filters, tabs, mention highlights. Display only |

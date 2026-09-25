@@ -1,6 +1,6 @@
 # Plan
 
-Targets: 18 jars (see `versions.json`). Two extra user requests are folded in: **Prism Launcher support** and **addons like
+Targets: 18 jars (see [`versions.json`](../versions.json)). Two extra user requests are folded in: **Prism Launcher support** and **addons like
 TierTagger** (the `tiertags` plugin), plus **show own name** (the `own_nametag` module).
 
 ## Environment (verified 2026-09-25)
@@ -13,14 +13,14 @@ TierTagger** (the `tiertags` plugin), plus **show own name** (the `own_nametag` 
 
 | Phase | Deliverables | Exit criteria (evidence) |
 |---|---|---|
-| 0 Research & plan | PLAN, ARCHITECTURE, RULES_MATRIX, FEATHER, DECISIONS, versions.json | Committed. Every claim has a source |
-| 1 Walking skeleton | Gradle monorepo; `api`, `core` (+ tests); Fabric **1.21.11** + Forge **1.8.9** adapters; GUI shell (all pages stubbed, Mods and HUD Editor working); config/profiles; modules FPS, Keystrokes, Armor; `scripts/smoke.sh` | `./gradlew buildAll` builds both jars; core tests pass; `smoke.sh 1.21.11` and `smoke.sh 1.8.9` pass (title → world → GUI → screenshot → 60 s → clean log) |
+| 0 Research & plan | PLAN, [ARCHITECTURE](ARCHITECTURE.md), [RULES_MATRIX](RULES_MATRIX.md), [FEATHER](FEATHER.md), [DECISIONS](DECISIONS.md), versions.json | Committed. Every claim has a source |
+| 1 Walking skeleton | Gradle monorepo; `api`, `core` (+ tests); Fabric **1.21.11** + Forge **1.8.9** adapters; GUI shell (all pages stubbed, Mods and HUD Editor working); config/profiles; modules FPS, Keystrokes, Armor; [`scripts/smoke.sh`](../scripts/smoke.sh) | `./gradlew buildAll` builds both jars; core tests pass; `smoke.sh 1.21.11` and `smoke.sh 1.8.9` pass (title → world → GUI → screenshot → 60 s → clean log) |
 | 2 Fan-out 1.21.x | 1.21 … 1.21.10 via Stonecutter; per-version code only in adapters/mixins | 12 Fabric jars build; smoke passes on each (or the failure is recorded with its log) |
 | 3 26.x | 26.1, 26.1.1, 26.1.2, 26.2, 26.3 (Java 25, no remap, Blaze3D only) | 5 jars build; smoke per target; `grep -r "org.lwjgl.opengl\|GL11\|GlStateManager" fabric/src` finds nothing for 26.x |
-| 4 Features | full module set, plugin API + loader + consent, sample plugin, `tiertags` addon, own nametag, docs (README, PLUGIN_API, THIRD_PARTY, PRISM) | unit tests (config migration, profile import/export, plugin loader, layout math, server rules, rules-matrix consistency); smoke clean |
+| 4 Features | full module set, plugin API + loader + consent, sample plugin, `tiertags` addon, own nametag, docs ([README](../README.md), [PLUGIN_API](PLUGIN_API.md), [THIRD_PARTY](THIRD_PARTY.md), [PRISM](PRISM.md)) | unit tests (config migration, profile import/export, plugin loader, layout math, server rules, rules-matrix consistency); smoke clean |
 | 5 Perf | benchmark harness (fixed seed, scripted camera path, PvP scene), then each optimisation measured before/after | `docs/PERF.md` with numbers per optimisation; losers removed or default-off |
 | 6 1.8.9 Hypixel | location (Mod API / opt-in `/locraw`), Auto GG/GL, stats overlay framework (in-game-data provider; API provider private-build only, D-010), nameplate stats, Bedwars trackers, Hypixel chat, scoreboard, lobby clutter, quick commands | unit tests for parsers (locraw JSON, scoreboard, chat patterns); smoke 1.8.9 clean |
-| 7 Release | production-layout launch test per target, Prism instance zips, `docs/COMPAT_MATRIX.md`, Feather/Dawn and Prism manual checklists, final report | every matrix cell is pass, fail or not-run with evidence |
+| 7 Release | production-layout launch test per target, Prism instance zips, [`docs/COMPAT_MATRIX.md`](COMPAT_MATRIX.md), Feather/Dawn and Prism manual checklists, final report | every matrix cell is pass, fail or not-run with evidence |
 
 ## Verification tooling
 - `./gradlew buildAll`: all jars, plugin jars, Prism zips, SHA256SUMS.

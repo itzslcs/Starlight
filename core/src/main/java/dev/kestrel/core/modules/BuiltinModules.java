@@ -11,15 +11,14 @@ public final class BuiltinModules {
     private BuiltinModules() {}
 
     /** Fresh instances; also used by tests (RulesMatrixTest) without a running client. */
-    public static List<Module> create(ClickTracker clicks) {
+    public static List<Module> create(InputRates rates) {
         List<Module> m = new ArrayList<Module>();
         // HUD
         m.add(new FpsModule());
-        m.add(new CpsModule(clicks));
+        m.add(new KeyCpsModule(rates));
         m.add(new PingModule());
         m.add(new CoordsModule());
         m.add(new DirectionModule());
-        m.add(new KeystrokesModule(clicks));
         m.add(new ArmorModule());
         m.add(new EffectsModule());
         m.add(new ItemCounterModule());
@@ -46,6 +45,6 @@ public final class BuiltinModules {
     }
 
     public static void registerAll(Kestrel k) {
-        for (Module m : create(k.clicks)) k.register(m, "core");
+        for (Module m : create(k.rates)) k.register(m, "core");
     }
 }

@@ -25,7 +25,7 @@ and manifests only, never decompiled code. Everything marked **[web]** is a seco
 **Consequences for us**
 - A standard Fabric mod in the profile's mods folder is the supported path. No Dawn-specific hacks are needed.
 - Fabric API is present on Dawn but **not** guaranteed on Prism or vanilla Fabric, so the mod stays
-  Fabric-API-free (see DECISIONS D-004).
+  Fabric-API-free (see [DECISIONS](DECISIONS.md) D-004).
 - Dawn bundles Sodium plus its own `mixins.feather.*` mixins. Our optimisation modules must detect
   Sodium and Dawn (mod id `dawn`) and step aside where they overlap (`compat.*` flags).
 - Mixin 0.8.7 and MixinExtras 0.5.4 are available on every modern target, since Fabric Loader bundles them.
@@ -71,7 +71,7 @@ verified on Prism or vanilla Fabric.
 ## 5. What we cannot verify here
 
 - We cannot sign in to Dawn from an automated session. It needs the user's Microsoft account. So
-  "Feather/Dawn verified" stays **not-run** in `docs/COMPAT_MATRIX.md` until someone runs the manual
+  "Feather/Dawn verified" stays **not-run** in [`docs/COMPAT_MATRIX.md`](COMPAT_MATRIX.md) until someone runs the manual
   checklist in `docs/FEATHER_CHECKLIST.md` (written in Phase 7).
 - Whether Dawn's own mixins conflict with ours is unknown until a real run. The runtime `compat.dawn` flag
   (mod id `dawn`) is the mitigation hook.

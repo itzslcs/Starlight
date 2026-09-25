@@ -6,6 +6,7 @@ import dev.kestrel.api.render.ItemRef;
 import dev.kestrel.core.Hooks;
 import dev.kestrel.core.Keys;
 import dev.kestrel.core.Kestrel;
+import dev.kestrel.core.SdlKeys;
 import dev.kestrel.core.platform.ChatAccess;
 import dev.kestrel.core.platform.ModList;
 import dev.kestrel.core.platform.Platform;
@@ -44,6 +45,7 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
+//? if <26.3
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.LoggerFactory;
 
@@ -251,12 +253,19 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     @Override
     public boolean isKeyDown(int key) {
+        //? if >=26.3 {
+        /*if (Keys.isMouse(key)) {
+            int mask = org.lwjgl.sdl.SDLMouse.SDL_GetMouseState((java.nio.FloatBuffer) null, (java.nio.FloatBuffer) null);
+            return (mask & (1 << (SdlKeys.sdlButton(key - Keys.MOUSE_BASE) - 1))) != 0;
+        }
+        int sdl = SdlKeys.toSdl(key);
+        return sdl > 0 && InputConstants.isKeyDown(sdl);
+        *///?} elif >=1.21.9 {
         if (Keys.isMouse(key)) return GLFW.glfwGetMouseButton(window(), key - Keys.MOUSE_BASE) == GLFW.GLFW_PRESS;
-        if (key <= 0) return false;
-        //? if >=1.21.9 {
-        return InputConstants.isKeyDown(mc.getWindow(), key);
+        return key > 0 && InputConstants.isKeyDown(mc.getWindow(), key);
         //?} else {
-        /*return InputConstants.isKeyDown(window(), key);
+        /*if (Keys.isMouse(key)) return GLFW.glfwGetMouseButton(window(), key - Keys.MOUSE_BASE) == GLFW.GLFW_PRESS;
+        return key > 0 && InputConstants.isKeyDown(window(), key);
         *///?}
     }
 
@@ -290,7 +299,7 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
         KeyMapping km = mapping(b);
         InputConstants.Key key = ((KeyMappingAccessor) km).kestrel$key();
         if (key.getType() == InputConstants.Type.MOUSE) {
-            int v = key.getValue();
+            int v = FabricCompat.button(key.getValue());
             return v == 0 ? "LMB" : v == 1 ? "RMB" : v == 2 ? "MMB" : "M" + (v + 1);
         }
         String s = key.getDisplayName().getString();
@@ -346,7 +355,7 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     @Override
     public boolean hideGui() {
-        return mc.options.hideGui;
+        return FabricCompat.hideGui(mc);
     }
 
     @Override
@@ -368,14 +377,14 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
     @Override
     public void vanillaBindings(BindingSink sink) {
         for (KeyMapping km : mc.options.keyMappings) {
-            InputConstants.Key key = ((KeyMappingAccessor) km).kestrel$key();
-            int code;
-            if (key.getType() == InputConstants.Type.MOUSE) code = Keys.mouse(key.getValue());
-            else if (key.getType() == InputConstants.Type.KEYSYM) code = key.getValue();
-            else continue;
-            if (code < 0) continue;
-            sink.accept(Component.translatable(km.getName()).getString(), code);
+            int code = FabricCompat.canonical(((KeyMappingAccessor) km).kestrel$key());
+            if (code != Keys.NONE) sink.accept(Component.translatable(km.getName()).getString(), code);
         }
+    }
+
+    @Override
+    public int bindingKey(Binding b) {
+        return FabricCompat.canonical(((KeyMappingAccessor) mapping(b)).kestrel$key());
     }
 
     @Override
@@ -385,12 +394,18 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
         } catch (java.io.IOException ignored) {
             // opening will report it
         }
+        //? if >=26.3 {
+        /*com.mojang.blaze3d.Blaze3D.openPath(dir);
+        *///?} else {
         Util.getPlatform().openPath(dir);
+        //?}
     }
 
     @Override
     public void screenshot(String name) {
-        //? if >=1.21.6 {
+        //? if >=26.2 {
+        /*Screenshot.grab(mc.gameDirectory, name + ".png", mc.gameRenderer.mainRenderTarget(), 1, msg -> log.info("screenshot: {}", msg.getString()));
+        *///?} elif >=1.21.6 {
         Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), 1, msg -> log.info("screenshot: {}", msg.getString()));
         //?} else {
         /*Screenshot.grab(mc.gameDirectory, name + ".png", mc.getMainRenderTarget(), msg -> log.info("screenshot: {}", msg.getString()));
@@ -404,20 +419,24 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     @Override
     public void openWorld(String folder, long seed) {
-        Screen parent = mc.screen;
+        Screen parent = FabricCompat.screen(mc);
         if (mc.getLevelSource().levelExists(folder)) {
-            mc.createWorldOpenFlows().openWorld(folder, () -> mc.setScreen(parent));
+            mc.createWorldOpenFlows().openWorld(folder, () -> FabricCompat.setScreen(mc, parent));
             return;
         }
-        //? if >=1.21.11 {
-        net.minecraft.world.level.gamerules.GameRules rules = new net.minecraft.world.level.gamerules.GameRules(FeatureFlags.DEFAULT_FLAGS);
+        //? if >=26.1 {
+        /*LevelSettings settings = new LevelSettings(folder, GameType.CREATIVE,
+                new LevelSettings.DifficultySettings(Difficulty.PEACEFUL, false, false), true, WorldDataConfiguration.DEFAULT);
+        *///?} elif >=1.21.11 {
+        LevelSettings settings = new LevelSettings(folder, GameType.CREATIVE, false, Difficulty.PEACEFUL, true,
+                new net.minecraft.world.level.gamerules.GameRules(FeatureFlags.DEFAULT_FLAGS), WorldDataConfiguration.DEFAULT);
         //?} elif >=1.21.2 {
-        /*net.minecraft.world.level.GameRules rules = new net.minecraft.world.level.GameRules(FeatureFlags.DEFAULT_FLAGS);
+        /*LevelSettings settings = new LevelSettings(folder, GameType.CREATIVE, false, Difficulty.PEACEFUL, true,
+                new net.minecraft.world.level.GameRules(FeatureFlags.DEFAULT_FLAGS), WorldDataConfiguration.DEFAULT);
         *///?} else {
-        /*net.minecraft.world.level.GameRules rules = new net.minecraft.world.level.GameRules();
+        /*LevelSettings settings = new LevelSettings(folder, GameType.CREATIVE, false, Difficulty.PEACEFUL, true,
+                new net.minecraft.world.level.GameRules(), WorldDataConfiguration.DEFAULT);
         *///?}
-        LevelSettings settings = new LevelSettings(folder, GameType.CREATIVE, false, Difficulty.PEACEFUL, true, rules,
-                WorldDataConfiguration.DEFAULT);
         mc.createWorldOpenFlows().createFreshLevel(folder, settings, new WorldOptions(seed, false, false),
                 WorldPresets::createNormalWorldDimensions, parent);
     }
@@ -502,7 +521,12 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     @Override
     public long dayTime() {
-        return mc.level == null ? -1 : mc.level.getDayTime();
+        if (mc.level == null) return -1;
+        //? if >=26.1 {
+        /*return mc.level.getOverworldClockTime(); // 26.1 world clocks; day time was always the overworld's
+        *///?} else {
+        return mc.level.getDayTime();
+        //?}
     }
 
     @Override
@@ -512,7 +536,7 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     @Override
     public void debugIncomingChat(String text) {
-        mc.gui.getChat().addMessage(Component.literal(text));
+        FabricCompat.serverMessage(mc, Component.literal(text));
     }
 
     @Override
@@ -524,17 +548,19 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     @Override
     public void openGui() {
-        if (!(mc.screen instanceof KestrelScreen)) mc.setScreen(new KestrelScreen(mc.screen));
+        Screen s = FabricCompat.screen(mc);
+        if (!(s instanceof KestrelScreen)) FabricCompat.setScreen(mc, new KestrelScreen(s));
     }
 
     @Override
     public void closeGui() {
-        if (mc.screen instanceof KestrelScreen) mc.screen.onClose();
+        Screen s = FabricCompat.screen(mc);
+        if (s instanceof KestrelScreen) s.onClose();
     }
 
     @Override
     public Kind current() {
-        Screen s = mc.screen;
+        Screen s = FabricCompat.screen(mc);
         if (s == null) return Kind.NONE;
         if (s instanceof KestrelScreen) return Kind.OURS;
         if (s instanceof TitleScreen) return Kind.TITLE;
@@ -563,7 +589,7 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     @Override
     public void showLocal(String formatted) {
-        mc.gui.getChat().addMessage(Component.literal(formatted));
+        FabricCompat.localMessage(mc, Component.literal(formatted));
     }
 
     @Override

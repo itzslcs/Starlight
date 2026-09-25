@@ -4,7 +4,11 @@ import dev.kestrel.core.Kestrel;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+//? if >=26.1 {
+/*import net.minecraft.client.gui.GuiGraphicsExtractor;
+*///?} else {
 import net.minecraft.client.gui.GuiGraphics;
+//?}
 
 /** Entrypoint + the static bridge the mixins call (keeps mixin bodies one line). */
 public final class KestrelFabric implements ClientModInitializer {
@@ -26,7 +30,11 @@ public final class KestrelFabric implements ClientModInitializer {
         Kestrel.onTick(end);
     }
 
+    //? if >=26.1 {
+    /*public static void hud(GuiGraphicsExtractor g) {
+    *///?} else {
     public static void hud(GuiGraphics g) {
+    //?}
         Minecraft mc = Minecraft.getInstance();
         Kestrel.onHudRender(HUD.bind(g), mc.getWindow().getGuiScaledWidth(), mc.getWindow().getGuiScaledHeight());
     }

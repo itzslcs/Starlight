@@ -16,7 +16,7 @@ import java.util.UUID;
 final class TestPlatform implements Platform, ScreenHost, ChatAccess, ModList {
     private final Path gameDir;
 
-    private TestPlatform(Path gameDir) {
+    TestPlatform(Path gameDir) {
         this.gameDir = gameDir;
     }
 
@@ -51,6 +51,7 @@ final class TestPlatform implements Platform, ScreenHost, ChatAccess, ModList {
     public String clipboard() { return ""; }
     public void setClipboard(String text) {}
     public void vanillaBindings(BindingSink sink) {}
+    public int bindingKey(Binding b) { return b == Binding.ATTACK ? Keys.mouse(0) : b == Binding.USE ? Keys.mouse(1) : Keys.NONE; }
     public void openFolder(Path dir) {}
     public void screenshot(String name) {}
     public void quit() {}

@@ -70,6 +70,7 @@ tasks.processResources {
 tasks.named<Jar>("jar") {
     dependsOn(bundle)
     from({ bundle.map { zipTree(it) } }) { exclude("META-INF/MANIFEST.MF") }
+    from(rootProject.file("LICENSE")) { rename { "LICENSE_kestrel" } }
 }
 
 // Copies the final (remapped on <=1.21.11) jar to <root>/dist.

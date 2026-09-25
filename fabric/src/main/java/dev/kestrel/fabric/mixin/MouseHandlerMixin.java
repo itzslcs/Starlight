@@ -1,6 +1,7 @@
 package dev.kestrel.fabric.mixin;
 
 import dev.kestrel.core.Kestrel;
+import dev.kestrel.fabric.FabricCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 //? if >=1.21.9
@@ -20,7 +21,7 @@ public abstract class MouseHandlerMixin {
     //? if >=1.21.9 {
     @Inject(method = "onButton", at = @At("HEAD"))
     private void kestrel$button(long window, MouseButtonInfo info, int action, CallbackInfo ci) {
-        if (window == Minecraft.getInstance().getWindow().handle()) Kestrel.onMouseButton(info.button(), action);
+        if (window == Minecraft.getInstance().getWindow().handle()) Kestrel.onMouseButton(FabricCompat.button(info.button()), action);
     }
     //?} else {
     /*@Inject(method = "onPress", at = @At("HEAD"))
