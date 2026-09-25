@@ -1,0 +1,21 @@
+# Gradle / IDE
+.gradle/
+build/
+out/
+.idea/
+*.iml
+.kotlin/
+# Stonecutter generated version dirs keep only their gradle.properties overrides
+fabric/versions/*/build/
+fabric/versions/*/.gradle/
+# Runtime + outputs
+run/
+fabric/run/
+legacy/run/
+dist/
+smoke-out/
+bench-out/
+# User's local editor files (not part of the project)
+.obsidian/
+Untitled.base
+.claude/settings.local.json

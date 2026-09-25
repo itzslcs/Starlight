@@ -1,0 +1,113 @@
+# Architecture
+
+```
+api/     Java 8, zero MC imports: the stable plugin API (versioned, semver). Module/HudModule base classes,
+         settings, events, Renderer, PluginContext, NameDecorator, Http. Plugins compile against this only.
+core/    Java 8, zero MC imports: module manager, event bus, config/profiles/migrations, plugin loader,
+         GUI widget tree + pages + HUD editor, animation, themes, toasts, server-rule engine, JSON codec,
+         HTTP client (LRU+TTL cache, rate limiter), the built-in modules' logic.
+fabric/  Stonecutter tree → versions/<mc>/ for 1.21 … 26.3. Platform adapters + mixins only.
+legacy/  Separate Gradle build: Forge 1.8.9 platform adapters + mixins. Consumes api/ and core/ sources.
+addons/  Plugin jars built against api/ only: sample plugin, tiertags (TierTagger-style tier display).
+```
+
+`buildAll` → `dist/Kestrel-<modver>+mc<mc>.jar` ×18, `dist/plugins/*.jar`, `dist/prism/*.zip`, `dist/SHA256SUMS`.
+
+## Layering rule
+`platform → core → api`. Core never imports a Minecraft class, and the build fails if it does: `core` and `api` have no
+Minecraft on their compile classpath. Everything version-specific sits behind the interfaces below, and Stonecutter
+`//? if` blocks live **only** in `fabric/src` adapter classes and mixins.
+
+## Platform contract (core/src/main/java/dev/kestrel/core/platform)
+
+It was designed against 1.8.9 (LWJGL2, immediate-mode GL, MCP names, Forge events) and 26.x (Blaze3D, retained GUI
+extraction, no raw GL) at the same time.
+
+| Interface | Responsibility | 1.8.9 | 1.21.x | 26.x |
+|---|---|---|---|---|
+| `Renderer` (api) | rect, gradient, text, item icon, clip, push/pop/translate/scale, guiScale | `Gui.drawRect`, `FontRenderer`, `GlStateManager`, `RenderItem` | `GuiGraphics` (+ pose) | `GuiGraphicsExtractor` |
+| `ScreenHost` | open/close our screen, screen kind, scaled size | `GuiScreen` subclass | `Screen` subclass | `Screen` subclass (`gui.setScreen` on 26.2+) |
+| `InputBackend` | key/mouse state, key names, vanilla binds (conflicts), clipboard | LWJGL2 `Keyboard`/`Mouse` (codes mapped to GLFW) | GLFW via `InputConstants` | same |
+| `PlayerAccess` | pos/rot, ping, armor/hands/inventory counts, effects, hurt state, reducedDebugInfo | `EntityPlayerSP` | `LocalPlayer` | `LocalPlayer` |
+| `WorldAccess` | loaded?, server address, dimension, time, tab players, scoreboard lines | `WorldClient` | `ClientLevel` | `ClientLevel` |
+| `ChatAccess` | local message, explicit send (user-initiated only) | `GuiNewChat` | `ChatComponent` | same |
+| `GameOptions` | gamma, fov, hideGui, perspective, guiScale, sensitivity | `GameSettings` | `Options` | `Options` |
+| `ModList` | loaded mod ids and versions → `compat.*` flags | `Loader` | `FabricLoader` | `FabricLoader` |
+
+Key codes are **GLFW constants** everywhere in core. The 1.8.9 adapter translates LWJGL2 codes through a table. Mouse
+buttons are `1000 + button`.
+
+**Hooks in (platform → core)** are plain static calls on `dev.kestrel.core.Kestrel`. They cost nothing when no module is
+interested. Each wraps its work in the guard described below.
+- events: `tick(start/end)`, `renderHud(Renderer, partial)`, `key(code, action, mods)`, `mouse(button, action)`,
+  `scroll(delta) → consumed?`, `chat(ChatLine) → keep/modify`, `joinServer(addr)`, `leaveServer()`, `screenOpened(kind)`,
+  `attack(entityId)`, `screenshot(path)`, `frame(nanos)`
+- queries: `fovMultiplier()`, `gammaOverride()`, `hitColor()`, `renderOwnName()`, `nameSuffix(uuid, name)`,
+  `crosshairOverride()`, `fireOverlayOffset()`, `damageTiltScale()`, `particleMultiplier()`, `freelook*()`
+
+## Error isolation
+Every module callback (`onEnable/onTick/onRender/...`) runs inside `Guard.run(module, phase, fn)`:
+- It catches `Throwable` (except VirtualMachineError), logs `[Kestrel] module <id> failed in <phase>` with the stack
+  trace, and increments the module's failure counter.
+- At **5 failures** the module is disabled for the session with a toast "‹name› was disabled after repeated errors" and
+  a log line. It is not persisted, so a restart retries.
+- Each platform hook wraps its whole body too, so an error inside core can never propagate into Minecraft's frame.
+- The crash-report section lists enabled modules and plugins (Fabric: mixin into `Minecraft.fillReport`; Forge: `ICrashCallable`).
+
+## Event bus
+Listeners are indexed by exact event class into pre-sized arrays, and dispatch is a plain indexed loop. Hot events
+(`RenderHudEvent`, `TickEvent`) are **singleton mutable objects reused every frame**, so dispatch allocates nothing.
+
+## Config
+`<gameDir>/Kestrel/config.json` (global) + `profiles/<name>.json`, both carrying `"schema": N`.
+- **Migrations**: an ordered list `N → N+1` of pure functions over the JSON tree, unit-tested with fixtures.
+- **Atomic writes**: write `name.json.tmp`, fsync, `Files.move(ATOMIC_MOVE, REPLACE_EXISTING)`. If the platform lacks
+  atomic move, fall back to a non-atomic replace.
+- **Debounced autosave**: a dirty flag plus one background thread. It saves 1.5 s after the last change and flushes on shutdown.
+- **Rolling backups**: `backups/<file>.<yyyyMMdd-HHmmss>.json`, newest 10 kept. A corrupt file on load is moved to
+  `*.corrupt-<ts>` and the newest backup is loaded.
+- **Profiles**: unlimited; switching is instant (in memory). Export = `KESTREL-P1:` + base64(deflate(json)) + `:` + crc32.
+  Import validates the CRC and schema, then migrates. Auto-switch maps a server pattern to a profile name.
+
+## Plugins
+`<gameDir>/Kestrel/plugins/*.jar` + `plugin.json` `{id, name, version, api, main, depends{}, authors, description}`.
+Load order: parse → API check (same major, minor ≤ host) → dependency resolution (topological, cycle = error) →
+first-run consent (D-014) → `URLClassLoader(parent = Kestrel's loader)` → `main.onEnable(PluginContext)`.
+A plugin that throws during enable is disabled and reported on the Plugins page. The loader never crashes the game.
+
+## GUI
+A retained widget tree in core (`Widget`: bounds, children, `render(Renderer, mouse, dt)`, input handlers, focus).
+Pages: Mods, HUD Editor, Profiles, Keybinds, Plugins, Server Rules, Performance, Themes, About/Compat.
+Animations use `Anim` (value, target, 150–250 ms, ease-out-cubic) and are ticked with frame dt, which allocates nothing.
+Themes are token sets (bg, surface, surface2, border, text, textDim, accent, good, warn, bad) with presets and a
+user accent colour. Blur comes from vanilla `Screen` background rendering (1.20.5+). The 1.8.9 fallback is a dim overlay.
+
+## HUD
+`HudModule` has a `HudElement` (anchor ∈ 9 points, offset in GUI units or % of screen, scale, opacity, colours,
+background, border, shadow, radius). Layout math (`HudLayout`) is pure and unit-tested: anchor → absolute rect,
+clamping, snapping (edges/centres of other elements and screen guides, 4-unit threshold), and grid.
+The editor supports drag, resize (scale), anchor picking, undo/redo (snapshot stack, 64 deep) and reset.
+Text is cached per element and rebuilt only when the underlying value changes, so there is no per-frame string building.
+
+## Threads
+- Main/render thread: all Minecraft access.
+- `Kestrel-IO` (1 thread): config saves and backups.
+- `Kestrel-Net` (2 threads): HTTP. Results return to the main thread through `Scheduler.runOnMain`, drained at tick start.
+
+## Performance budget
+Own overhead < 0.3 ms/frame with default modules. Each hook is timed (`System.nanoTime` pairs, ~20 ns). Per-module
+cost appears on the Performance page and is exported by the benchmark harness (Phase 5). No steady-state allocation
+in our code: reused event objects, cached strings, pooled `EffectInfo`/`ItemRef` handles.
+
+## Fabric version groups (hypothesis; confirmed with `javap` against each mapped jar in Phases 1–3)
+| Group | Versions | Breaking points for us |
+|---|---|---|
+| A | 1.21, 1.21.1 | immediate `GuiGraphics`, `RenderSystem.setShaderColor`, `Screen.render(GuiGraphics,int,int,float)` |
+| B | 1.21.2 – 1.21.4 | entity render states, `blit(RenderType::guiTextured …)`, `CoreShaders` |
+| C | 1.21.5 | `RenderPipelines`/`GpuDevice` |
+| D | 1.21.6 – 1.21.8 | deferred GUI render state, `Matrix3x2fStack` pose, blur changes |
+| E | 1.21.9 – 1.21.10 | `KeyEvent`/`MouseButtonEvent`/`CharacterEvent` input records, `KeyMapping.Category` |
+| F | 1.21.11 | `ResourceLocation` → `Identifier` |
+| G | 26.1 – 26.1.2 | unobfuscated; `GuiGraphicsExtractor`, `Screen.extractRenderState`, `text()` |
+| H | 26.2 | `gui.setScreen`, Gui/Hud split, optional Vulkan backend (so we must never touch GL directly) |
+| I | 26.3 | TBD |
