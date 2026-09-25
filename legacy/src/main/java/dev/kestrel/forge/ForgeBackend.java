@@ -72,10 +72,14 @@ public final class ForgeBackend implements RenderBackend {
     public void text(String text, float x, float y, float scale, int argb, boolean shadow) {
         flush();
         FontRenderer f = mc.fontRendererObj;
+        GlStateManager.enableBlend();
+        if (scale == 1f) {
+            f.drawString(text, x, y, argb, shadow); // takes floats: no matrix push per string
+            return;
+        }
         GlStateManager.pushMatrix();
         GlStateManager.translate(x, y, 0);
-        if (scale != 1f) GlStateManager.scale(scale, scale, 1f);
-        GlStateManager.enableBlend();
+        GlStateManager.scale(scale, scale, 1f);
         f.drawString(text, 0, 0, argb, shadow);
         GlStateManager.popMatrix();
     }

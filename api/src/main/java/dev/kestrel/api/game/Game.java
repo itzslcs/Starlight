@@ -50,7 +50,7 @@ public interface Game {
     boolean isKeyDown(int key);
 
     /** Vanilla key bindings the HUD cares about (respects the player's rebinds). */
-    enum Binding { FORWARD, LEFT, BACK, RIGHT, JUMP, SNEAK, SPRINT, ATTACK, USE }
+    enum Binding { FORWARD, LEFT, BACK, RIGHT, JUMP, SNEAK, SPRINT, ATTACK, USE, SCREENSHOT }
 
     boolean bindingDown(Binding b);
 

@@ -70,6 +70,7 @@ public final class ModuleManager {
     private final List<State> order = new ArrayList<State>();
     private State[] activeTick = new State[0];
     private State[] activeHud = new State[0];
+    private State[] activeOverlay = new State[0];
     private Listener listener;
 
     public void setListener(Listener l) {
@@ -180,14 +181,21 @@ public final class ModuleManager {
     }
 
     private void rebuild() {
-        List<State> t = new ArrayList<State>(), h = new ArrayList<State>();
+        List<State> t = new ArrayList<State>(), h = new ArrayList<State>(), o = new ArrayList<State>();
         for (State s : order) {
             if (!s.active) continue;
             t.add(s);
             if (s.module instanceof HudModule) h.add(s);
+            if (s.module instanceof Overlay) o.add(s);
         }
         activeTick = t.toArray(new State[0]);
         activeHud = h.toArray(new State[0]);
+        activeOverlay = o.toArray(new State[0]);
+    }
+
+    /** Active modules implementing {@link Overlay}. */
+    public State[] activeOverlay() {
+        return activeOverlay;
     }
 
     /** Active HUD modules in registration order. Array is replaced (never mutated) on change. */

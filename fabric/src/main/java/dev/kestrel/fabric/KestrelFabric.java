@@ -22,7 +22,7 @@ public final class KestrelFabric implements ClientModInitializer {
 
     public static void tick(boolean end) {
         if (platform == null) return;
-        if (!end) platform.pollServer();
+        if (!end) platform.tick();
         Kestrel.onTick(end);
     }
 

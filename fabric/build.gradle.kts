@@ -31,6 +31,9 @@ loom {
         runDirectory = rootProject.file("run/$mc")
         generateRunConfig = false
         jvmArguments.add("-Dmixin.debug.export=true")
+        // Logs an error for any injector that matched fewer targets than expected, even with require = 0,
+        // so a silently skipped optional mixin fails the smoke test.
+        jvmArguments.add("-Dmixin.debug.countInjections=true")
         if (smokeSeconds != null) {
             jvmArguments.add("-Dkestrel.smoke=1")
             jvmArguments.add("-Dkestrel.smoke.seconds=$smokeSeconds")

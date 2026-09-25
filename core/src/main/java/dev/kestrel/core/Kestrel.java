@@ -54,19 +54,48 @@ public final class Kestrel {
     public final HookWatchdog hooks = new HookWatchdog();
     public final Compat compat;
     public final dev.kestrel.core.modules.ClickTracker clicks = new dev.kestrel.core.modules.ClickTracker();
+    public final dev.kestrel.core.plugin.NameTagRegistry nameTags = new dev.kestrel.core.plugin.NameTagRegistry();
+    public final dev.kestrel.core.plugin.PanelRegistry panels = new dev.kestrel.core.plugin.PanelRegistry();
+    public final dev.kestrel.core.net.HttpClient http;
+    public final dev.kestrel.core.plugin.PluginManager plugins;
     public Theme theme = Theme.preset("Kestrel");
     public String currentServer;
     private GuiRoot gui;
     private final Gfx hudGfx = new Gfx();
     private final ClientTickEvent tickEvent = new ClientTickEvent();
+    private final dev.kestrel.core.event.ScrollEvent scrollEvent = new dev.kestrel.core.event.ScrollEvent();
+    private final dev.kestrel.core.event.AttackEvent attackEvent = new dev.kestrel.core.event.AttackEvent();
+    private final dev.kestrel.api.event.ChatReceivedEvent chatEvent = new dev.kestrel.api.event.ChatReceivedEvent();
+    private final OverlayCall overlayCall = new OverlayCall();
+
+    private static final class OverlayCall implements Runnable {
+        private ModuleManager.State s;
+        private Gfx g;
+        private float w, h;
+
+        void set(ModuleManager.State s, Gfx g, float w, float h) {
+            this.s = s;
+            this.g = g;
+            this.w = w;
+            this.h = h;
+        }
+
+        @Override
+        public void run() {
+            ((dev.kestrel.core.module.Overlay) s.module).renderOverlay(g, w, h);
+        }
+    }
     private final KeyPressEvent keyEvent = new KeyPressEvent();
     private Smoke smoke;
+    private boolean started;
 
     private Kestrel(Platform platform, String modVersion) {
         this.platform = platform;
         this.modVersion = modVersion;
         this.compat = new Compat(platform.mods());
         this.config = new ConfigManager(platform.gameDir().resolve(NAME), modules, hud, client, scheduler);
+        this.http = new dev.kestrel.core.net.HttpClient(scheduler, modVersion);
+        this.plugins = new dev.kestrel.core.plugin.PluginManager(this, config.pluginsDir);
     }
 
     public static Kestrel get() {
@@ -84,13 +113,20 @@ public final class Kestrel {
         Guard.run("init", new Runnable() {
             @Override
             public void run() {
-                Kestrel k = new Kestrel(platform, modVersion);
-                k.start();
-                instance = k;
+                Kestrel k = boot(platform, modVersion);
                 Log.info(NAME + " " + modVersion + " on Minecraft " + platform.minecraftVersion() + " (" + platform.loader()
                         + "), API " + KestrelApi.VERSION + "; compat: " + k.compat.describePresent());
             }
         });
+    }
+
+    /** Builds and publishes an instance (tests call this directly to get a fresh client per case). */
+    static Kestrel boot(Platform platform, String modVersion) {
+        Kestrel k = new Kestrel(platform, modVersion);
+        instance = k; // before start(): modules enabled by the profile may call Kestrel.get() in onEnable
+        k.start();
+        k.plugins.loadAll();
+        return k;
     }
 
     private void start() {
@@ -122,6 +158,7 @@ public final class Kestrel {
         for (String n : config.notices) toast("Config restored", n, theme.warn);
         config.notices.clear();
         if ("1".equals(System.getProperty("kestrel.smoke"))) smoke = new Smoke(this);
+        started = true;
     }
 
     private final Runnable dirtyListener = new Runnable() {
@@ -135,7 +172,7 @@ public final class Kestrel {
     public ModuleManager.State register(Module m, String owner) {
         ModuleManager.State s = modules.register(m, owner);
         for (dev.kestrel.api.setting.Setting<?> set : m.settings()) set.addListener(dirtyListener);
-        if (instance != null) {
+        if (started) {
             config.applyTo(s);
             applyRulesTo(s, currentServer == null ? null : serverRules.disallowedFor(currentServer));
         }
@@ -256,7 +293,13 @@ public final class Kestrel {
         try {
             g.begin(backend, System.currentTimeMillis());
             boolean editing = k.gui != null && k.gui.isHudEditorOpen() && k.platform.screens().current() == ScreenHost.Kind.OURS;
-            if (!k.platform.hideGui() && !editing) k.hud.render(g, screenWidth, screenHeight, false);
+            if (!k.platform.hideGui() && !editing) {
+                k.hud.render(g, screenWidth, screenHeight, false);
+                for (ModuleManager.State s : k.modules.activeOverlay()) {
+                    k.overlayCall.set(s, g, screenWidth, screenHeight);
+                    k.modules.guard(s, "overlay", k.overlayCall);
+                }
+            }
             if (k.platform.screens().current() != ScreenHost.Kind.OURS) k.toasts.render(g, k.theme, screenWidth, g.millis());
         } catch (VirtualMachineError e) {
             throw e;
@@ -321,6 +364,67 @@ public final class Kestrel {
         }
     }
 
+    /** Mouse wheel while no screen is open; returns true when a module consumed it (e.g. zoom). */
+    public static boolean onScroll(double amount) {
+        Kestrel k = instance;
+        if (k == null || k.platform.screens().current() != ScreenHost.Kind.NONE) return false;
+        try {
+            k.scrollEvent.amount = amount;
+            k.scrollEvent.consumed = false;
+            k.events.post(k.scrollEvent);
+            return k.scrollEvent.consumed;
+        } catch (VirtualMachineError e) {
+            throw e;
+        } catch (Throwable t) {
+            Log.error("hook scroll failed", t);
+            return false;
+        }
+    }
+
+    /** The local player attacked an entity. */
+    public static void onAttack(int entityId) {
+        Kestrel k = instance;
+        if (k == null) return;
+        try {
+            k.attackEvent.entityId = entityId;
+            k.events.post(k.attackEvent);
+        } catch (VirtualMachineError e) {
+            throw e;
+        } catch (Throwable t) {
+            Log.error("hook attack failed", t);
+        }
+    }
+
+    /** Incoming chat line: plugins may cancel it, then Chat Tools may decorate it. Never throws. */
+    public static void onChat(dev.kestrel.core.chat.ChatLine line) {
+        Kestrel k = instance;
+        if (k == null) return;
+        k.hooks.chat = true;
+        try {
+            k.chatEvent.reset(line.plain, line.formatted);
+            k.events.post(k.chatEvent);
+            if (k.chatEvent.cancelled()) {
+                line.cancel = true;
+                return;
+            }
+            ModuleManager.State s = k.modules.get("chat");
+            if (s != null && s.active()) {
+                final dev.kestrel.core.chat.ChatLine l = line;
+                final dev.kestrel.core.modules.ChatModule chat = (dev.kestrel.core.modules.ChatModule) s.module;
+                k.modules.guard(s, "chat", new Runnable() {
+                    @Override
+                    public void run() {
+                        chat.process(l);
+                    }
+                });
+            }
+        } catch (VirtualMachineError e) {
+            throw e;
+        } catch (Throwable t) {
+            Log.error("hook chat failed", t);
+        }
+    }
+
     public static void onServerJoin(final String address) {
         final Kestrel k = instance;
         if (k == null) return;
@@ -361,6 +465,24 @@ public final class Kestrel {
         });
     }
 
+    /**
+     * Text to append to a player's name (plugins such as Tier Tags), or null. Called while rendering nametags and the
+     * tab list, so the fast path (no decorators) is a single field read.
+     */
+    public static String nameSuffix(java.util.UUID uuid, String name, boolean tabList) {
+        Kestrel k = instance;
+        if (k == null || k.nameTags.isEmpty()) return null;
+        try {
+            return k.nameTags.suffix(uuid, name, tabList ? dev.kestrel.api.name.NameDecorator.Placement.TAB_LIST
+                    : dev.kestrel.api.name.NameDecorator.Placement.NAMETAG);
+        } catch (VirtualMachineError e) {
+            throw e;
+        } catch (Throwable t) {
+            Log.error("hook nameSuffix failed", t);
+            return null;
+        }
+    }
+
     /** A vanilla title/pause screen finished init: returns whether to add our menu button. */
     public static boolean wantMenuButton() {
         Kestrel k = instance;
@@ -376,8 +498,10 @@ public final class Kestrel {
         Guard.run("shutdown", new Runnable() {
             @Override
             public void run() {
+                k.plugins.shutdown();
                 k.config.shutdown();
                 k.scheduler.shutdown();
+                k.http.shutdown();
             }
         });
     }

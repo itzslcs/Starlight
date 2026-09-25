@@ -31,7 +31,7 @@ val collectAddons by tasks.registering(Copy::class) {
 tasks.register("buildAll") {
     group = "build"
     description = "Builds every target jar into dist/ plus SHA256SUMS."
-    dependsOn(cleanDist, ":core:test", buildLegacy) // + collectAddons once the plugin loader lands (Phase 4)
+    dependsOn(cleanDist, ":core:test", buildLegacy, collectAddons)
     dependsOn(project(":fabric").subprojects.map { "${it.path}:collectJar" })
     doLast {
         val root = dist.asFile

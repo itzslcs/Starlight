@@ -1,6 +1,13 @@
 package dev.kestrel.forge;
 
+import dev.kestrel.core.Hooks;
 import dev.kestrel.core.Keys;
+import dev.kestrel.core.chat.ChatLine;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
+import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import dev.kestrel.core.Kestrel;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiIngameMenu;
@@ -22,15 +29,15 @@ import org.lwjgl.input.Keyboard;
 public final class KestrelForge {
     public static final String VERSION = "0.1.0+mc1.8.9";
     private static final int BUTTON_ID = 0x4B53; // "KS"
-    private static Hooks hooks;
+    private static Handlers hooks;
 
-    static Hooks hooks() {
+    static Handlers hooks() {
         return hooks;
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
-        hooks = new Hooks(new ForgePlatform());
+        hooks = new Handlers(new ForgePlatform());
         hooks.platform().refreshResolution();
         Kestrel.init(hooks.platform(), VERSION);
         MinecraftForge.EVENT_BUS.register(hooks);
@@ -55,11 +62,11 @@ public final class KestrelForge {
     }
 
     /** Forge event handlers; each forwards to core in one line. */
-    public static final class Hooks {
+    public static final class Handlers {
         private final ForgePlatform platform;
         private final ForgeBackend hud = new ForgeBackend();
 
-        Hooks(ForgePlatform platform) {
+        Handlers(ForgePlatform platform) {
             this.platform = platform;
         }
 
@@ -71,7 +78,7 @@ public final class KestrelForge {
         public void onTick(TickEvent.ClientTickEvent e) {
             if (e.phase == TickEvent.Phase.START) {
                 platform.refreshResolution();
-                platform.pollServer();
+                platform.tick();
                 Kestrel.onTick(false);
             } else {
                 Kestrel.onTick(true);
@@ -86,6 +93,62 @@ public final class KestrelForge {
         }
 
         @SubscribeEvent
+        public void onOverlayPre(RenderGameOverlayEvent.Pre e) {
+            if (e.type == RenderGameOverlayEvent.ElementType.CROSSHAIRS && Hooks.hideCrosshair) e.setCanceled(true);
+        }
+
+        @SubscribeEvent
+        public void onFov(EntityViewRenderEvent.FOVModifier e) {
+            float m = Hooks.fov();
+            if (m != 1f) e.setFOV(e.getFOV() * m);
+        }
+
+        @SubscribeEvent
+        public void onAttack(AttackEntityEvent e) {
+            if (e.entityPlayer == net.minecraft.client.Minecraft.getMinecraft().thePlayer && e.target != null) Kestrel.onAttack(e.target.getEntityId());
+        }
+
+        @SubscribeEvent
+        public void onChat(ClientChatReceivedEvent e) {
+            if (e.type == 2 || e.message == null) return; // action bar
+            ChatLine line = chat.reset(e.message.getUnformattedText(), e.message.getFormattedText());
+            Kestrel.onChat(line);
+            if (line.cancel) {
+                e.setCanceled(true);
+                return;
+            }
+            if (!line.modified() && !line.track) return;
+            // Print ourselves with a per-text line id so "(xN)" stacking can delete the previous copy.
+            e.setCanceled(true);
+            IChatComponent out = new ChatComponentText("");
+            if (line.highlight != 0) out.appendSibling(new ChatComponentText("§" + nearest(line.highlight) + "▍§r"));
+            if (line.prefix != null) out.appendSibling(new ChatComponentText(line.prefix));
+            out.appendSibling(e.message);
+            if (line.repeatSuffix() != null) out.appendSibling(new ChatComponentText(line.repeatSuffix()));
+            int id = line.plain.hashCode() | 0x40000000; // never 0 (0 = "no id")
+            net.minecraft.client.Minecraft.getMinecraft().ingameGUI.getChatGUI().printChatMessageWithOptionalDeletion(out, id);
+        }
+
+        private final ChatLine chat = new ChatLine();
+
+        /** Closest legacy colour code for an ARGB colour (1.8.9 chat has no RGB). */
+        private static char nearest(int argb) {
+            int[] rgb = {0x000000, 0x0000AA, 0x00AA00, 0x00AAAA, 0xAA0000, 0xAA00AA, 0xFFAA00, 0xAAAAAA,
+                    0x555555, 0x5555FF, 0x55FF55, 0x55FFFF, 0xFF5555, 0xFF55FF, 0xFFFF55, 0xFFFFFF};
+            int best = 15;
+            long bestD = Long.MAX_VALUE;
+            for (int i = 0; i < 16; i++) {
+                long dr = ((argb >> 16) & 255) - ((rgb[i] >> 16) & 255), dg = ((argb >> 8) & 255) - ((rgb[i] >> 8) & 255), db = (argb & 255) - (rgb[i] & 255);
+                long d = dr * dr + dg * dg + db * db;
+                if (d < bestD) {
+                    bestD = d;
+                    best = i;
+                }
+            }
+            return "0123456789abcdef".charAt(best);
+        }
+
+        @SubscribeEvent
         public void onKey(InputEvent.KeyInputEvent e) {
             int code = Keyboard.getEventKey();
             if (code == 0) return;
@@ -96,6 +159,7 @@ public final class KestrelForge {
         @SubscribeEvent
         public void onMouse(MouseEvent e) {
             if (e.button >= 0) Kestrel.onMouseButton(e.button, e.buttonstate ? Keys.ACTION_PRESS : Keys.ACTION_RELEASE);
+            if (e.dwheel != 0 && Kestrel.onScroll(e.dwheel > 0 ? 1 : -1)) e.setCanceled(true);
         }
 
         @SubscribeEvent

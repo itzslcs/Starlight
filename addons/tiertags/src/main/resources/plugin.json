@@ -1,0 +1,9 @@
+{
+  "id": "tiertags",
+  "name": "Tier Tags",
+  "version": "${version}",
+  "api": "1.0",
+  "main": "dev.kestrel.addons.tiertags.TierTagsPlugin",
+  "authors": ["Kestrel contributors"],
+  "description": "Shows PvP tier-list ranks (MCTiers, SubTiers or any v2-compatible list) next to player names."
+}

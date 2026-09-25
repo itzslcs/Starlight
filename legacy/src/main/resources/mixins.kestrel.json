@@ -4,7 +4,14 @@
   "package": "dev.kestrel.forge.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [
-    "MinecraftMixin"
+    "EffectRendererMixin",
+    "EntityMixin",
+    "EntityRendererMixin",
+    "GuiPlayerTabOverlayMixin",
+    "ItemRendererMixin",
+    "MinecraftMixin",
+    "RenderMixin",
+    "RendererLivingEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

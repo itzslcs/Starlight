@@ -26,6 +26,7 @@ loom {
         named("client") {
             runDir = "../run/1.8.9"
             property("mixin.debug", "true")
+            property("mixin.debug.countInjections", "true")
             programArgs("--tweakClass", "org.spongepowered.asm.launch.MixinTweaker")
             if (smokeSeconds != null) {
                 property("kestrel.smoke", "1")

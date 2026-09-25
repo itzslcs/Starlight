@@ -1,0 +1,74 @@
+package dev.kestrel.fabric;
+
+import net.fabricmc.loader.api.FabricLoader;
+import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
+import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Gate for kestrel.optional.mixins.json: skips a feature mixin when a mod that does the same job is loaded, or when the
+ * user lists it in -Dkestrel.mixins.disable=Name1,Name2 (escape hatch for launcher-specific conflicts, no rebuild).
+ */
+public final class KestrelMixinPlugin implements IMixinConfigPlugin {
+    /** Simple mixin class name -> mod ids that make us step aside. */
+    private static final Map<String, List<String>> CONFLICTS = new HashMap<String, List<String>>();
+    static final Set<String> SKIPPED = new HashSet<String>();
+
+    static {
+        CONFLICTS.put("CameraMixin", Arrays.asList("freelook", "perspectivemod"));
+        CONFLICTS.put("EntityTurnMixin", Arrays.asList("freelook", "perspectivemod"));
+    }
+
+    private Set<String> userDisabled = new HashSet<String>();
+
+    @Override
+    public void onLoad(String mixinPackage) {
+        String p = System.getProperty("kestrel.mixins.disable", "");
+        for (String s : p.split(",")) if (!s.trim().isEmpty()) userDisabled.add(s.trim());
+    }
+
+    @Override
+    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        String simple = mixinClassName.substring(mixinClassName.lastIndexOf('.') + 1);
+        if (userDisabled.contains(simple)) {
+            SKIPPED.add(simple + " (user)");
+            return false;
+        }
+        List<String> mods = CONFLICTS.get(simple);
+        if (mods != null) {
+            for (String id : mods) {
+                if (FabricLoader.getInstance().isModLoaded(id)) {
+                    SKIPPED.add(simple + " (" + id + ")");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String getRefMapperConfig() {
+        return null;
+    }
+
+    @Override
+    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {}
+
+    @Override
+    public List<String> getMixins() {
+        return null;
+    }
+
+    @Override
+    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {}
+
+    @Override
+    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {}
+}

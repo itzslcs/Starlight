@@ -1,0 +1,25 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "dev.kestrel.fabric.mixin",
+  "plugin": "dev.kestrel.fabric.KestrelMixinPlugin",
+  "compatibilityLevel": "${java}",
+  "client": [
+    "CameraMixin",
+    "ChatComponentMixin",
+    "EntityTurnMixin",
+    "GameRendererMixin",
+    "ItemInHandRendererMixin",
+    "LightTextureMixin",
+    "LivingEntityRendererMixin",
+    "MultiPlayerGameModeMixin",
+    "NameTagMixin",
+    "OverlayTextureAccessor",
+    "ParticleEngineMixin",
+    "PlayerTabOverlayMixin",
+    "ScreenEffectRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

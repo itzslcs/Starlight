@@ -38,6 +38,7 @@ public final class GuiRoot {
     private final Anim[] sideHover;
     private Page page;
     private final HudEditor hudEditor;
+    private final dev.kestrel.core.gui.page.ChatSearchPage chatSearch;
     private boolean editing;
 
     private Widget popup, popupOwner, focused, captured;
@@ -65,6 +66,7 @@ public final class GuiRoot {
         for (int i = 0; i < sideHover.length; i++) sideHover[i] = new Anim(0);
         page = pages.get(0);
         hudEditor = new HudEditor(this);
+        chatSearch = new dev.kestrel.core.gui.page.ChatSearchPage(this);
     }
 
     // ------------------------------------------------------------------ lifecycle
@@ -105,6 +107,13 @@ public final class GuiRoot {
         editing = true;
         popup = popupOwner = null;
         hudEditor.onShow();
+    }
+
+    /** Opens the menu on the chat search page (Chat Tools' search key). */
+    public void openChatSearch() {
+        if (k.platform.screens().current() != dev.kestrel.core.platform.ScreenHost.Kind.OURS) k.openGui();
+        editing = false;
+        show(chatSearch);
     }
 
     public void closeHudEditor() {

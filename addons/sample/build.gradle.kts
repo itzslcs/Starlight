@@ -9,3 +9,9 @@ tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("-Xlint:-options")
 }
 tasks.jar { archiveFileName = "Kestrel-addon-sample-${project.property("mod.version")}.jar" }
+
+tasks.processResources {
+    val v = project.property("mod.version").toString()
+    inputs.property("version", v)
+    filesMatching("plugin.json") { expand("version" to v) }
+}

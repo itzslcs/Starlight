@@ -31,3 +31,14 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
   version (1.21.11) from the tree.
 - **Fix:** settings.gradle.kts always keeps the active version (parsed from `fabric/stonecutter.gradle.kts`) registered.
   Verified by re-running the loop (results below in COMPAT_MATRIX).
+
+## 2026-09-25 · Zoom (and any default-on module) failed in onEnable at startup
+- **Repro:** `PluginManagerTest` (boots a real Kestrel on a test platform); stderr: `module zoom failed in enable (1/5)`,
+  `NullPointerException: Cannot read field "events" because "k" is null` at `ZoomModule.onEnable`.
+- **Hypothesis:** `Kestrel.init` published `instance` only after `start()`, but `start()` → `config.load()` enables
+  default-on modules, whose `onEnable` calls `Kestrel.get()`. Refuted if the NPE persists with the instance published first.
+- **Fix:** publish the instance before `start()`; late registrations are applied based on a `started` flag, not on
+  `instance != null`. Re-ran the test: no `failed in enable` lines. This would have broken Zoom on every real startup;
+  the Phase 1 smoke runs did not cover it because Zoom did not exist yet.
+- **Also in that run (test bug, not product):** the test's jar builder packaged only `Main.class`, so a plugin using an
+  anonymous class failed with `NoClassDefFoundError: paddon/Main$1`. The builder now packages every compiled class.

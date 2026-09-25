@@ -3,6 +3,7 @@ package dev.kestrel.fabric;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.kestrel.api.Logger;
 import dev.kestrel.api.render.ItemRef;
+import dev.kestrel.core.Hooks;
 import dev.kestrel.core.Keys;
 import dev.kestrel.core.Kestrel;
 import dev.kestrel.core.platform.ChatAccess;
@@ -30,6 +31,10 @@ import net.minecraft.util.Util;
 /*import net.minecraft.Util;
 *///?}
 import net.minecraft.world.Difficulty;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.flag.FeatureFlags;
@@ -44,7 +49,9 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /** Platform for Fabric targets. Everything version-specific lives here, in FabricBackend and in the mixins. */
@@ -58,6 +65,9 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
     private final String mcVersion;
     private boolean wasInWorld;
     private String lastServer;
+    private final Map<String, FabricItem> icons = new HashMap<String, FabricItem>();
+    private boolean savedToggleSprint, savedToggleSneak;
+    private int appliedHitColor;
 
     private final Logger logger = new Logger() {
         @Override
@@ -83,6 +93,36 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
     }
 
     /** Called at the start of every client tick: detects world/server changes without extra mixins. */
+    /** Start of every client tick. */
+    void tick() {
+        pollServer();
+        if (Hooks.hitColor != appliedHitColor) applyHitColor(Hooks.hitColor);
+    }
+
+    /** Rewrites the red rows of the entity hurt-overlay texture (vanilla restores with colour 0). */
+    private void applyHitColor(int argb) {
+        appliedHitColor = argb;
+        try {
+            net.minecraft.client.renderer.texture.DynamicTexture tex =
+                    ((dev.kestrel.fabric.mixin.OverlayTextureAccessor) mc.gameRenderer.overlayTexture()).kestrel$texture();
+            com.mojang.blaze3d.platform.NativeImage img = tex.getPixels();
+            if (img == null) return;
+            int c = argb == 0 ? 0xB2FF0000 : argb;
+            for (int y = 0; y < 8; y++) {
+                for (int x = 0; x < 16; x++) {
+                    //? if >=1.21.2 {
+                    img.setPixel(x, y, c);
+                    //?} else {
+                    /*img.setPixelRGBA(x, y, (c & 0xFF00FF00) | ((c >> 16) & 0xFF) | ((c & 0xFF) << 16));
+                    *///?}
+                }
+            }
+            tex.upload();
+        } catch (Throwable t) {
+            log.warn("hit colour not applied: {}", t.toString());
+        }
+    }
+
     void pollServer() {
         boolean inWorld = mc.level != null && mc.player != null;
         String server = inWorld && mc.getCurrentServer() != null ? mc.getCurrentServer().ip : null;
@@ -235,6 +275,7 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
             case SNEAK: return mc.options.keyShift;
             case SPRINT: return mc.options.keySprint;
             case ATTACK: return mc.options.keyAttack;
+            case SCREENSHOT: return mc.options.keyScreenshot;
             default: return mc.options.keyUse;
         }
     }
@@ -379,6 +420,104 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
                 WorldDataConfiguration.DEFAULT);
         mc.createWorldOpenFlows().createFreshLevel(folder, settings, new WorldOptions(seed, false, false),
                 WorldPresets::createNormalWorldDimensions, parent);
+    }
+
+    // ------------------------------------------------------------------ Phase 4 data
+
+    @Override
+    public void effects(EffectSink sink) {
+        if (mc.player == null) return;
+        for (MobEffectInstance inst : mc.player.getActiveEffects()) {
+            MobEffect e = inst.getEffect().value();
+            sink.accept(e.getDisplayName().getString(), inst.getAmplifier(), inst.isInfiniteDuration() ? -1 : inst.getDuration(),
+                    e.getColor(), e.isBeneficial());
+        }
+    }
+
+    @Override
+    public ItemRef itemIcon(String itemId) {
+        FabricItem f = icons.get(itemId);
+        if (f == null) {
+            //? if >=1.21.11 {
+            net.minecraft.resources.Identifier id = net.minecraft.resources.Identifier.tryParse(itemId);
+            //?} else {
+            /*net.minecraft.resources.ResourceLocation id = net.minecraft.resources.ResourceLocation.tryParse(itemId);
+            *///?}
+            net.minecraft.world.item.Item item = id == null ? null : BuiltInRegistries.ITEM.getOptional(id).orElse(null);
+            f = new FabricItem().set(item == null ? ItemStack.EMPTY : new ItemStack(item));
+            icons.put(itemId, f);
+        }
+        return f;
+    }
+
+    @Override
+    public float attackCooldown() {
+        return mc.player == null ? 1f : mc.player.getAttackStrengthScale(0f);
+    }
+
+    @Override
+    public int hurtTime() {
+        return mc.player == null ? 0 : mc.player.hurtTime;
+    }
+
+    @Override
+    public boolean sprinting() {
+        return mc.player != null && mc.player.isSprinting();
+    }
+
+    @Override
+    public boolean sneaking() {
+        return mc.player != null && mc.player.isShiftKeyDown();
+    }
+
+    /** Uses vanilla's own "Toggle" key mode (Accessibility options); restores the previous mode when turned off. */
+    @Override
+    public void setToggle(Binding binding, boolean enabled) {
+        if (binding == Binding.SPRINT) {
+            if (enabled) savedToggleSprint = mc.options.toggleSprint().get();
+            mc.options.toggleSprint().set(enabled || savedToggleSprint);
+        } else if (binding == Binding.SNEAK) {
+            if (enabled) savedToggleSneak = mc.options.toggleCrouch().get();
+            mc.options.toggleCrouch().set(enabled || savedToggleSneak);
+        }
+    }
+
+    @Override
+    public boolean toggleLatched(Binding binding) {
+        if (binding == Binding.SPRINT) return mc.options.toggleSprint().get() && mc.options.keySprint.isDown();
+        if (binding == Binding.SNEAK) return mc.options.toggleCrouch().get() && mc.options.keyShift.isDown();
+        return false;
+    }
+
+    @Override
+    public void setSmoothCamera(boolean on) {
+        mc.options.smoothCamera = on;
+    }
+
+    @Override
+    public void setPerspective(int perspective) {
+        CameraType[] types = CameraType.values();
+        mc.options.setCameraType(types[Math.max(0, Math.min(types.length - 1, perspective))]);
+    }
+
+    @Override
+    public long dayTime() {
+        return mc.level == null ? -1 : mc.level.getDayTime();
+    }
+
+    @Override
+    public Path screenshotsDir() {
+        return mc.gameDirectory.toPath().resolve("screenshots");
+    }
+
+    @Override
+    public void debugIncomingChat(String text) {
+        mc.gui.getChat().addMessage(Component.literal(text));
+    }
+
+    @Override
+    public void playPing() {
+        mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING, 1.5f));
     }
 
     // ------------------------------------------------------------------ ScreenHost

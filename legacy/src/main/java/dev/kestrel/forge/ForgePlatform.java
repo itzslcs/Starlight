@@ -33,7 +33,9 @@ import org.lwjgl.input.Mouse;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /** Platform for Forge 1.8.9 (MCP names). */
@@ -43,6 +45,10 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
     private final ForgeItem[] armor = {new ForgeItem(), new ForgeItem(), new ForgeItem(), new ForgeItem()};
     private final ForgeItem main = new ForgeItem(), off = new ForgeItem(), probe = new ForgeItem();
     private int scaledW = 1, scaledH = 1, scale = 1;
+    private final Map<String, ForgeItem> icons = new HashMap<String, ForgeItem>();
+    // 1.8.9 has no vanilla toggle mode: latch the key ourselves (GRAY modules only)
+    private final boolean[] toggleOn = new boolean[2], latched = new boolean[2], wasPhysical = new boolean[2];
+    private float savedGamma = Float.NaN;
     private boolean wasInWorld;
     private String lastServer;
 
@@ -74,6 +80,40 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
         scaledW = r.getScaledWidth();
         scaledH = r.getScaledHeight();
         scale = r.getScaleFactor();
+    }
+
+    /** Start of every client tick. */
+    void tick() {
+        pollServer();
+        applyGamma();
+        tickToggle(0, mc.gameSettings.keyBindSprint);
+        tickToggle(1, mc.gameSettings.keyBindSneak);
+    }
+
+    /** Brightness: 1.8.9 does not clamp gammaSetting at render time, so set it while the module is on. */
+    private void applyGamma() {
+        double g = dev.kestrel.core.Hooks.gamma;
+        if (!Double.isNaN(g)) {
+            if (Float.isNaN(savedGamma)) savedGamma = mc.gameSettings.gammaSetting;
+            mc.gameSettings.gammaSetting = (float) g;
+        } else if (!Float.isNaN(savedGamma)) {
+            mc.gameSettings.gammaSetting = savedGamma;
+            savedGamma = Float.NaN;
+        }
+    }
+
+    private boolean physicallyDown(KeyBinding kb) {
+        int code = kb.getKeyCode();
+        if (code < 0) return Mouse.isButtonDown(code + 100);
+        return code > 0 && Keyboard.isKeyDown(code);
+    }
+
+    private void tickToggle(int i, KeyBinding kb) {
+        if (!toggleOn[i]) return;
+        boolean phys = mc.currentScreen == null && physicallyDown(kb);
+        if (phys && !wasPhysical[i]) latched[i] = !latched[i];
+        wasPhysical[i] = phys;
+        if (latched[i] && mc.currentScreen == null) KeyBinding.setKeyBindState(kb.getKeyCode(), true);
     }
 
     void pollServer() {
@@ -216,6 +256,7 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
             case SNEAK: return o.keyBindSneak;
             case SPRINT: return o.keyBindSprint;
             case ATTACK: return o.keyBindAttack;
+            case SCREENSHOT: return o.keyBindScreenshot;
             default: return o.keyBindUseItem;
         }
     }
@@ -335,6 +376,103 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
     @Override
     public void openWorld(String folder, long seed) {
         mc.launchIntegratedServer(folder, folder, new WorldSettings(seed, WorldSettings.GameType.CREATIVE, false, false, WorldType.DEFAULT));
+    }
+
+    // ------------------------------------------------------------------ Phase 4 data
+
+    @Override
+    public void effects(EffectSink sink) {
+        if (mc.thePlayer == null) return;
+        for (net.minecraft.potion.PotionEffect e : mc.thePlayer.getActivePotionEffects()) {
+            int id = e.getPotionID();
+            net.minecraft.potion.Potion p = id >= 0 && id < net.minecraft.potion.Potion.potionTypes.length ? net.minecraft.potion.Potion.potionTypes[id] : null;
+            if (p == null) continue;
+            sink.accept(I18n.format(p.getName()), e.getAmplifier(), e.getDuration() >= 32767 ? -1 : e.getDuration(), p.getLiquidColor(), !p.isBadEffect());
+        }
+    }
+
+    @Override
+    public ItemRef itemIcon(String itemId) {
+        ForgeItem f = icons.get(itemId);
+        if (f == null) {
+            net.minecraft.item.Item item = net.minecraft.item.Item.itemRegistry.getObject(new net.minecraft.util.ResourceLocation(itemId));
+            f = new ForgeItem().set(item == null ? null : new ItemStack(item));
+            icons.put(itemId, f);
+        }
+        return f;
+    }
+
+    @Override
+    public float attackCooldown() {
+        return 1f;
+    }
+
+    @Override
+    public int hurtTime() {
+        return mc.thePlayer == null ? 0 : mc.thePlayer.hurtTime;
+    }
+
+    @Override
+    public boolean sprinting() {
+        return mc.thePlayer != null && mc.thePlayer.isSprinting();
+    }
+
+    @Override
+    public boolean sneaking() {
+        return mc.thePlayer != null && mc.thePlayer.isSneaking();
+    }
+
+    @Override
+    public void setToggle(Binding binding, boolean enabled) {
+        int i = binding == Binding.SPRINT ? 0 : binding == Binding.SNEAK ? 1 : -1;
+        if (i < 0) return;
+        toggleOn[i] = enabled;
+        if (!enabled && latched[i]) {
+            KeyBinding kb = i == 0 ? mc.gameSettings.keyBindSprint : mc.gameSettings.keyBindSneak;
+            KeyBinding.setKeyBindState(kb.getKeyCode(), physicallyDown(kb));
+        }
+        latched[i] = false;
+    }
+
+    @Override
+    public boolean toggleLatched(Binding binding) {
+        int i = binding == Binding.SPRINT ? 0 : binding == Binding.SNEAK ? 1 : -1;
+        return i >= 0 && toggleOn[i] && latched[i];
+    }
+
+    @Override
+    public void setSmoothCamera(boolean on) {
+        mc.gameSettings.smoothCamera = on;
+    }
+
+    @Override
+    public void setPerspective(int perspective) {
+        mc.gameSettings.thirdPersonView = Math.max(0, Math.min(2, perspective));
+    }
+
+    @Override
+    public long dayTime() {
+        return mc.theWorld == null ? -1 : mc.theWorld.getWorldTime();
+    }
+
+    @Override
+    public Path screenshotsDir() {
+        return mc.mcDataDir.toPath().resolve("screenshots");
+    }
+
+    /** Mirrors NetHandlerPlayClient.handleChat: post the Forge event, print unless cancelled. */
+    @Override
+    public void debugIncomingChat(String text) {
+        net.minecraftforge.client.event.ClientChatReceivedEvent e =
+                new net.minecraftforge.client.event.ClientChatReceivedEvent((byte) 1, new ChatComponentText(text));
+        if (!net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(e) && e.message != null) {
+            mc.ingameGUI.getChatGUI().printChatMessage(e.message);
+        }
+    }
+
+    @Override
+    public void playPing() {
+        mc.getSoundHandler().playSound(net.minecraft.client.audio.PositionedSoundRecord.create(new net.minecraft.util.ResourceLocation("note.pling"), 1.5f));
     }
 
     // ------------------------------------------------------------------ ScreenHost

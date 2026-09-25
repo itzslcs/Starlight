@@ -30,7 +30,7 @@ public final class KeystrokesModule extends HudModule {
     private String lText = "LMB", rText = "RMB";
 
     public KeystrokesModule(ClickTracker clicks) {
-        super("keystrokes", "Keystrokes", "Movement keys and mouse buttons you are holding", Rule.ALLOWED, true, Anchor.BOTTOM_LEFT, 4, 4);
+        super("keystrokes", "Keystrokes", "Movement keys and mouse buttons you are holding", Rule.ALLOWED, true, Anchor.LEFT, 4, 0);
         this.clicks = clicks;
         for (int i = 0; i < anim.length; i++) anim[i] = new Anim(0);
     }

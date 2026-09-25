@@ -12,6 +12,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MouseHandler.class)
 public abstract class MouseHandlerMixin {
+    @Inject(method = "onScroll", at = @At("HEAD"), cancellable = true)
+    private void kestrel$scroll(long window, double xOffset, double yOffset, CallbackInfo ci) {
+        if (yOffset != 0 && Kestrel.onScroll(yOffset)) ci.cancel();
+    }
+
     //? if >=1.21.9 {
     @Inject(method = "onButton", at = @At("HEAD"))
     private void kestrel$button(long window, MouseButtonInfo info, int action, CallbackInfo ci) {
