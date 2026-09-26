@@ -10,7 +10,9 @@
 - **New modules:** Hitboxes (vanilla's F3+B view as a module), TNT Timer, Reach Display (off on Hypixel), Quick
   Commands (a key sends one command, like /hub).
 - **Custom Crosshair:** finer steps and an overall scale, down to a quarter size.
-- **Faster:** Memory/CPU no longer reads the CPU load on the render thread (it was the costliest HUD module).
+- **Faster:** Memory/CPU no longer reads the CPU load on the render thread (it was the costliest HUD module). On
+  1.8.9, HUD text is drawn in one batch instead of one draw call per letter: MW19's HUD costs about 30 % less there
+  (KeyCPS about 4.5× less).
 
 ## 0.3.0
 - **New home screen look:** the game's own panorama, a pixel-block MW19 logo, your skin in 3D on the left (drag to
