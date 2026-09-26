@@ -12,7 +12,21 @@ rm -rf "$OUT" && mkdir -p "$OUT" "$RUN"
 rm -rf "$RUN/saves/mw19-smoke" "$RUN"/screenshots/mw19-smoke-* "$RUN/logs/latest.log" "$RUN/MW19"
 # WITH_MODS="sodium ..." adds those mods from Modrinth to the dev run (compatibility/perf checks); cleared otherwise.
 rm -rf "$RUN/mods" && mkdir -p "$RUN/mods"
-if [ -n "${WITH_MODS:-}" ] && [ "$MC" != "1.8.9" ]; then python3 "$ROOT/scripts/testmods.py" "$MC" "$RUN/mods" $WITH_MODS || exit 1; fi
+rm -rf "$RUN/compat-mods"
+if [ -n "${WITH_MODS:-}" ] && [ "$MC" != "1.8.9" ]; then
+  MODS_LIST=""
+  for m in $WITH_MODS; do
+    if [ "$m" = "fabric-api" ]; then  # from Fabric's Maven: its modules are nested jars (fabric/build.gradle.kts)
+      FAPI=$(python3 -c "import json,sys,urllib.request,urllib.parse;q=urllib.parse.urlencode({'loaders':'["fabric"]','game_versions':json.dumps([sys.argv[1]])});v=json.load(urllib.request.urlopen(urllib.request.Request('https://api.modrinth.com/v2/project/fabric-api/version?'+q,headers={'User-Agent':'itzslcs/mw19-smoke'})));print([x for x in v if x['version_type']=='release'][0]['version_number'])" "$MC") || exit 1
+      WITH_MODS_ARG="${WITH_MODS_ARG:-} -Pmw19.fabricApi=$FAPI"
+    else
+      MODS_LIST="$MODS_LIST $m"
+    fi
+  done
+  mkdir -p "$RUN/compat-mods"
+  if [ -n "$MODS_LIST" ]; then python3 "$ROOT/scripts/testmods.py" "$MC" "$RUN/compat-mods" $MODS_LIST || exit 1; fi
+  WITH_MODS_ARG="${WITH_MODS_ARG:-} -Pmw19.withMods=$RUN/compat-mods"  # Loom remaps them at build time
+fi
 
 # Fresh MW19 config with the addon plugins installed and pre-approved (consent is keyed by the jar's SHA-256).
 mkdir -p "$RUN/MW19/plugins"
@@ -54,7 +68,7 @@ if [ "$MC" = "1.8.9" ]; then
   (cd "$ROOT" && ./gradlew :api:jar :core:jar -q) || { echo "FAIL build core" | tee "$OUT/result.txt"; exit 1; }
   CMD=(bash -c "cd '$ROOT/legacy' && ./gradlew runClient --console=plain -Pmw19.smoke=$SECS $CLICKS")
 else
-  CMD=("$ROOT/gradlew" -p "$ROOT" ":fabric:$MC:runClient" --console=plain "-Pmw19.smoke=$SECS" "-Pmw19.fabricTargets=$MC" $CLICKS)
+  CMD=("$ROOT/gradlew" -p "$ROOT" ":fabric:$MC:runClient" --console=plain "-Pmw19.smoke=$SECS" "-Pmw19.fabricTargets=$MC" $CLICKS ${WITH_MODS_ARG:-})
 fi
 
 # Click helper: waits for "SMOKE CLICK <display> <pid> <x> <y>" (window pixels) in the run output and clicks there.
@@ -116,7 +130,9 @@ allow = [r"Failed to fetch user properties", r"Realms", r"realms", r"Narrator", 
          # Forge 1.8.9 dev runtime (no binary patches/signatures in dev) and its dead Twitch integration
          r"binary patch set is missing", r"missing any signature data", r"twitch stream",
          # the dev account has no token, so authlib's key-pair fetch gets a 401 (26.2+)
-         r"Failed to retrieve profile key pair"]
+         r"Failed to retrieve profile key pair",
+         # vanilla fetching Mojang's service keys at start; a network timeout there is not ours (debug-log 2026-09-26)
+         r"Failed to request yggdrasil public key"]
 # Minecraft logs a GLFW error as three records ("#### GL ERROR ####", "@ <where>", "<code>: <message>"). Xvfb has no
 # cursor theme, so only that one message (with its frame) is environment noise; any other GL error still fails.
 env = set()

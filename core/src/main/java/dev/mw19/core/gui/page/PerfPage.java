@@ -5,6 +5,7 @@ import dev.mw19.core.PerfStats;
 import dev.mw19.core.gui.GuiRoot;
 import dev.mw19.core.gui.Ui;
 import dev.mw19.core.module.ModuleManager;
+import dev.mw19.core.perf.VideoPreset;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,28 +19,38 @@ public final class PerfPage extends Page {
     private String line1 = "", line2 = "";
     private final List<ModuleManager.State> sorted = new ArrayList<ModuleManager.State>();
 
-    private final dev.mw19.core.gui.widget.Button boost, undo;
+    private final dev.mw19.core.gui.widget.Button[] presets = new dev.mw19.core.gui.widget.Button[VideoPreset.values().length];
+    private final dev.mw19.core.gui.widget.Button auto, undo;
     private final dev.mw19.core.gui.widget.Toggle vulkan;
-    private String boostNote = "";
 
     public PerfPage(final GuiRoot root) {
         super(root);
-        boost = new dev.mw19.core.gui.widget.Button("FPS Boost", dev.mw19.core.gui.widget.Button.Style.PRIMARY, new Runnable() {
+        for (final VideoPreset v : VideoPreset.values()) {
+            dev.mw19.core.gui.widget.Button b = new dev.mw19.core.gui.widget.Button(v.label, dev.mw19.core.gui.widget.Button.Style.SECONDARY, new Runnable() {
+                @Override
+                public void run() {
+                    choose(v, "");
+                }
+            });
+            b.tooltip = v.blurb;
+            presets[v.ordinal()] = b;
+        }
+        auto = new dev.mw19.core.gui.widget.Button("Auto", dev.mw19.core.gui.widget.Button.Style.GHOST, new Runnable() {
             @Override
             public void run() {
-                int n = root.k.fpsBoost.apply();
-                boostNote = n + " settings switched to fast values";
-                root.k.toast("FPS Boost", "Fast settings applied (clouds, particles, shadows, smooth lighting, ...). Undo restores yours.", root.k.theme.good);
+                dev.mw19.core.perf.HardwareTier.Suggestion s = root.k.video.suggestion();
+                choose(s.preset, " (picked for " + s.reason + ")");
             }
         });
-        boost.tooltip = "Clouds off, fewer particles, no entity shadows or smooth lighting, fast leaves, no VSync, unlimited FPS, render distance at most 12";
-        undo = new dev.mw19.core.gui.widget.Button("Undo", dev.mw19.core.gui.widget.Button.Style.SECONDARY, new Runnable() {
+        auto.tooltip = "The preset that suits the graphics card MW19 detected";
+        undo = new dev.mw19.core.gui.widget.Button("Undo", dev.mw19.core.gui.widget.Button.Style.GHOST, new Runnable() {
             @Override
             public void run() {
-                root.k.fpsBoost.undo();
-                boostNote = "your previous settings are back";
+                root.k.video.undo();
+                root.k.toast("Graphics", "Your own video settings are back.", root.k.theme.good);
             }
         });
+        undo.tooltip = "Puts back the video settings you had before the first preset";
         vulkan = new dev.mw19.core.gui.widget.Toggle(new dev.mw19.core.gui.widget.Toggle.Model() {
             @Override
             public boolean get() {
@@ -52,6 +63,11 @@ public final class PerfPage extends Page {
                 root.k.toast("Renderer", (v ? "Vulkan" : "OpenGL") + " takes effect after a restart (Vulkan falls back to OpenGL if the GPU cannot run it).", root.k.theme.warn);
             }
         });
+    }
+
+    private void choose(VideoPreset v, String why) {
+        int n = root.k.video.apply(v, false);
+        root.k.toast("Graphics: " + v.label, n + " video settings changed" + why + ". Undo restores yours.", root.k.theme.good);
     }
 
     @Override
@@ -72,7 +88,7 @@ public final class PerfPage extends Page {
             float avg = p.avgFrameMs();
             line1 = String.format(Locale.ROOT, "%.0f FPS avg · 1%% low %.0f · 0.1%% low %.0f · p99 %.1f ms",
                     avg > 0 ? 1000 / avg : 0, p.lowFps(0.01f), p.lowFps(0.001f), p.percentile(0.99f));
-            line2 = String.format(Locale.ROOT, "MW19: %.1f µs/frame (HUD) · %.1f µs/tick · budget 300 µs/frame", p.avgOwnUs(), p.tickUs);
+            line2 = String.format(Locale.ROOT, "MW19: %.0f µs/frame · %.0f µs/tick (budget 300 µs/frame)", p.avgOwnUs(), p.tickUs);
             sorted.clear();
             for (ModuleManager.State s : root.k.modules.all()) if (s.active()) sorted.add(s);
             Collections.sort(sorted, new Comparator<ModuleManager.State>() {
@@ -82,21 +98,27 @@ public final class PerfPage extends Page {
                 }
             });
         }
-        heading(ui, "Performance", "Measured while the HUD renders (the menu itself is excluded from the budget)");
-        undo.enabled = root.k.fpsBoost.active();
-        boost.bounds(x + w - 128, y, 76, 16).render(ui);
-        undo.bounds(x + w - 48, y, 48, 16).render(ui);
-        ui.g.text(line1, x, y + 26, ui.t.text, false);
-        ui.g.text(line2, x, y + 37, p.avgOwnUs() > 300 ? ui.t.bad : ui.t.textDim, false);
-        float top = y + 50;
-        if (!boostNote.isEmpty() || root.k.fpsBoost.active()) {
-            ui.g.text("FPS Boost: " + (boostNote.isEmpty() ? "on (Undo restores your settings)" : boostNote), x, top, ui.t.good, false);
-            top += 12;
+        heading(ui, "Performance", "Graphics presets for the most FPS, and what MW19 itself costs");
+        // presets: Potato .. High, Auto, Undo
+        VideoPreset cur = root.k.video.current();
+        float by = y + 28, gap = 3, aw = 34, uw = 36, pw = (w - aw - uw - gap * 6) / presets.length;
+        for (int i = 0; i < presets.length; i++) {
+            presets[i].style = cur != null && cur.ordinal() == i ? dev.mw19.core.gui.widget.Button.Style.PRIMARY : dev.mw19.core.gui.widget.Button.Style.SECONDARY;
+            presets[i].bounds(x + i * (pw + gap), by, pw, 16).render(ui);
         }
+        auto.bounds(x + presets.length * (pw + gap) + gap, by, aw, 16).render(ui);
+        undo.enabled = root.k.video.active();
+        undo.bounds(x + w - uw, by, uw, 16).render(ui);
+        dev.mw19.core.perf.HardwareTier.Suggestion sug = root.k.video.suggestion();
+        String gpu = root.k.platform.gpuName();
+        ui.g.text(ui.g.ellipsize("Detected: " + (gpu.isEmpty() ? "unknown graphics" : gpu) + "  ·  suggests " + sug.preset.label, w), x, by + 20, ui.t.textDim, false);
+        ui.g.text(ui.g.ellipsize(line1, w), x, by + 34, ui.t.text, false);
+        ui.g.text(ui.g.ellipsize(line2, w), x, by + 45, p.avgOwnUs() > 300 ? ui.t.bad : ui.t.textDim, false);
+        float top = by + 58;
         if (dev.mw19.core.Hooks.entityCulling && root.k.occlusion.calls > 0) {
             dev.mw19.core.perf.Occlusion oc = root.k.occlusion;
-            ui.g.text("Entity culling: " + (oc.culled * 100 / oc.calls) + "% of entity draws skipped (" + oc.culled + " of " + oc.calls
-                    + " in the last second)", x, top, ui.t.textDim, false);
+            ui.g.text(ui.g.ellipsize("Entity culling: " + (oc.culled * 100 / oc.calls) + "% of entity draws skipped (" + oc.culled + " of " + oc.calls
+                    + " in the last second)", w), x, top, ui.t.textDim, false);
             top += 12;
         }
         if (root.k.platform.graphicsApi() != null) {
@@ -107,7 +129,7 @@ public final class PerfPage extends Page {
             top += 22;
         }
         // graph
-        float gx = x, gy = top, gw = w, gh = 70;
+        float gx = x, gy = top, gw = w, gh = 56;
         ui.g.roundRect(gx, gy, gw, gh, 4, ui.t.surface);
         int n = Math.min(p.count, (int) gw);
         float max = 50f; // ms at the top of the graph
@@ -135,7 +157,8 @@ public final class PerfPage extends Page {
 
     @Override
     public boolean mouseClicked(Ui ui, int button) {
-        return boost.mouseClicked(ui, button) || undo.mouseClicked(ui, button)
+        for (dev.mw19.core.gui.widget.Button b : presets) if (b.mouseClicked(ui, button)) return true;
+        return auto.mouseClicked(ui, button) || undo.mouseClicked(ui, button)
                 || (root.k.platform.graphicsApi() != null && vulkan.mouseClicked(ui, button));
     }
 }

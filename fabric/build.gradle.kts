@@ -23,6 +23,18 @@ dependencies {
     bundle(project(":core"))
 }
 
+// -Pmw19.withMods=<dir>: every jar in <dir> joins the dev run as a mod, remapped by Loom at build time (smoke.sh
+// WITH_MODS compatibility runs). Dropping them into run/<mc>/mods instead left Fabric Loader's runtime remapping to it,
+// and Sodium 0.8.14's own mixins then failed to find their targets (debug-log 2026-09-26).
+// Only for the requested target: Stonecutter also configures its active version, which must not get another version's mods.
+val requested = providers.gradleProperty("mw19.fabricTargets").orNull?.split(",")?.map { it.trim() }
+val extraMods = requested == null || mc in requested
+val withMods: String? = providers.gradleProperty("mw19.withMods").orNull
+if (withMods != null && extraMods) dependencies { "modLocalRuntime"(fileTree(withMods) { include("*.jar") }) }
+// -Pmw19.fabricApi=<version>: Fabric API from Fabric's Maven (its modules are nested jars that a plain file dependency skips).
+val withFabricApi: String? = providers.gradleProperty("mw19.fabricApi").orNull
+if (withFabricApi != null && extraMods) dependencies { "modLocalRuntime"("net.fabricmc.fabric-api:fabric-api:$withFabricApi") }
+
 // -Pmw19.smoke=<seconds> makes the dev client drive itself (see core Smoke + scripts/smoke.sh).
 val smokeSeconds: String? = providers.gradleProperty("mw19.smoke").orNull
 // -Pmw19.smokeClicks=1: smoke.sh's xdotool helper will click the menu for real (Smoke.requestClick).
@@ -36,8 +48,9 @@ loom {
         generateRunConfig = false
         jvmArguments.add("-Dmixin.debug.export=true")
         // Logs an error for any injector that matched fewer targets than expected, even with require = 0,
-        // so a silently skipped optional mixin fails the smoke test.
-        jvmArguments.add("-Dmixin.debug.countInjections=true")
+        // so a silently skipped optional mixin fails the smoke test. Not with other mods present: their optional
+        // injectors would trip it too (MW19's own wiring is still checked by scripts/mixin-audit.py).
+        if (withMods == null) jvmArguments.add("-Dmixin.debug.countInjections=true")
         if (smokeSeconds != null) {
             jvmArguments.add("-Dmw19.smoke=1")
             jvmArguments.add("-Dmw19.smoke.seconds=$smokeSeconds")

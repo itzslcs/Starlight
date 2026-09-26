@@ -31,13 +31,25 @@ public final class Theme {
                 0xFFECEFF4, 0xFF8C95A5, accent, 0xFF141007, 0xFF3DD68C, 0xFFFFC53D, 0xFFFF5C5C);
     }
 
-    public static final String[] PRESETS = {"MW19", "Glacier", "Violet", "Forest", "Rose", "Daylight"};
+    public static final String[] PRESETS = {"MW19", "Glacier", "Violet", "Forest", "Rose", "Daylight", "Black", "White", "Crystal"};
 
     public static Theme preset(String name) {
         if ("Glacier".equals(name)) return dark(name, 0xFF4CC9F0);
         if ("Violet".equals(name)) return dark(name, 0xFF9B7BFF);
         if ("Forest".equals(name)) return dark(name, 0xFF45D08A);
         if ("Rose".equals(name)) return dark(name, 0xFFFF6B9A);
+        if ("Black".equals(name)) { // OLED black, white accent
+            return new Theme(name, 0x90000000, 0xF5000000, 0xF5050505, 0xFF0E0E0E, 0xFF1A1A1A, 0x26FFFFFF,
+                    0xFFFFFFFF, 0xFF8A8A8A, 0xFFFFFFFF, 0xFF000000, 0xFF3DD68C, 0xFFFFC53D, 0xFFFF5C5C);
+        }
+        if ("White".equals(name)) { // paper white, black accent
+            return new Theme(name, 0x50FFFFFF, 0xF7FFFFFF, 0xF7F2F2F2, 0xFFFFFFFF, 0xFFEDEDED, 0x1F000000,
+                    0xFF111111, 0xFF6B6B6B, 0xFF111111, 0xFFFFFFFF, 0xFF1F9D5C, 0xFFB7860B, 0xFFD63B3B);
+        }
+        if ("Crystal".equals(name)) { // frosted ice: blue-tinted glass panels
+            return new Theme(name, 0x600A1622, 0xE60E1A27, 0xE60A131E, 0xFF132236, 0xFF1B2F47, 0x4099D6FF,
+                    0xFFEAF6FF, 0xFF8FB3CC, 0xFF9BE3FF, 0xFF06121E, 0xFF5BE3B0, 0xFFFFD66B, 0xFFFF7A8A);
+        }
         if ("Daylight".equals(name)) {
             return new Theme(name, 0x50FFFFFF, 0xF2F4F5F8, 0xF2E6E9EF, 0xFFFFFFFF, 0xFFE9EDF3, 0x22000000,
                     0xFF1B1F27, 0xFF5E6675, 0xFFE8702A, 0xFFFFFFFF, 0xFF1F9D5C, 0xFFB7860B, 0xFFD63B3B);

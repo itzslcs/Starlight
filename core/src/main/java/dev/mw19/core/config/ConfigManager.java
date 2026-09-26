@@ -75,9 +75,13 @@ public final class ConfigManager {
     // ------------------------------------------------------------------ load
 
     /** Loads config.json and the active profile. Never throws; falls back to backups, then defaults. */
+    /** No profile had been saved before this start: MW19's first run in this game directory. */
+    public boolean freshInstall;
+
     public void load() {
         suppressDirty = true;
         try {
+            freshInstall = !Files.exists(profileFile(DEFAULT_PROFILE));
             Files.createDirectories(profilesDir);
             Files.createDirectories(pluginsDir);
             Map<String, Object> g = readWithRecovery(root.resolve("config.json"), false);

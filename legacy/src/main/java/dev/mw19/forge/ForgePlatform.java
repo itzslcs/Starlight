@@ -444,6 +444,49 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
     }
 
     @Override
+    public void setHitboxes(boolean on) {
+        mc.getRenderManager().setDebugBoundingBox(on);
+    }
+
+    private final java.util.Set<Integer> tntLabels = new java.util.HashSet<Integer>();
+
+    @Override
+    public void tntTimers(boolean on, int range) {
+        if (mc.theWorld == null || mc.thePlayer == null) {
+            tntLabels.clear();
+            return;
+        }
+        double max = (double) range * range;
+        for (net.minecraft.entity.Entity e : mc.theWorld.loadedEntityList) {
+            if (!(e instanceof net.minecraft.entity.item.EntityTNTPrimed)) continue;
+            if (on && e.getDistanceSqToEntity(mc.thePlayer) <= max) {
+                int fuse = ((net.minecraft.entity.item.EntityTNTPrimed) e).fuse;
+                String col = fuse < 20 ? "\u00a7c" : fuse < 40 ? "\u00a76" : "\u00a7a";
+                e.setCustomNameTag(col + String.format(java.util.Locale.ROOT, "%.1fs", fuse / 20f));
+                e.setAlwaysRenderNameTag(true);
+                tntLabels.add(e.getEntityId());
+            } else if (tntLabels.remove(e.getEntityId())) {
+                e.setCustomNameTag("");
+                e.setAlwaysRenderNameTag(false);
+            }
+        }
+        if (!on) tntLabels.clear();
+    }
+
+    @Override
+    public double reachTo(int entityId) {
+        if (mc.theWorld == null || mc.thePlayer == null) return -1;
+        net.minecraft.entity.Entity e = mc.theWorld.getEntityByID(entityId);
+        if (e == null) return -1;
+        net.minecraft.util.Vec3 eye = mc.thePlayer.getPositionEyes(1f);
+        net.minecraft.util.AxisAlignedBB b = e.getEntityBoundingBox();
+        double dx = Math.max(Math.max(b.minX - eye.xCoord, 0), eye.xCoord - b.maxX);
+        double dy = Math.max(Math.max(b.minY - eye.yCoord, 0), eye.yCoord - b.maxY);
+        double dz = Math.max(Math.max(b.minZ - eye.zCoord, 0), eye.zCoord - b.maxZ);
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    @Override
     public float health() {
         return mc.thePlayer == null ? 0 : mc.thePlayer.getHealth();
     }
@@ -542,50 +585,107 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
 
     /** FPS Boost on 1.8.9: GameSettings fields, then a renderer reload (fast/fancy and smooth lighting need one). */
     @Override
-    public java.util.Map<String, String> applyFpsBoost() {
+    public java.util.Map<String, String> applyVideo(java.util.Map<String, String> v) {
         net.minecraft.client.settings.GameSettings g = mc.gameSettings;
         java.util.Map<String, String> b = new java.util.LinkedHashMap<String, String>();
-        b.put("clouds", String.valueOf(g.clouds));
-        g.clouds = 0;
-        b.put("particles", String.valueOf(g.particleSetting));
-        g.particleSetting = 1;
-        b.put("entityShadows", String.valueOf(g.entityShadows));
-        g.entityShadows = false;
-        b.put("smoothLighting", String.valueOf(g.ambientOcclusion));
-        g.ambientOcclusion = 0;
-        b.put("fancyGraphics", String.valueOf(g.fancyGraphics));
-        g.fancyGraphics = false;
-        b.put("vsync", String.valueOf(g.enableVsync));
-        g.enableVsync = false;
-        b.put("maxFps", String.valueOf(g.limitFramerate));
-        g.limitFramerate = 260;
-        b.put("vbo", String.valueOf(g.useVbo));
-        g.useVbo = true;
-        if (g.renderDistanceChunks > 12) {
-            b.put("renderDistance", String.valueOf(g.renderDistanceChunks));
-            g.renderDistanceChunks = 12; // only ever lowered
+        try {
+            int n;
+            if ((n = num(v.get("renderDistance"), -1)) >= 2 && n != g.renderDistanceChunks) {
+                b.put("renderDistance", String.valueOf(g.renderDistanceChunks));
+                g.renderDistanceChunks = n;
+            }
+            if ((n = level(v.get("particles"), "ALL", "DECREASED", "MINIMAL")) >= 0 && n != g.particleSetting) {
+                b.put("particles", String.valueOf(g.particleSetting));
+                g.particleSetting = n;
+            }
+            if ((n = level(v.get("clouds"), "OFF", "FAST", "FANCY")) >= 0 && n != g.clouds) {
+                b.put("clouds", String.valueOf(g.clouds));
+                g.clouds = n;
+            }
+            String ao = v.get("smoothLighting");
+            if (ao != null && (n = ao.equals("true") ? 2 : ao.equals("false") ? 0 : num(ao, -1)) >= 0 && n != g.ambientOcclusion) {
+                b.put("smoothLighting", String.valueOf(g.ambientOcclusion));
+                g.ambientOcclusion = n;
+            }
+            String gr = v.containsKey("graphics") ? v.get("graphics") : v.get("fancyGraphics"); // 0.2.0 FPS Boost backups
+            if (gr != null) {
+                boolean fancy = gr.equals("FANCY") || gr.equals("true");
+                if (fancy != g.fancyGraphics) {
+                    b.put("graphics", g.fancyGraphics ? "FANCY" : "FAST");
+                    g.fancyGraphics = fancy;
+                }
+            }
+            if (v.containsKey("entityShadows") && Boolean.parseBoolean(v.get("entityShadows")) != g.entityShadows) {
+                b.put("entityShadows", String.valueOf(g.entityShadows));
+                g.entityShadows = !g.entityShadows;
+            }
+            if ((n = num(v.get("mipmaps"), -1)) >= 0 && n <= 4 && n != g.mipmapLevels) {
+                b.put("mipmaps", String.valueOf(g.mipmapLevels));
+                g.mipmapLevels = n;
+                mc.getTextureMapBlocks().setMipmapLevels(n);
+                mc.scheduleResourcesRefresh();
+            }
+            if (v.containsKey("vsync") && Boolean.parseBoolean(v.get("vsync")) != g.enableVsync) {
+                b.put("vsync", String.valueOf(g.enableVsync));
+                g.enableVsync = !g.enableVsync;
+            }
+            if ((n = num(v.get("maxFps"), -1)) > 0 && n != g.limitFramerate) {
+                b.put("maxFps", String.valueOf(g.limitFramerate));
+                g.limitFramerate = n;
+            }
+            boolean vbo = v.containsKey("vbo") ? Boolean.parseBoolean(v.get("vbo")) : true; // VBOs are the faster path on 1.8.9
+            if (vbo != g.useVbo) {
+                b.put("vbo", String.valueOf(g.useVbo));
+                g.useVbo = vbo;
+            }
+        } catch (RuntimeException e) {
+            logger.warn("video options: " + e);
         }
         applyGameSettings();
         return b;
     }
 
+    /** "OFF"/"FAST"/"FANCY"-style names or the stored 0-2 numbers (0.2.0 backups). -1 when absent. */
+    private static int level(String v, String... names) {
+        if (v == null) return -1;
+        for (int i = 0; i < names.length; i++) if (names[i].equals(v)) return i;
+        return num(v, -1);
+    }
+
+    private static int num(String v, int def) {
+        if (v == null) return def;
+        try {
+            return (int) Double.parseDouble(v);
+        } catch (NumberFormatException e) {
+            return def;
+        }
+    }
+
     @Override
     public void restoreOptions(java.util.Map<String, String> p) {
-        net.minecraft.client.settings.GameSettings g = mc.gameSettings;
+        java.util.Map<String, String> v = new java.util.HashMap<String, String>(p);
+        if (!v.containsKey("vbo")) v.put("vbo", String.valueOf(mc.gameSettings.useVbo)); // leave VBOs alone unless saved
+        applyVideo(v);
+    }
+
+    @Override
+    public int videoOption(String id) {
+        return "renderDistance".equals(id) ? mc.gameSettings.renderDistanceChunks : -1;
+    }
+
+    @Override
+    public String gpuName() {
         try {
-            if (p.containsKey("clouds")) g.clouds = Integer.parseInt(p.get("clouds"));
-            if (p.containsKey("particles")) g.particleSetting = Integer.parseInt(p.get("particles"));
-            if (p.containsKey("entityShadows")) g.entityShadows = Boolean.parseBoolean(p.get("entityShadows"));
-            if (p.containsKey("smoothLighting")) g.ambientOcclusion = Integer.parseInt(p.get("smoothLighting"));
-            if (p.containsKey("fancyGraphics")) g.fancyGraphics = Boolean.parseBoolean(p.get("fancyGraphics"));
-            if (p.containsKey("vsync")) g.enableVsync = Boolean.parseBoolean(p.get("vsync"));
-            if (p.containsKey("maxFps")) g.limitFramerate = Integer.parseInt(p.get("maxFps"));
-            if (p.containsKey("vbo")) g.useVbo = Boolean.parseBoolean(p.get("vbo"));
-            if (p.containsKey("renderDistance")) g.renderDistanceChunks = Integer.parseInt(p.get("renderDistance"));
-        } catch (NumberFormatException e) {
-            logger.warn("FPS Boost undo: bad saved value (" + e.getMessage() + ")");
+            String r = org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_RENDERER);
+            return r == null ? "" : r;
+        } catch (RuntimeException e) {
+            return "";
         }
-        applyGameSettings();
+    }
+
+    @Override
+    public String gpuKind() {
+        return "";
     }
 
     private void applyGameSettings() {

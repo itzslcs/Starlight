@@ -6,27 +6,38 @@ Legend: **pass** / **fail** / **not-run**. Each cell links to or names its evide
 
 | Target | Build (`buildAll`) | Dev smoke ([`scripts/smoke.sh`](../scripts/smoke.sh)) | Production-layout launch | Prism | Dawn/Feather |
 |---|---|---|---|---|---|
-| 1.8.9 (Forge 11.15.1.2318) | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 13/13) | not-run | not-run | not-run |
-| 1.21 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 1.21.1 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 1.21.2 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 1.21.3 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 1.21.4 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 1.21.5 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 1.21.6 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 1.21.7 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 1.21.8 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 1.21.9 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 1.21.10 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 1.21.11 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 26.1 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 26.1.1 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 26.1.2 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
-| 26.2 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 28/28) | not-run | not-run | not-run |
-| 26.3 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 28/28) | not-run | not-run | not-run |
+| 1.8.9 (Forge 11.15.1.2318) | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 13/13) | not-run | not-run | not-run |
+| 1.21 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.1 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.2 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.3 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.4 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.5 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.6 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.7 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.8 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.9 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) (rerun: the first run hit a vanilla network timeout, debug-log) | not-run | not-run | not-run |
+| 1.21.10 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.11 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 26.1 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 26.1.1 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 26.1.2 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 26.2 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 28/28) | not-run | not-run | not-run |
+| 26.3 | pass (0.4.0, 2026-09-26) | pass on b2fc30b (0.4.0; presets auto-detected and applied/undone, packs 20 results, LAN port opened, exploit self-test ok; audit 28/28) | not-run | not-run | not-run |
 
-Snapshots: 420a474 = 0.3.0 (these jars); 9473849 = 0.2.0 (18/18 pass, 2026-09-26); dbeb9f1 = Phase 4 commit; 848598d = Phase 3 (26.x) work tree; f82c0d6 = KeyCPS build (the code in the
+Snapshots: b2fc30b = 0.4.0 (these jars); 420a474 = 0.3.0 (18/18 pass); 9473849 = 0.2.0 (18/18 pass, 2026-09-26); dbeb9f1 = Phase 4 commit; 848598d = Phase 3 (26.x) work tree; f82c0d6 = KeyCPS build (the code in the
 0.1.0 jars). Every run enables all modules and both plugins, checks the log with the allowlist in `smoke.sh`, and runs the
-mixin audit (0.3.0: 27/27 wired on 1.21.x–26.1.x, 28/28 on 26.2+, 13/13 on 1.8.9). Since 0.3.0 every run also opens
+mixin audit (0.3.0 and 0.4.0: 27/27 wired on 1.21.x–26.1.x, 28/28 on 26.2+, 13/13 on 1.8.9). Since 0.3.0 every run also opens
 the Skins, Packs and Host World pages, searches Modrinth, opens the world to LAN and runs the exploit self-test. Evidence lives in `smoke-out/<mc>/` (gitignored,
 regenerated by the script). Smoke runs use Xvfb and Mesa llvmpipe, so FPS figures from them are not performance claims.
+
+## Alongside other mods
+Dev smoke with `WITH_MODS="fabric-api sodium immediatelyfast ferrite-core lithium"` (the mods of the MW19 Performance
+packs, from Modrinth and Fabric's Maven, never bundled; [debug-log](debug-log.md) has how the run was made to work).
+
+| Target | Mods | Result |
+|---|---|---|
+| 1.21.11 | Fabric API 0.141.6, Sodium 0.8.14, ImmediatelyFast 1.14.3, Lithium 0.21.4, FerriteCore 8.2.0 | **pass** (0.4.0 working tree, 2026-09-26): all smoke checks, audit 27/27 |
+| 26.3 | Fabric API 0.161.0, Sodium 0.9.2, ImmediatelyFast 1.17.1, Lithium 0.26.1, FerriteCore 9.0.0 | **pass** (0.4.0 working tree, 2026-09-26): all smoke checks, audit 28/28 |
+
+The other 16 targets have not been run with these mods yet, so MW19 Performance packs exist only for 1.21.11 and 26.3.

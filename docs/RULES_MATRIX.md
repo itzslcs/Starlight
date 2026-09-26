@@ -59,6 +59,9 @@ truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/mw19/core/
 | stopwatch | Stopwatch | all | none (not game info) | ALLOWED | off | Started and stopped only by your key presses |
 | day_counter | Day Counter | all | HUD | ALLOWED | off | Same day number as F3 |
 | low_health | Low Health Warning | all | AESTHETIC | ALLOWED | off | Red screen edges from your own health, which the hearts already show |
+| hitboxes | Hitboxes | all | none (vanilla F3+B) | ALLOWED | off | Vanilla's own hitbox view kept on; switched off while the server sets reducedDebugInfo |
+| tnt_timer | TNT Timer | all | HUD? | GRAY | off | Exact fuse seconds on primed TNT; vanilla only flashes the block |
+| reach | Reach Display | all | fails HUD ("player distance/range") | DISALLOWED@hypixel | off | Distance to what you hit. Server-gated by serverrules.json |
 | durability_alert | Durability Alert | all | HUD | ALLOWED | off | Durability already shows on the items; this only notifies (like Armor Status) |
 | screenshot | Screenshot Tools | all | none (not gameplay) | ALLOWED | off | Copy to clipboard, open folder. No uploads |
 | freelook | Freelook | all | fails AESTHETIC ("perspective") | DISALLOWED@hypixel | off | Server-gated by serverrules.json |
@@ -72,7 +75,7 @@ truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/mw19/core/
 | hypixel_chat | Hypixel Chat | 1.8.9 | AESTHETIC | ALLOWED | off | Filters, tabs, mention highlights. Display only |
 | scoreboard | Scoreboard Tweaks | 1.8.9 | HUD | ALLOWED | off | Hide numbers, move, retitle |
 | lobby_clutter | Lobby Clutter | 1.8.9 | AESTHETIC | ALLOWED | off | Hides lobby spam and holograms client-side |
-| quick_commands | Quick Commands | 1.8.9 | none | GRAY | off | **One command per keypress**. No sequences, no timers |
+| quick_commands | Quick Commands | all | none | GRAY | off | **One command per keypress** (at most one a second, only with no screen open). No sequences, no timers |
 | tiertags | Tier Tags (addon plugin) | all | none | GRAY | off | Third-party PvP tier-list data next to names. Force-disabled on Hypixel |
 | opt_* | Optimizations (Phase 5) | 1.21+ | PERF | ALLOWED | per benchmark | Only kept if measured; see docs/PERF.md |
 
@@ -80,7 +83,7 @@ truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/mw19/core/
 
 ```json
 { "schema": 1, "servers": [ { "name": "Hypixel", "match": ["hypixel.net", "*.hypixel.net"],
-  "disallow": ["freelook", "tiertags"], "note": "Allowed Modifications policy, perspective + extra player info" } ] }
+  "disallow": ["freelook", "tiertags", "reach"], "note": "Allowed Modifications policy, perspective + extra player info" } ] }
 ```
 
 The user can update `<gameDir>/MW19/serverrules.json` without a new jar (it is merged over the bundled default).

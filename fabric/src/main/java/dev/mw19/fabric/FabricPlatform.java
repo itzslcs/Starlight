@@ -504,6 +504,65 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
         return "exploit".equals(what) ? ExploitGuard.selfTest() : "n/a";
     }
 
+    //? if >=1.21.9 {
+    private net.minecraft.client.gui.components.debug.DebugScreenEntryStatus hitboxesBefore;
+    //?}
+
+    @Override
+    public void setHitboxes(boolean on) {
+        //? if >=1.21.9 {
+        var id = net.minecraft.client.gui.components.debug.DebugScreenEntries.ENTITY_HITBOXES; // ResourceLocation before 1.21.11
+        if (on) {
+            if (hitboxesBefore == null) hitboxesBefore = mc.debugEntries.getStatus(id);
+            mc.debugEntries.setStatus(id, net.minecraft.client.gui.components.debug.DebugScreenEntryStatus.ALWAYS_ON);
+        } else {
+            mc.debugEntries.setStatus(id, hitboxesBefore != null ? hitboxesBefore : net.minecraft.client.gui.components.debug.DebugScreenEntryStatus.NEVER);
+            hitboxesBefore = null;
+        }
+        //?} else {
+        /*mc.getEntityRenderDispatcher().setRenderHitBoxes(on);
+        *///?}
+    }
+
+    /** Entity ids whose name MW19 set for the TNT timer (cleared again when the module stops). */
+    private final java.util.Set<Integer> tntLabels = new java.util.HashSet<>();
+
+    @Override
+    public void tntTimers(boolean on, int range) {
+        if (mc.level == null || mc.player == null) {
+            tntLabels.clear();
+            return;
+        }
+        double max = (double) range * range;
+        for (net.minecraft.world.entity.Entity e : mc.level.entitiesForRendering()) {
+            if (!(e instanceof net.minecraft.world.entity.item.PrimedTnt tnt)) continue;
+            if (on && e.distanceToSqr(mc.player) <= max) {
+                int fuse = tnt.getFuse();
+                int rgb = fuse < 20 ? 0xFF5555 : fuse < 40 ? 0xFFAA00 : 0x55FF55;
+                e.setCustomName(Component.literal(String.format(java.util.Locale.ROOT, "%.1fs", fuse / 20f)).withColor(rgb));
+                e.setCustomNameVisible(true);
+                tntLabels.add(e.getId());
+            } else if (tntLabels.remove(e.getId())) {
+                e.setCustomName(null);
+                e.setCustomNameVisible(false);
+            }
+        }
+        if (!on) tntLabels.clear();
+    }
+
+    @Override
+    public double reachTo(int entityId) {
+        if (mc.level == null || mc.player == null) return -1;
+        net.minecraft.world.entity.Entity e = mc.level.getEntity(entityId);
+        if (e == null) return -1;
+        net.minecraft.world.phys.Vec3 eye = mc.player.getEyePosition();
+        net.minecraft.world.phys.AABB b = e.getBoundingBox();
+        double dx = Math.max(Math.max(b.minX - eye.x, 0), eye.x - b.maxX);
+        double dy = Math.max(Math.max(b.minY - eye.y, 0), eye.y - b.maxY);
+        double dz = Math.max(Math.max(b.minZ - eye.z, 0), eye.z - b.maxZ);
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
     @Override
     public float health() {
         return mc.player == null ? 0 : mc.player.getHealth();
@@ -591,69 +650,94 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     // ------------------------------------------------------------------ FPS Boost / graphics API
 
-    private static <T> void tweak(Map<String, String> backup, String id, net.minecraft.client.OptionInstance<T> opt, T fast) {
-        T old = opt.get();
-        backup.put(id, old instanceof Enum ? ((Enum<?>) old).name() : String.valueOf(old));
-        opt.set(fast);
-    }
-
-    private <T> void restore(Map<String, String> previous, String id, net.minecraft.client.OptionInstance<T> opt,
-                                    java.util.function.Function<String, T> parse) {
-        String v = previous.get(id);
-        if (v == null) return;
+    /** Sets one option from its text value (skipped if unchanged or unparseable), recording the old value in {@code backup}. */
+    private <T> void set(Map<String, String> backup, Map<String, String> want, String id, net.minecraft.client.OptionInstance<T> opt,
+                         java.util.function.Function<String, T> parse) {
+        String w = want.get(id);
+        if (w == null) return;
+        T value;
         try {
-            opt.set(parse.apply(v));
+            value = parse.apply(w);
         } catch (RuntimeException e) {
-            log.warn("FPS Boost undo: could not restore {}={}: {}", id, v, e.toString());
+            log.warn("video option {}={} not understood: {}", id, w, e.toString());
+            return;
         }
+        T old = opt.get();
+        if (value.equals(old)) return;
+        backup.put(id, old instanceof Enum ? ((Enum<?>) old).name() : String.valueOf(old));
+        opt.set(value); // vanilla's own update hooks run (chunk rebuild, texture reload for mipmaps, ...)
     }
 
     @Override
-    public Map<String, String> applyFpsBoost() {
+    public Map<String, String> applyVideo(Map<String, String> v) {
         net.minecraft.client.Options o = mc.options;
         Map<String, String> b = new java.util.LinkedHashMap<String, String>();
-        tweak(b, "clouds", o.cloudStatus(), net.minecraft.client.CloudStatus.OFF);
-        tweak(b, "particles", o.particles(), ParticleStatus.DECREASED);
-        tweak(b, "entityShadows", o.entityShadows(), false);
-        tweak(b, "biomeBlend", o.biomeBlendRadius(), 0);
-        tweak(b, "smoothLighting", o.ambientOcclusion(), false);
-        tweak(b, "entityDistance", o.entityDistanceScaling(), 0.75);
-        tweak(b, "vsync", o.enableVsync(), false);
-        tweak(b, "maxFps", o.framerateLimit(), 260);
-        if (o.renderDistance().get() > 12) tweak(b, "renderDistance", o.renderDistance(), 12); // only ever lowered
+        set(b, v, "renderDistance", o.renderDistance(), Integer::valueOf);
+        set(b, v, "simulationDistance", o.simulationDistance(), Integer::valueOf);
+        set(b, v, "entityDistance", o.entityDistanceScaling(), Double::valueOf);
+        set(b, v, "particles", o.particles(), ParticleStatus::valueOf);
+        set(b, v, "clouds", o.cloudStatus(), net.minecraft.client.CloudStatus::valueOf);
+        set(b, v, "smoothLighting", o.ambientOcclusion(), Boolean::valueOf);
+        set(b, v, "biomeBlend", o.biomeBlendRadius(), Integer::valueOf);
+        set(b, v, "entityShadows", o.entityShadows(), Boolean::valueOf);
+        set(b, v, "mipmaps", o.mipmapLevels(), Integer::valueOf);
+        set(b, v, "menuBlur", o.menuBackgroundBlurriness(), Integer::valueOf);
+        set(b, v, "chunkUpdates", o.prioritizeChunkUpdates(), net.minecraft.client.PrioritizeChunkUpdates::valueOf);
+        set(b, v, "vsync", o.enableVsync(), Boolean::valueOf);
+        set(b, v, "maxFps", o.framerateLimit(), Integer::valueOf);
+        //? if >=1.21.6
+        set(b, v, "cloudRange", o.cloudRange(), Integer::valueOf);
         //? if >=1.21.11 {
-        tweak(b, "cutoutLeaves", o.cutoutLeaves(), false);
-        tweak(b, "improvedTransparency", o.improvedTransparency(), false);
-        tweak(b, "vignette", o.vignette(), false);
-        tweak(b, "weatherRadius", o.weatherRadius(), 5);
+        set(b, v, "cutoutLeaves", o.cutoutLeaves(), Boolean::valueOf);
+        set(b, v, "improvedTransparency", o.improvedTransparency(), Boolean::valueOf);
+        set(b, v, "vignette", o.vignette(), Boolean::valueOf);
+        set(b, v, "weatherRadius", o.weatherRadius(), Integer::valueOf);
         //?} else {
-        /*tweak(b, "graphics", o.graphicsMode(), net.minecraft.client.GraphicsStatus.FAST);
+        /*set(b, v, "graphics", o.graphicsMode(), net.minecraft.client.GraphicsStatus::valueOf);
         *///?}
         o.save();
         return b;
     }
 
     @Override
-    public void restoreOptions(Map<String, String> p) {
-        net.minecraft.client.Options o = mc.options;
-        restore(p, "clouds", o.cloudStatus(), net.minecraft.client.CloudStatus::valueOf);
-        restore(p, "particles", o.particles(), ParticleStatus::valueOf);
-        restore(p, "entityShadows", o.entityShadows(), Boolean::valueOf);
-        restore(p, "biomeBlend", o.biomeBlendRadius(), Integer::valueOf);
-        restore(p, "smoothLighting", o.ambientOcclusion(), Boolean::valueOf);
-        restore(p, "entityDistance", o.entityDistanceScaling(), Double::valueOf);
-        restore(p, "vsync", o.enableVsync(), Boolean::valueOf);
-        restore(p, "maxFps", o.framerateLimit(), Integer::valueOf);
-        restore(p, "renderDistance", o.renderDistance(), Integer::valueOf);
-        //? if >=1.21.11 {
-        restore(p, "cutoutLeaves", o.cutoutLeaves(), Boolean::valueOf);
-        restore(p, "improvedTransparency", o.improvedTransparency(), Boolean::valueOf);
-        restore(p, "vignette", o.vignette(), Boolean::valueOf);
-        restore(p, "weatherRadius", o.weatherRadius(), Integer::valueOf);
-        //?} else {
-        /*restore(p, "graphics", o.graphicsMode(), net.minecraft.client.GraphicsStatus::valueOf);
-        *///?}
-        o.save();
+    public void restoreOptions(Map<String, String> previous) {
+        applyVideo(previous);
+    }
+
+    @Override
+    public int videoOption(String id) {
+        if ("renderDistance".equals(id)) return mc.options.renderDistance().get();
+        if ("simulationDistance".equals(id)) return mc.options.simulationDistance().get();
+        return -1;
+    }
+
+    @Override
+    public String gpuName() {
+        try {
+            //? if >=26.2 {
+            /*return com.mojang.blaze3d.systems.RenderSystem.getDevice().getDeviceInfo().name();
+            *///?} elif >=1.21.5 {
+            return com.mojang.blaze3d.systems.RenderSystem.getDevice().getRenderer();
+            //?} else {
+            /*return com.mojang.blaze3d.platform.GlUtil.getRenderer();
+            *///?}
+        } catch (RuntimeException e) {
+            return "";
+        }
+    }
+
+    @Override
+    public String gpuKind() {
+        try {
+            //? if >=26.2 {
+            /*String t = com.mojang.blaze3d.systems.RenderSystem.getDevice().getDeviceInfo().type().name().toLowerCase(java.util.Locale.ROOT);
+            return t.equals("other") ? "" : t;
+            *///?} else {
+            return "";
+            //?}
+        } catch (RuntimeException e) {
+            return "";
+        }
     }
 
     @Override

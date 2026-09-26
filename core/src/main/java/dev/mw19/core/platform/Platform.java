@@ -46,13 +46,23 @@ public interface Platform extends Game {
     int bindingKey(Binding b);
 
     /**
-     * FPS Boost: switches the vanilla options that cost the most frames to their fast values and saves the options file.
-     * Returns the previous values (option id -> value text) so {@link #restoreOptions} can undo it, even after a restart.
+     * Sets vanilla video options (ids and values from {@link dev.mw19.core.perf.VideoPreset}; ids this version lacks are
+     * skipped) and saves the options file. Returns the previous values of the options it changed, so
+     * {@link #restoreOptions} can undo it, even after a restart.
      */
-    java.util.Map<String, String> applyFpsBoost();
+    java.util.Map<String, String> applyVideo(java.util.Map<String, String> values);
 
-    /** Puts back values returned by {@link #applyFpsBoost()} (unknown ids are ignored). */
+    /** Puts back values returned by {@link #applyVideo} (unknown ids are ignored). */
     void restoreOptions(java.util.Map<String, String> previous);
+
+    /** Current value of an integer video option ("renderDistance", "simulationDistance"), or -1 if unknown. */
+    int videoOption(String id);
+
+    /** The graphics device's name as the game reports it ("" if unknown). Game thread. */
+    String gpuName();
+
+    /** "integrated", "discrete", "cpu" or "virtual" where the game reports the device type (26.2+), else "". */
+    String gpuKind();
 
     /** The game's graphics API preference where it has one (26.2+: "default", "opengl", "vulkan"), else null. */
     String graphicsApi();
@@ -95,6 +105,15 @@ public interface Platform extends Game {
     int hurtTime();
 
     boolean sprinting();
+
+    /** Vanilla's entity hitboxes, as F3+B toggles them. */
+    void setHitboxes(boolean on);
+
+    /** TNT Timer (tick): while on, primed TNT within {@code range} blocks shows its fuse; off removes the labels MW19 set. */
+    void tntTimers(boolean on, int range);
+
+    /** Distance from the player's eyes to the nearest point of the entity's hitbox, or -1. */
+    double reachTo(int entityId);
 
     /** The local player's health and food (0 without a world). */
     float health();

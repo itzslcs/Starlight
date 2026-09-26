@@ -5,7 +5,7 @@ It targets **1.8.9 (Forge)** and **every release from 1.21 to 26.3 (Fabric)**, 1
 It is legit only: no cheats and no automation. Every module is checked against server rules
 ([RULES_MATRIX](docs/RULES_MATRIX.md)).
 
-> Status: in development (0.3.0). What has actually been run and passed is in [COMPAT_MATRIX](docs/COMPAT_MATRIX.md),
+> Status: in development (0.4.0). What has actually been run and passed is in [COMPAT_MATRIX](docs/COMPAT_MATRIX.md),
 > and where the project stands is in [PROGRESS](docs/PROGRESS.md).
 
 ## Install
@@ -18,7 +18,8 @@ It is legit only: no cheats and no automation. Every module is checked against s
 Put the jar for your version in the instance's `mods` folder. **Fabric API is not needed.**
 
 **Most FPS (1.21+):** import `dist/modrinth/MW19-Performance-<mc>.mrpack` in Prism or the Modrinth app. It is MW19 plus
-Sodium, ImmediatelyFast, FerriteCore and Lithium; the launcher downloads those mods from Modrinth.
+Sodium, ImmediatelyFast, FerriteCore and Lithium (and Fabric API, which Sodium needs); the launcher downloads those
+mods from Modrinth.
 
 **Prism Launcher:** import a ready-made instance (`dist/prism/MW19-<mc>.zip`) or add the jar to your own instance.
 Both are covered step by step in [PRISM](docs/PRISM.md). Prism has not yet been checked with a real launch; see the
@@ -39,9 +40,15 @@ Prism column of [COMPAT_MATRIX](docs/COMPAT_MATRIX.md).
   commands for guests, address with a Copy button). *Over the internet* asks your router to forward the port (UPnP)
   and turns on a whitelist: only players you invite by name can join. The forward is removed when you stop, leave
   the world or quit. If your router has UPnP off, forward the port shown by hand.
-- **Performance page:** **FPS Boost** switches the vanilla options that cost the most frames to fast values in one click,
-  and *Undo* restores yours. On 26.2 and 26.3 there is a **Vulkan renderer** switch (it applies after a restart and
-  falls back to OpenGL if the GPU cannot run it). Numbers are in [PERF](docs/PERF.md).
+- **Graphics presets (Performance page):** **Potato** (integrated graphics, old laptops), **Low**, **Medium** and **High**
+  set the vanilla video options in one click, all tuned for frame rate (no VSync, unlimited FPS, even High stays at the
+  default view distance). **Auto** picks one from your graphics card, CPU and memory, and MW19 does that by itself the
+  first time it starts (it never raises your view distance then). *Undo* restores your own settings, even after a
+  restart. On 26.2 and 26.3 there is a **Vulkan renderer** switch (it applies after a restart and falls back to OpenGL
+  if the GPU cannot run it). Numbers are in [PERF](docs/PERF.md).
+- **Themes:** nine colour presets, including Black (OLED), White and Crystal (frosted ice), plus your own accent colour.
+  Menus animate (page cross-fades, a sliding sidebar highlight, a staggered home screen); set the animation speed to 0
+  to turn that off.
 - **HUD Editor:** drag elements (they snap), drag a corner to scale, and right-click an element for its text colour and shadow.
 - **Profiles:** one layout and module set per profile. They switch automatically per server and can be shared as a
   `MW19-P1:` code.
@@ -49,7 +56,7 @@ Prism column of [COMPAT_MATRIX](docs/COMPAT_MATRIX.md).
 ### Modules
 | HUD | Visual | Performance | Utility | Chat |
 |---|---|---|---|---|
-| FPS, **KeyCPS** (keystrokes + CPS), Speed, Ping, Coordinates, Direction, Armor Status, Potion Effects, Item Counter, Clock, Memory/CPU, FPS Graph, Server Address, Combo, Saturation, Session Time, Pack Display, Stopwatch, Day Counter | Custom Crosshair, Brightness, Hit Color, Damage Tilt, Low Fire, Shield Overlay, Particle Multiplier, Show Own Nametag, 1.8 Combat Visuals, Clear Weather, Low Health Warning | **Entity Culling** (on by default), FPS Boost, Vulkan switch (26.2+) | Zoom, Toggle Sprint/Sneak, Freelook, Screenshot Tools, Durability Alert, **Exploit Protection** | Chat Tools (timestamps, highlights, stacking, search) |
+| FPS, **KeyCPS** (keystrokes + CPS), Speed, Ping, Coordinates, Direction, Armor Status, Potion Effects, Item Counter, Clock, Memory/CPU, FPS Graph, Server Address, Combo, Saturation, Session Time, Pack Display, Stopwatch, Day Counter, Reach Display | Custom Crosshair, Brightness, Hit Color, Damage Tilt, Low Fire, Shield Overlay, Particle Multiplier, Show Own Nametag, 1.8 Combat Visuals, Clear Weather, Low Health Warning, Hitboxes, TNT Timer | **Entity Culling** (on by default), graphics presets with auto-detection, Vulkan switch (26.2+) | Zoom, Toggle Sprint/Sneak, Freelook, Screenshot Tools, Durability Alert, **Exploit Protection**, Quick Commands | Chat Tools (timestamps, highlights, stacking, search) |
 
 KeyCPS is the author's own [KeyCPS](https://modrinth.com/mod/keycps) mod, built in ([D-018](docs/DECISIONS.md)).
 **Exploit Protection** closes the client-side probes that [ExploitPreventer](https://modrinth.com/mod/exploitpreventer)
@@ -106,6 +113,8 @@ Gradle runs on JDK 25, and the build downloads JDK 8 and 21 toolchains itself. C
 | [PERF](docs/PERF.md) | FPS features and how they are measured |
 | [PLUGIN_API](docs/PLUGIN_API.md) | Writing plugins |
 | [PRISM](docs/PRISM.md) | Installing in Prism Launcher (instance zips or manual) |
+| [PUBLISHING](docs/PUBLISHING.md) | Uploading to Modrinth and pushing to GitHub, step by step |
+| [MODRINTH](docs/MODRINTH.md) | The Modrinth listing text |
 | [THIRD_PARTY](docs/THIRD_PARTY.md) | Dependencies, licences, online services |
 | [debug-log](docs/debug-log.md) | Every bug hunt: repro, hypothesis, evidence, fix |
 

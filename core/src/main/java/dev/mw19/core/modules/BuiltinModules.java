@@ -49,6 +49,10 @@ public final class BuiltinModules {
         m.add(new MoreHud.Stopwatch());
         m.add(new MoreHud.DayCounter());
         m.add(new MoreHud.LowHealth());
+        m.add(new MoreHud.Hitboxes());
+        m.add(new MoreHud.TntTimer());
+        m.add(new MoreHud.Reach());
+        m.add(new MoreHud.QuickCommands());
         m.add(new DurabilityAlertModule());
         m.add(new ScreenshotModule());
         m.add(new FreelookModule());

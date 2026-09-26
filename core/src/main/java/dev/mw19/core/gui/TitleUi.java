@@ -32,6 +32,7 @@ public final class TitleUi implements Surface {
     private final List<HomeButton> main = new ArrayList<HomeButton>(), side = new ArrayList<HomeButton>();
     private final HomeButton options, quit, skins, vanilla;
     private final Anim intro = new Anim(0);
+    private long openedAt;
     private final String footer;
     private float w, h;
     private float modelX, modelY, modelW, modelH, yaw = 25, lastX;
@@ -142,29 +143,35 @@ public final class TitleUi implements Surface {
 
     private void content() {
         float px = Math.max(2, Math.min(5, (float) Math.floor(h / 55f)));
-        float logoY = Math.max(8, h * 0.09f);
-        logo(w / 2f, logoY, px);
+        float logoY = Math.max(8, h * 0.09f), lp = stagger(0);
+        g.pushAlpha(lp);
+        logo(w / 2f, logoY - (1 - lp) * 10, px);
+        g.popAlpha();
         float bh = h < 230 ? 18 : 20, gap = 4, bw = Math.min(200, w * 0.42f);
         float cx = w / 2f - bw / 2f, top = Math.max(logoY + 7 * px + px + 18, h * 0.36f);
         float yy = top;
+        int n = 0;
         for (HomeButton b : main) {
-            b.bounds(cx, yy, bw, bh).render(ui);
+            enter(b, n++, cx, yy, bw, bh, -14);
             yy += bh + gap;
         }
         float half = (bw - gap) / 2f;
         yy += 8;
-        options.bounds(cx, yy, half, bh).render(ui);
-        quit.bounds(cx + half + gap, yy, half, bh).render(ui);
+        enter(options, n, cx, yy, half, bh, -14);
+        enter(quit, n++, cx + half + gap, yy, half, bh, 14);
         boolean wide = w >= 400;
         if (wide) {
             float sw = Math.min(104, (w - bw) / 2f - 24), sx = w - sw - Math.max(12, w * 0.05f);
             float sy = top;
+            int j = 1;
             for (HomeButton b : side) {
-                b.bounds(sx, sy, sw, bh).render(ui);
+                enter(b, j++, sx, sy, sw, bh, 16);
                 sy += bh + gap;
             }
             float modelTop = logoY; // the logo is centred, so the left column can start level with it
+            g.pushAlpha(stagger(3));
             player(Math.max(12, w * 0.05f), modelTop, Math.min(104, (w - bw) / 2f - 24), yy + bh - modelTop);
+            g.popAlpha();
         } else {
             // Narrow window: MW19's screens become a second row of small buttons.
             float sy = yy + bh + gap, sw = (bw - gap * (side.size() - 1)) / side.size();
@@ -282,6 +289,23 @@ public final class TitleUi implements Surface {
     @Override
     public void onOpen() {
         intro.snap(0);
+        openedAt = System.currentTimeMillis();
+    }
+
+    /** Staggered entrance: element {@code i} eases in 45 ms after the one before (1 when animations are off). */
+    private float stagger(int i) {
+        if (Anim.speed <= 0) return 1;
+        float t = ((ui.now - openedAt) / Anim.speed - 60 - i * 45) / 260f;
+        if (t >= 1) return 1;
+        if (t <= 0) return 0;
+        return 1 - (1 - t) * (1 - t) * (1 - t);
+    }
+
+    private void enter(HomeButton b, int i, float x, float y, float w, float h, float dx) {
+        float p = stagger(i);
+        g.pushAlpha(p);
+        b.bounds(x + (1 - p) * dx, y, w, h).render(ui);
+        g.popAlpha();
     }
 
     @Override

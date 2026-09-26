@@ -205,6 +205,151 @@ public final class MoreHud {
         }
     }
 
+    /** Vanilla's hitboxes (the F3+B view) as a module, so it survives restarts. Off while the server hides debug info. */
+    public static final class Hitboxes extends Module {
+        private boolean shown;
+
+        public Hitboxes() {
+            super("hitboxes", "Hitboxes", "Show entity hitboxes (the same view as F3+B)", Category.VISUAL, Rule.ALLOWED, false);
+        }
+
+        @Override
+        public void onTick() {
+            Platform p = Mw19.get().platform;
+            boolean want = p.inWorld() && !p.reducedDebugInfo();
+            if (want != shown) {
+                shown = want;
+                p.setHitboxes(want);
+            }
+        }
+
+        @Override
+        public void onDisable() {
+            if (shown) Mw19.get().platform.setHitboxes(false);
+            shown = false;
+        }
+    }
+
+    /** Seconds left on primed TNT, shown above it. GRAY: vanilla only flashes the block. */
+    public static final class TntTimer extends Module {
+        public TntTimer() {
+            super("tnt_timer", "TNT Timer", "Seconds until primed TNT explodes, shown above it", Category.VISUAL, Rule.GRAY, false);
+        }
+
+        @Override
+        public void onTick() {
+            Mw19.get().platform.tntTimers(true, 64);
+        }
+
+        @Override
+        public void onDisable() {
+            Mw19.get().platform.tntTimers(false, 0);
+        }
+    }
+
+    /** How far away the last entity you hit was. Disallowed on Hypixel ("player distance/range"). */
+    public static final class Reach extends TextHud {
+        private double last = -1;
+        private long at;
+        private Subscription sub;
+
+        public Reach() {
+            super("reach", "Reach Display", "Distance to the last entity you hit", Rule.DISALLOWED_ON_SOME_SERVERS, false, Anchor.TOP, 0, 94);
+        }
+
+        @Override
+        public void onEnable() {
+            sub = Mw19.get().events.on(dev.mw19.core.event.AttackEvent.class, new Consumer<dev.mw19.core.event.AttackEvent>() {
+                @Override
+                public void accept(dev.mw19.core.event.AttackEvent e) {
+                    double d = Mw19.get().platform.reachTo(e.entityId);
+                    if (d >= 0) {
+                        last = d;
+                        at = System.currentTimeMillis();
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onDisable() {
+            if (sub != null) sub.cancel();
+        }
+
+        @Override
+        protected boolean hasContent() {
+            return last >= 0 && System.currentTimeMillis() - at < 3000;
+        }
+
+        @Override
+        protected long key() {
+            return Math.round(last * 100);
+        }
+
+        @Override
+        protected String build() {
+            return String.format(Locale.ROOT, "%.2f blocks", last);
+        }
+
+        @Override
+        protected String previewText() {
+            return "3.00 blocks";
+        }
+    }
+
+    /**
+     * Up to three keys that each send one command (e.g. /hub), one press = one command, at most once a second, and
+     * only while no screen is open. GRAY: a key sending a command is a (small) automation.
+     */
+    public static final class QuickCommands extends Module {
+        private final KeySetting[] keys = new KeySetting[3];
+        private final dev.mw19.api.setting.TextSetting[] commands = new dev.mw19.api.setting.TextSetting[3];
+        private long lastSent;
+        private Subscription sub;
+
+        public QuickCommands() {
+            super("quick_commands", "Quick Commands", "Keys that send a command you choose, like /hub", Category.UTILITY, Rule.GRAY, false);
+            String[] defs = {"/hub", "/lobby", ""};
+            for (int i = 0; i < 3; i++) {
+                keys[i] = add(new KeySetting("key" + (i + 1), "Key " + (i + 1), "Sends command " + (i + 1), KeySetting.NONE));
+                commands[i] = add(new dev.mw19.api.setting.TextSetting("command" + (i + 1), "Command " + (i + 1), "A command starting with /", defs[i], 100));
+            }
+        }
+
+        @Override
+        public void onEnable() {
+            sub = Mw19.get().events.on(KeyPressEvent.class, new Consumer<KeyPressEvent>() {
+                @Override
+                public void accept(KeyPressEvent e) {
+                    Mw19 k = Mw19.get();
+                    if (!k.platform.inWorld() || k.platform.screens().current() != dev.mw19.core.platform.ScreenHost.Kind.NONE) return;
+                    for (int i = 0; i < 3; i++) {
+                        if (!keys[i].bound() || e.key != keys[i].key()) continue;
+                        String cmd = command(commands[i].get());
+                        long now = System.currentTimeMillis();
+                        if (cmd == null || now - lastSent < 1000) return;
+                        lastSent = now;
+                        k.platform.chat().sendCommand(cmd);
+                        return;
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onDisable() {
+            if (sub != null) sub.cancel();
+        }
+
+        /** "/hub" -> "hub"; anything that is not a single-line command -> null. */
+        static String command(String s) {
+            if (s == null) return null;
+            s = s.trim();
+            if (!s.startsWith("/") || s.length() < 2 || s.indexOf('\n') >= 0 || s.indexOf('\r') >= 0) return null;
+            return s.substring(1);
+        }
+    }
+
     /** A pulsing red edge while your health is low. Your own health, already shown by the hearts. */
     public static final class LowHealth extends Module implements Overlay {
         private final NumberSetting below = add(new NumberSetting("below", "Below", "Health share that starts the warning (percent)", 30, 5, 80, 5));

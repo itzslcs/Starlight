@@ -147,3 +147,30 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
 - **Fix:** `ConfigManager.writeBoth` writes under one lock and skips snapshots older than the last one written;
   profile writes take the same lock.
 - **Regression test:** `ConfigRaceTest`.
+
+## 2026-09-26 · 1.21.9 smoke flagged vanilla's key fetch timing out
+- **Repro:** 0.4.0 `smoke-all.sh` (snapshot b2fc30b): 1.21.9 printed `MW19 SMOKE PASS` and audit 27/27, but the checker
+  flagged `[Yggdrasil Key Fetcher/ERROR] Failed to request yggdrasil public key`, caused by
+  `MinecraftClientException: Failed to read from https://api.minecraftservices.com/publickeys due to Connect timed out`.
+- **Cause:** authlib (vanilla) fetches Mojang's service public keys at start; the connection timed out on this
+  network. No MW19 frame is in the trace, and the other 17 targets did not hit it in the same run.
+- **Fix:** smoke.sh allowlists that record head, like the existing dev-account `Failed to retrieve profile key pair`.
+  A rerun of 1.21.9 is the regression check (below).
+
+## 2026-09-26 · Compatibility run with Sodium: three setup problems, then PASS
+- **Run 1:** `WITH_MODS="sodium immediatelyfast ferrite-core lithium" smoke.sh 1.21.11` crashed at start:
+  `Mixin apply for mod sodium failed sodium-frapi.mixins.json:BlockRenderDispatcherMixin ... @Redirect ... could not find
+  any targets`. MW19 has no mixin on that class. The jars had been dropped into `run/<mc>/mods`, which leaves remapping
+  to Fabric Loader's runtime remapper in a Mojang-mapped dev run. **Fix:** `-Pmw19.withMods=<dir>` adds them with Loom's
+  `modLocalRuntime`, remapped at build time ([fabric/build.gradle.kts](../fabric/build.gradle.kts)).
+- **Run 2:** Fabric Loader refused to start: Sodium 0.8.14 requires `fabric-block-view-api-v2`,
+  `fabric-rendering-fluids-v1` and `fabric-resource-loader-v0`, i.e. **Fabric API**. So the MW19 Performance packs
+  need Fabric API too ([`scripts/mrpack.py`](../scripts/mrpack.py) now lists it).
+- **Run 3:** Fabric API as a file dependency still left its modules missing: they are nested jars inside the Fabric
+  API jar, which a plain file dependency does not unpack. **Fix:** `-Pmw19.fabricApi=<version>` pulls it from Fabric's
+  Maven (smoke.sh looks the version up on Modrinth).
+- **Run 4: PASS** on 1.21.11 with fabric-api 0.141.6, sodium 0.8.14, immediatelyfast 1.14.3, lithium 0.21.4 and
+  ferritecore 8.2.0 (55 mods): every smoke check, and the mixin audit 27/27 (Entity Culling still wired under Sodium).
+- **26.3:** the first try failed while configuring `:fabric:1.21.11`: Stonecutter always configures its active version,
+  which then got 26.3's mods to remap. The extra mods now apply only to the requested target. Then **PASS** with
+  fabric-api 0.161.0, sodium 0.9.2, immediatelyfast 1.17.1, lithium 0.26.1 and ferritecore 9.0.0 (audit 28/28).

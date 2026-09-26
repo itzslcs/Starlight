@@ -45,6 +45,8 @@ public final class GuiRoot implements Surface {
     private final List<Widget> focusOrder = new ArrayList<Widget>();
     private final List<Widget> lastFocusOrder = new ArrayList<Widget>();
     private final Anim open = new Anim(0);
+    /** Page cross-fade and the sliding sidebar highlight. */
+    private final Anim pageIn = new Anim(1), selY = new Anim(-1);
     private float width, height, scale = 1;
     private long hoverSince;
     private String lastTooltip;
@@ -160,6 +162,8 @@ public final class GuiRoot implements Surface {
     public void show(Page p) {
         if (p == page) return;
         page = p;
+        pageIn.snap(0);
+        pageIn.to(1, 220, System.currentTimeMillis());
         popup = popupOwner = null;
         focused = null;
         page.onShow();
@@ -266,16 +270,21 @@ public final class GuiRoot implements Surface {
         g.rect(px + 14, py + 16, px + 17, py + 17, t.onAccent);
         g.text(Mw19.NAME, px + 23, py + 11, 1.25f, t.text, false);
         g.text("v" + k.modVersion, px + 23, py + 23, t.textDim, false);
-        // nav
+        // nav: one highlight slides to the selected page; hover fades in under the others
         float ny = py + 40, step = navStep(), ih = step - 2, pad = (ih - 9) / 2f;
+        float target = py + 40 + pages.indexOf(page) * step;
+        if (selY.target() < 0) selY.snap(target);
+        selY.to(target, 180, now);
+        float sy = selY.get(now);
+        g.roundRect(px + 6, sy, SIDEBAR - 12, ih, 4, t.surface2);
+        g.roundRect(px + 6, sy + pad, 2, 9, 1, t.accent);
         for (int i = 0; i < pages.size(); i++) {
             Page p = pages.get(i);
             boolean sel = p == page;
             boolean hv = ui.hover(px + 6, ny, SIDEBAR - 12, ih);
-            sideHover[i].to(sel ? 1 : hv ? 0.5f : 0, 150, now);
+            sideHover[i].to(!sel && hv ? 0.5f : 0, 150, now);
             float a = sideHover[i].get(now);
             if (a > 0.01f) g.roundRect(px + 6, ny, SIDEBAR - 12, ih, 4, Colors.fade(t.surface2, a));
-            if (sel) g.roundRect(px + 6, ny + pad, 2, 9, 1, t.accent);
             int col = sel ? t.text : Colors.lerp(t.textDim, t.text, a);
             Icons.draw(g, p.icon(), px + 13, ny + pad, sel ? t.accent : col);
             g.text(p.title(), px + 28, ny + pad + 1, col, false);
@@ -291,9 +300,15 @@ public final class GuiRoot implements Surface {
         float cx = px + SIDEBAR - 18, cy = py + 12;
         Icons.draw(g, "close", cx, cy, ui.hover(cx - 3, cy - 3, 16, 16) ? t.bad : t.textDim);
         if (ui.hover(cx - 3, cy - 3, 16, 16)) ui.tooltip = "Close (Esc)";
-        // content
+        // content: the new page fades in and settles upward
         page.bounds(px + SIDEBAR + 10, py + 10, pw - SIDEBAR - 20, ph - 20);
+        float pin = pageIn.get(now);
+        g.pushAlpha(pin);
+        g.push();
+        g.translate(0, (1 - pin) * 6);
         page.render(ui);
+        g.pop();
+        g.popAlpha();
         g.popAlpha();
         g.pop();
     }

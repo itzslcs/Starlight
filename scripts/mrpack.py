@@ -10,8 +10,9 @@ usage: scripts/mrpack.py <dist-dir> [mc ...]      (default: every Fabric jar in 
 """
 import glob, hashlib, json, os, re, sys, urllib.parse, urllib.request, zipfile
 
-MODS = ["sodium", "immediatelyfast", "ferrite-core", "lithium"]
-NAMES = {"sodium": "Sodium", "immediatelyfast": "ImmediatelyFast", "ferrite-core": "FerriteCore", "lithium": "Lithium"}
+# Sodium 0.8 needs Fabric API (block view, fluid rendering and resource loader modules), so the pack carries it too.
+MODS = ["fabric-api", "sodium", "immediatelyfast", "ferrite-core", "lithium"]
+NAMES = {"fabric-api": "Fabric API", "sodium": "Sodium", "immediatelyfast": "ImmediatelyFast", "ferrite-core": "FerriteCore", "lithium": "Lithium"}
 UA = {"User-Agent": "itzslcs/mw19-mrpack/0.2.0"}
 LOADER = "0.19.5"
 

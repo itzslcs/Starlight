@@ -54,7 +54,7 @@ public final class Mw19 {
     public final HookWatchdog hooks = new HookWatchdog();
     public final Compat compat;
     public final dev.mw19.core.modules.InputRates rates = new dev.mw19.core.modules.InputRates();
-    public final FpsBoost fpsBoost = new FpsBoost(this);
+    public final VideoPresets video = new VideoPresets(this);
     public final dev.mw19.core.perf.Occlusion occlusion = new dev.mw19.core.perf.Occlusion();
     public final dev.mw19.core.plugin.NameTagRegistry nameTags = new dev.mw19.core.plugin.NameTagRegistry();
     public final dev.mw19.core.plugin.PanelRegistry panels = new dev.mw19.core.plugin.PanelRegistry();
@@ -299,7 +299,7 @@ public final class Mw19 {
     private final Runnable tickStart = new Runnable() {
         @Override
         public void run() {
-            modules.gameReady(); // no-op after the first tick
+            if (modules.gameReady() && bench == null) video.firstRun(config.freshInstall); // first tick only
             scheduler.tick();
             tickEvent.end = false;
             events.post(tickEvent);

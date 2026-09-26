@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.0
+- **Graphics presets:** Potato, Low, Medium and High on the Performance page, all tuned for frame rate, with Undo.
+  **Auto-detection:** on first start MW19 reads your graphics card (and CPU threads and memory) and picks a preset by
+  itself; the Performance page shows what it detected. FPS Boost became these presets.
+- **Smooth menus:** page cross-fades, a sliding sidebar highlight and a staggered home screen entrance (the animation
+  speed setting turns them off).
+- **Themes:** Black, White and Crystal.
+- **New modules:** Hitboxes (vanilla's F3+B view as a module), TNT Timer, Reach Display (off on Hypixel), Quick
+  Commands (a key sends one command, like /hub).
+- **Custom Crosshair:** finer steps and an overall scale, down to a quarter size.
+- **Faster:** Memory/CPU no longer reads the CPU load on the render thread (it was the costliest HUD module).
+
 ## 0.3.0
 - **New home screen look:** the game's own panorama, a pixel-block MW19 logo, your skin in 3D on the left (drag to
   turn it) and *Host World*, *Packs* and *MW19 Menu* on the right. No more particles or tip cards.

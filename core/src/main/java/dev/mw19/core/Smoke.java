@@ -23,7 +23,7 @@ final class Smoke {
     private boolean clickBefore;
     private long clickTicks;
     private String guiClick = CLICKS ? "pending" : "skipped (no xdotool)";
-    private String packs = "not run", packEnable = "not run", host = "not run", exploit = "not run";
+    private String packs = "not run", packEnable = "not run", host = "not run", exploit = "not run", presets = "not run";
 
     /**
      * debug-log 2026-09-26: every click on the Mods page threw and the smoke never noticed, because it only rendered
@@ -206,11 +206,27 @@ final class Smoke {
                     else k.gui().openHost();
                 } else if (stageTicks == 280) {
                     k.platform.screenshot("mw19-smoke-9-host");
-                } else if (stageTicks == 290) {
-                    exploit = k.platform.selfTest("exploit");
+                } else if (stageTicks == 300) {
+                    // Graphics presets: what first-run detection picked, then Medium and Undo (render distance is readable).
+                    dev.mw19.core.perf.VideoPreset auto = k.video.current();
+                    presets = "auto=" + (auto == null ? "none" : auto.label) + " (" + k.video.suggestion().reason + ")";
+                    int before = k.platform.videoOption("renderDistance");
+                    k.video.apply(dev.mw19.core.perf.VideoPreset.MEDIUM, false);
+                    int medium = k.platform.videoOption("renderDistance");
+                    k.gui().openPage(dev.mw19.core.gui.page.PerfPage.class);
+                    k.video.undo();
+                    int after = k.platform.videoOption("renderDistance");
+                    presets += " rd " + before + "->" + medium + "->" + after;
+                    Log.info("SMOKE: presets " + presets);
+                    if (auto == null) fail("first-run graphics detection did not apply a preset");
+                    else if (medium != 10 || after != before) fail("presets: render distance " + before + " -> " + medium + " -> " + after);
+                } else if (stageTicks == 330) {
+                    k.platform.screenshot("mw19-smoke-9b-performance");
+                } else if (stageTicks == 340) {
+                    exploit = k.platform.selfTest("exploit"); // last: its probe toast would cover the screenshots
                     Log.info("SMOKE: exploit protection " + exploit);
                     if (exploit.startsWith("FAIL")) fail("exploit protection self-test: " + exploit);
-                } else if (stageTicks == 300) {
+                } else if (stageTicks == 350) {
                     k.gui().close();
                     next();
                 }
@@ -297,7 +313,19 @@ final class Smoke {
                 return;
             }
         }
-        Log.info("MW19 SMOKE PASS hooks[" + k.hooks.describe() + "] guiClick[" + guiClick + "] keycps[" + keyCps + "] packs[" + packs + "] packEnable[" + packEnable + "] host[" + host
+        java.util.List<ModuleManager.State> costly = new java.util.ArrayList<ModuleManager.State>(k.modules.all());
+        java.util.Collections.sort(costly, new java.util.Comparator<ModuleManager.State>() {
+            @Override
+            public int compare(ModuleManager.State a, ModuleManager.State b) {
+                return Double.compare(b.renderNanos, a.renderNanos);
+            }
+        });
+        StringBuilder costs = new StringBuilder();
+        for (int i = 0; i < 5 && i < costly.size(); i++) {
+            costs.append(costly.get(i).module.id()).append('=').append(String.format(java.util.Locale.ROOT, "%.0f", costly.get(i).renderNanos / 1000.0)).append("us ");
+        }
+        Log.info("SMOKE: top HUD costs " + costs.toString().trim());
+        Log.info("MW19 SMOKE PASS hooks[" + k.hooks.describe() + "] guiClick[" + guiClick + "] keycps[" + keyCps + "] presets[" + presets + "] packs[" + packs + "] packEnable[" + packEnable + "] host[" + host
                 + "] exploit[" + exploit + "] plugins[" + plugins.toString().trim() + "] modules["
                 + k.modules.describeEnabled() + "] avgFrameMs=" + k.perf.avgFrameMs() + " ownUsPerFrame=" + k.perf.avgOwnUs());
         k.config.flush();

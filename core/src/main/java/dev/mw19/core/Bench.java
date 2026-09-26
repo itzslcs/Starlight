@@ -118,8 +118,8 @@ final class Bench {
     private void configure(String p) {
         ModuleManager.State culling = k.modules.get("entity_culling");
         if (culling != null) k.modules.setEnabled(culling, p.contains("culling"));
-        if (p.contains("boost") && !k.fpsBoost.active()) k.fpsBoost.apply();
-        if (!p.contains("boost") && k.fpsBoost.active()) k.fpsBoost.undo();
+        if (p.contains("boost") && !k.video.active()) k.video.apply(dev.mw19.core.perf.VideoPreset.LOW, true);
+        if (!p.contains("boost") && k.video.active()) k.video.undo();
         Log.info("BENCH: phase " + p);
     }
 
@@ -152,7 +152,7 @@ final class Bench {
 
     private void finish(String why) {
         if (why != null) Log.error("MW19 BENCH FAIL: " + why, null);
-        if (k.fpsBoost.active()) k.fpsBoost.undo();
+        if (k.video.active()) k.video.undo();
         stage = 99;
         k.config.flush();
         k.platform.quit();

@@ -43,6 +43,7 @@ Modrinth when you import the pack. They are not included in MW19's jars.
 
 | Mod | License (Modrinth) |
 |---|---|
+| Fabric API | Apache-2.0 |
 | Sodium | PolyForm Shield 1.0.0 |
 | ImmediatelyFast | LGPL-3.0-or-later |
 | FerriteCore | MIT |

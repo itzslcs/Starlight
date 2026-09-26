@@ -81,6 +81,10 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 - [build.gradle.kts](../api/build.gradle.kts)
 
+## core tests · `dev.mw19.core.modules`
+
+- [QuickCommandsTest.java](../core/src/test/java/dev/mw19/core/modules/QuickCommandsTest.java): Quick Commands sends only single-line slash commands.
+
 ## core tests · `dev.mw19.core.net`
 
 - [NetTest.java](../core/src/test/java/dev/mw19/core/net/NetTest.java): UPnP, skin upload and local-address checks against a local fake server (no real network).
@@ -94,7 +98,6 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [ColorChromaTest.java](../core/src/test/java/dev/mw19/core/ColorChromaTest.java): debug-log 2026-09-26: chroma hue was computed in float from epoch millis and only moved every ~2 minutes.
 - [ConfigManagerTest.java](../core/src/test/java/dev/mw19/core/ConfigManagerTest.java)
 - [ConfigRaceTest.java](../core/src/test/java/dev/mw19/core/ConfigRaceTest.java): debug-log 2026-09-26: saves from two threads shared config.json.tmp and one failed (seen at exit on 1.8.9).
-- [FpsBoostTest.java](../core/src/test/java/dev/mw19/core/FpsBoostTest.java): FPS Boost keeps the player's original options (first snapshot wins) and Undo puts them back.
 - [GfxMeasureTest.java](../core/src/test/java/dev/mw19/core/GfxMeasureTest.java): debug-log 2026-09-26: GUI clicks measure text between render passes; that must work (it threw before).
 - [HudLayoutTest.java](../core/src/test/java/dev/mw19/core/HudLayoutTest.java)
 - [InputRatesTest.java](../core/src/test/java/dev/mw19/core/InputRatesTest.java): KeyCPS counting: per binding (TestPlatform binds attack to LMB and use to RMB), one-second window.
@@ -112,6 +115,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [TestModules.java](../core/src/test/java/dev/mw19/core/TestModules.java)
 - [TestPlatform.java](../core/src/test/java/dev/mw19/core/TestPlatform.java): Headless Platform for tests: no world, no screen, everything inert.
 - [TierFormatTest.java](../core/src/test/java/dev/mw19/core/TierFormatTest.java): Guard for the MCTiers v2 schema the Tier Tags addon relies on (field names checked against the live API).
+- [VideoPresetsTest.java](../core/src/test/java/dev/mw19/core/VideoPresetsTest.java): Presets keep the player's original options (first snapshot wins), Undo puts them back, and auto never raises distances.
 
 ## core · `dev.mw19.core.chat`
 
@@ -233,7 +237,9 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 ## core · `dev.mw19.core.perf`
 
+- [HardwareTier.java](../core/src/main/java/dev/mw19/core/perf/HardwareTier.java): Picks a starting VideoPreset from the graphics device the game reports, the CPU thread count and the memory Minecraft may use.
 - [Occlusion.java](../core/src/main/java/dev/mw19/core/perf/Occlusion.java): Entity culling: an entity is hidden only when every ray from the camera to its box (centre + 8 corners) hits a solid opaque block first.
+- [VideoPreset.java](../core/src/main/java/dev/mw19/core/perf/VideoPreset.java): Graphics presets for the vanilla video options, fastest first.
 
 ## core · `dev.mw19.core.platform`
 
@@ -272,7 +278,6 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 - [Bench.java](../core/src/main/java/dev/mw19/core/Bench.java): Benchmark (scripts/bench.sh, -Dmw19.bench=1): one fixed scene measured in phases, so every optimisation gets before/after numbers (docs/PERF.md).
 - [Compat.java](../core/src/main/java/dev/mw19/core/Compat.java): Runtime compat.* flags from the loaded mod list.
-- [FpsBoost.java](../core/src/main/java/dev/mw19/core/FpsBoost.java): FPS Boost (Performance page): one click switches the costliest vanilla options to fast values.
 - [Guard.java](../core/src/main/java/dev/mw19/core/Guard.java): Wraps every call that crosses from Minecraft into our code so an exception can never take the game down.
 - [HookWatchdog.java](../core/src/main/java/dev/mw19/core/HookWatchdog.java): Records which platform hooks have fired, so a silently failed mixin shows up in the UI and the smoke log.
 - [Hooks.java](../core/src/main/java/dev/mw19/core/Hooks.java): Values written by modules on the game thread and read by platform mixins every frame.
@@ -282,6 +287,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [PerfStats.java](../core/src/main/java/dev/mw19/core/PerfStats.java): Frame-time and own-cost ring buffers for the Performance page and the benchmark harness.
 - [SdlKeys.java](../core/src/main/java/dev/mw19/core/SdlKeys.java): Minecraft 26.3 moved from GLFW to SDL3: key events carry SDL scancodes (USB HID usage ids), modifiers are SDL_Keymod bits and mouse buttons are 1-based with...
 - [Smoke.java](../core/src/main/java/dev/mw19/core/Smoke.java): Self-driving smoke run (-Dmw19.smoke=1): title → GUI → HUD editor → world → GUI → every module on + chat lines → HUD / HUD-editor screenshots → N seconds in...
+- [VideoPresets.java](../core/src/main/java/dev/mw19/core/VideoPresets.java): Graphics presets (Performance page).
 
 ## core · build and resources
 
@@ -406,6 +412,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [bench.sh](../scripts/bench.sh): Benchmark one target headless (core Bench): fixed scene, phases baseline / culling / culling+boost.
 - [docs-graph.py](../scripts/docs-graph.py): Keeps the docs a linked graph (the repo root is also an Obsidian vault; the links work on GitHub too).
 - [mixin-audit.py](../scripts/mixin-audit.py): Proves MW19's injections were applied: disassembles the classes Mixin exported during a dev run
+- [modrinth.py](../scripts/modrinth.py): Updates MW19's Modrinth project from dist/: title, summary, description (docs/MODRINTH.md), icon, and one alpha
 - [mrpack.py](../scripts/mrpack.py): Builds "MW19 Performance" Modrinth packs (.mrpack) for Prism Launcher, the Modrinth app and ATLauncher.
 - [smoke-all.sh](../scripts/smoke-all.sh): Runs scripts/smoke.sh for each given version (default: every target in versions.json) and prints a summary.
 - [smoke.sh](../scripts/smoke.sh): Smoke test one target headless: title -> our GUI -> HUD editor -> world -> GUI -> N seconds -> quit.

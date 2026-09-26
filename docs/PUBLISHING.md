@@ -1,0 +1,27 @@
+# Publishing
+
+See also: [MODRINTH](MODRINTH.md) (the listing text), [COMPAT_MATRIX](COMPAT_MATRIX.md) (what was tested),
+[CHANGELOG](../CHANGELOG.md).
+
+## Modrinth
+The project is a **draft** (id `TVWRTUcc`, still named Kestrel from 0.1.0) until the owner submits it for review.
+[`scripts/modrinth.py`](../scripts/modrinth.py) renames it to MW19, uploads the description ([MODRINTH](MODRINTH.md)) and icon, deletes versions that
+are not in `dist/`, and uploads every `dist/` jar as an alpha version.
+
+1. On modrinth.com, click your avatar → **Settings** → **Personal access tokens** → **Create a PAT**.
+2. Name it `MW19 upload`, set it to expire tomorrow, and tick **Create versions**, **Write projects**, **Delete versions**
+   and **Read projects**. Click **Create PAT** and copy the token (it starts with `mrp_`).
+3. Build: `./gradlew buildAll`.
+4. In a terminal in the project folder: `MR=mrp_yourtoken scripts/modrinth.py TVWRTUcc dist "What changed"`.
+   (Or give the token to Claude for this one command.)
+5. Revoke the token afterwards (same settings page). The script never writes it anywhere.
+6. Check the page, then **Submit for review** on Modrinth when you are happy with it.
+
+## GitHub
+The repository has no remote yet.
+
+1. Open github.com/new. Name the repository `mw19`, choose Private or Public, and leave "Add a [README](../README.md)", ".gitignore" and
+   "license" unticked (the project has all three). Click **Create repository**.
+2. The easy way to let Claude push: install the GitHub CLI (`sudo pacman -S github-cli`), then in Claude Code type
+   `! gh auth login` and follow the prompts (GitHub.com → HTTPS → log in with a web browser).
+3. Then Claude runs `git remote add origin https://github.com/<you>/mw19.git` and `git push -u origin main`.

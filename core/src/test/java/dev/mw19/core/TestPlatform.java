@@ -47,6 +47,9 @@ final class TestPlatform implements Platform, ScreenHost, ChatAccess, ModList {
     public ScreenHost screens() { return this; }
     public dev.mw19.core.platform.Skins skins() { return skins; }
     public float health() { return 0; }
+    public void setHitboxes(boolean on) {}
+    public void tntTimers(boolean on, int range) {}
+    public double reachTo(int entityId) { return -1; }
     public float maxHealth() { return 0; }
     public int food() { return 0; }
     public float saturation() { return 0; }
@@ -81,12 +84,32 @@ final class TestPlatform implements Platform, ScreenHost, ChatAccess, ModList {
     public void setClipboard(String text) {}
     public void vanillaBindings(BindingSink sink) {}
     final java.util.Map<String, String> options = new java.util.HashMap<String, String>();
-    public java.util.Map<String, String> applyFpsBoost() {
+    public java.util.Map<String, String> applyVideo(java.util.Map<String, String> values) {
         java.util.Map<String, String> prev = new java.util.LinkedHashMap<String, String>();
-        prev.put("clouds", options.containsKey("clouds") ? options.get("clouds") : "FANCY");
-        options.put("clouds", "OFF");
+        for (java.util.Map.Entry<String, String> e : values.entrySet()) {
+            String old = options.containsKey(e.getKey()) ? options.get(e.getKey()) : DEFAULTS.get(e.getKey());
+            if (old == null || old.equals(e.getValue())) continue;
+            prev.put(e.getKey(), old);
+            options.put(e.getKey(), e.getValue());
+        }
         return prev;
     }
+    /** The options this fake game knows, at vanilla's defaults (others are "not on this version"). */
+    static final java.util.Map<String, String> DEFAULTS = new java.util.HashMap<String, String>();
+    static {
+        DEFAULTS.put("renderDistance", "12");
+        DEFAULTS.put("simulationDistance", "12");
+        DEFAULTS.put("clouds", "FANCY");
+        DEFAULTS.put("particles", "ALL");
+        DEFAULTS.put("vsync", "true");
+    }
+    public int videoOption(String id) {
+        String v = options.containsKey(id) ? options.get(id) : DEFAULTS.get(id);
+        try { return v == null ? -1 : Integer.parseInt(v); } catch (NumberFormatException e) { return -1; }
+    }
+    String gpu = "Mesa Intel(R) UHD Graphics 620 (KBL GT2)";
+    public String gpuName() { return gpu; }
+    public String gpuKind() { return ""; }
     public void restoreOptions(java.util.Map<String, String> previous) { options.putAll(previous); }
     public String graphicsApi() { return null; }
     public void setGraphicsApi(String api) {}

@@ -195,3 +195,24 @@ more modules.
 - **Not built: account switching.** An in-game switcher that reads the launcher's saved accounts would handle other
   programs' stored login tokens, which MW19's rules forbid (never read launcher account files). Launchers switch
   accounts themselves.
+
+## D-023 Graphics presets with auto-detection, and the community suggestion list (owner request, 2026-09-26)
+The owner passed on a list of player suggestions for Frost Client ("frost = mw19") and asked for low/mid/high video
+configs with automatic detection on first start, since MW19's focus is maximum FPS, plus smooth animations.
+- **Presets** ([`VideoPreset`](../core/src/main/java/dev/mw19/core/perf/VideoPreset.java)): values are platform-neutral ids; every version applies the ones it has. Values stay
+  inside vanilla's option ranges (read with javap), because vanilla replaces an out-of-range value with its default.
+- **Detection** ([`HardwareTier`](../core/src/main/java/dev/mw19/core/perf/HardwareTier.java)) is a heuristic from the renderer string (26.2+ also reports integrated/discrete/CPU):
+  software renderers and older Intel/mobile GPUs get Potato, Iris Xe and AMD APUs Low, GTX 10/16, RX 400-5000 and
+  strong APUs Medium, RTX, RX 6000+ and Arc B-series High; 4 or fewer CPU threads, or under 2 GB of heap, each step down.
+  It runs once, on the first start of a fresh install (no saved profile), never raises view distance, and says what it
+  picked; existing installs only get a hint. The benchmark skips it so its baseline stays the player's settings.
+- **From the suggestion list, built:** presets/"Lite"/iGPU (above), animations, UI vs vanilla (the home screen switch,
+  since 0.2.0), vanity themes (Black, White, Crystal), finer crosshair, Hitboxes, TNT Timer, Reach Display (DISALLOWED
+  on Hypixel), Quick Commands (GRAY), saturation and day counter (0.3.0), world hosting with a shareable address (0.3.0).
+- **Not built, and why:** a launcher, installers, update systems, RAM settings and instance/mod management are launcher
+  features (Prism and the Modrinth app do them; MW19 is a mod). Cracked/offline or alternative authentication and an
+  account switcher conflict with MW19's rules (legit only; never touch stored logins). Capes, emotes, friends, badges
+  and cloud-synced cosmetics need servers MW19 does not have (and no telemetry). Free cam gives an unfair view on
+  servers. Bedrock and 1.8(.0) are other games/targets. Discord Rich Presence needs a Discord application id that only
+  the owner can create. Motion blur, colour saturation and connected glass need shader or resource-pack work per
+  version and are open for later. Monetisation was set aside by the owner.

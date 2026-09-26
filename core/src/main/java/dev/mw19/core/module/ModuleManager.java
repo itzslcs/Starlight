@@ -160,10 +160,12 @@ public final class ModuleManager {
     }
 
     /** First client tick: the game exists, so modules the profile enabled start now. */
-    public void gameReady() {
-        if (!starting) return;
+    /** Returns true the one time it releases the modules (the first game tick). */
+    public boolean gameReady() {
+        if (!starting) return false;
         starting = false;
         for (State s : order) setSuspended(s, SUSPEND_STARTING, false);
+        return true;
     }
 
     /** Clears FAILED on every module (e.g. after a profile switch, the user gets another try). */

@@ -7,7 +7,7 @@ See also: [PLAN](PLAN.md) (Phase 5), [ARCHITECTURE](ARCHITECTURE.md) (performanc
 | Feature | Where | What it changes |
 |---|---|---|
 | **Entity Culling** (module, on by default) | all 18 targets | Mobs, items and other entities fully hidden behind solid blocks are not drawn. Rays from the camera to each entity's box (centre and 8 corners) walk the block grid. The entity is skipped only if every ray hits a full opaque block. Players, glowing entities and anything showing a name tag are always drawn, because vanilla shows those through walls. Results are cached per entity, re-checks are spread over frames, and block lookups are capped per frame, so the check cannot cost frames. It fails open: drawing is the default. |
-| **FPS Boost** (Performance page) | all 18 targets | One click switches the vanilla options that cost the most frames: clouds off, fewer particles, no entity shadows, no smooth lighting, biome blend 0, entity distance 75 %, VSync off, unlimited FPS, render distance capped at 12 (only lowered, never raised), and fast leaves (plus no improved transparency, vignette and weather radius 5 on 1.21.11+; fast graphics on older versions). *Undo* restores your values, even after a restart. |
+| **Graphics presets** (Performance page) | all 18 targets | [`VideoPreset`](../core/src/main/java/dev/mw19/core/perf/VideoPreset.java): Potato, Low, Medium, High. All keep VSync off and FPS unlimited, and even High stays at the default view distance (12). Potato: view 5, simulation 5, entity distance 50 %, minimal particles, no clouds, fast graphics/leaves, no smooth lighting, shadows, biome blend, mipmaps, menu blur or vignette. *Auto* ([`HardwareTier`](../core/src/main/java/dev/mw19/core/perf/HardwareTier.java)) picks from the GPU name (and device type on 26.2+), CPU threads and heap; MW19 applies it once on a fresh install, never raising view or simulation distance. *Undo* restores your values, even after a restart. (0.2.0's FPS Boost is now Low; the benchmark's "boost" phase uses Low.) |
 | **Vulkan renderer** (Performance page) | 26.2, 26.3 | Sets Minecraft's own graphics API preference to Vulkan. It applies after a restart, and the game falls back to OpenGL if the GPU cannot run it. |
 | Allocation-free HUD | all | No per-frame allocation in HUD paths; per-module cost is on the Performance page (budget 300 µs/frame). |
 
@@ -31,7 +31,7 @@ across machines. Vanilla's inactivity limiter (30 FPS after 60 s without input) 
 ([debug-log](debug-log.md)).
 
 ## Results
-Minecraft 1.21.11, `scripts/bench.sh`, this machine (Xvfb + Mesa llvmpipe, CPU rendering), 2026-09-26, MW19 0.2.0 code
+Minecraft 1.21.11, [`scripts/bench.sh`](../scripts/bench.sh), this machine (Xvfb + Mesa llvmpipe, CPU rendering), 2026-09-26, MW19 0.2.0 code
 (Entity Culling and FPS Boost are unchanged in 0.3.0). Two clean runs; a third ran while a Gradle build competed for
 the CPU and is left out (its boost phases fell to 54 and 72 FPS).
 

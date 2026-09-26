@@ -17,9 +17,10 @@ import dev.mw19.core.render.Gfx;
 /** Replaces the vanilla crosshair with a configurable one (same position, same purpose). */
 public final class CrosshairModule extends Module implements Overlay {
     private final ChoiceSetting style = add(new ChoiceSetting("style", "Style", "Crosshair shape", "Cross", "Cross", "Dot", "Circle", "T", "Plus + dot"));
-    private final NumberSetting size = add(new NumberSetting("size", "Size", "Arm length", 4, 1, 12, 0.5));
-    private final NumberSetting gap = add(new NumberSetting("gap", "Gap", "Space around the centre", 1.5, 0, 8, 0.5));
-    private final NumberSetting thickness = add(new NumberSetting("thickness", "Thickness", "Line width", 1, 0.5, 4, 0.5));
+    private final NumberSetting size = add(new NumberSetting("size", "Size", "Arm length", 4, 0.5, 12, 0.25));
+    private final NumberSetting gap = add(new NumberSetting("gap", "Gap", "Space around the centre", 1.5, 0, 8, 0.25));
+    private final NumberSetting thickness = add(new NumberSetting("thickness", "Thickness", "Line width", 1, 0.25, 4, 0.25));
+    private final NumberSetting scale = add(new NumberSetting("scale", "Scale", "Shrinks or grows the whole crosshair", 1, 0.25, 3, 0.05, "×"));
     private final ColorSetting color = add(new ColorSetting("color", "Colour", "Crosshair colour", 0xFFFFFFFF));
     private final BoolSetting outline = add(new BoolSetting("outline", "Outline", "Dark outline for visibility", true));
     private final BoolSetting cooldown = add(new BoolSetting("cooldown", "Attack cooldown", "Show the attack cooldown under the crosshair (1.9+)", true));
@@ -46,7 +47,8 @@ public final class CrosshairModule extends Module implements Overlay {
         if (p.perspective() != 0 && !thirdPerson.on()) return;
         float cx = Math.round(sw / 2f * g.guiScale()) / g.guiScale(), cy = Math.round(sh / 2f * g.guiScale()) / g.guiScale();
         int c = color.argb(g.millis()), o = 0xC0000000;
-        float t = thickness.floatValue(), s = size.floatValue(), gp = gap.floatValue(), h = t / 2f;
+        float k = scale.floatValue();
+        float t = thickness.floatValue() * k, s = size.floatValue() * k, gp = gap.floatValue() * k, h = t / 2f;
         String st = style.get();
         if (st.equals("Dot") || st.equals("Plus + dot")) {
             if (outline.on()) g.roundRect(cx - h - 0.5f, cy - h - 0.5f, t + 1, t + 1, (t + 1) / 2f, o);

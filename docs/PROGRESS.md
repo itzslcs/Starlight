@@ -64,6 +64,14 @@
 - **Fixed:** a config save race at exit (debug-log, [`ConfigRaceTest`](../core/src/test/java/dev/mw19/core/ConfigRaceTest.java)); the 1.8.9 dev version label.
 - **Not built:** in-game account switching (reads other programs' stored logins; D-022).
 
+## 2026-09-26: 0.4.0 (owner: max-FPS presets with auto-detection, smooth animations, the community suggestion list)
+- **Graphics presets** Potato/Low/Medium/High replace FPS Boost; **auto-detection** picks one on a fresh install from the
+  GPU name (device type on 26.2+), CPU threads and heap ([DECISIONS](DECISIONS.md) D-023). Every smoke run checks it
+  (llvmpipe → Potato) and applies/undoes Medium.
+- Menu animations, themes Black/White/Crystal, finer crosshair, modules Hitboxes, TNT Timer, Reach Display, Quick Commands.
+- Memory/CPU sampled off the render thread (was the costliest HUD module); smoke logs the five costliest HUD modules.
+- 70 core tests (hardware tiers from real renderer strings, preset ranges vs vanilla's, apply/undo/first-run rules).
+
 ## Release status (2026-09-25)
 - **Modrinth:** draft project `mw19` with all 18 jars as `0.1.0+mc<mc>` alpha versions (uploaded hashes match `dist/`).
   It is not submitted for review yet: the owner checks the page (the name is still the D-001 placeholder) and submits.
