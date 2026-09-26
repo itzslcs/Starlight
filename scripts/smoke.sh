@@ -43,17 +43,44 @@ soundCategory_master:0.0
 OPT
 cp "$RUN/options.txt" "$RUN/optionsof.txt" 2>/dev/null || true
 
+# With xdotool, the run also clicks the menu through real X11 input (Smoke.requestClick logs where).
+CLICKS=""
+command -v xdotool >/dev/null && CLICKS="-Pkestrel.smokeClicks=1"
 if [ "$MC" = "1.8.9" ]; then
   (cd "$ROOT" && ./gradlew :api:jar :core:jar -q) || { echo "FAIL build core" | tee "$OUT/result.txt"; exit 1; }
-  CMD=(bash -c "cd '$ROOT/legacy' && ./gradlew runClient --console=plain -Pkestrel.smoke=$SECS")
+  CMD=(bash -c "cd '$ROOT/legacy' && ./gradlew runClient --console=plain -Pkestrel.smoke=$SECS $CLICKS")
 else
-  CMD=("$ROOT/gradlew" -p "$ROOT" ":fabric:$MC:runClient" --console=plain "-Pkestrel.smoke=$SECS" "-Pkestrel.fabricTargets=$MC")
+  CMD=("$ROOT/gradlew" -p "$ROOT" ":fabric:$MC:runClient" --console=plain "-Pkestrel.smoke=$SECS" "-Pkestrel.fabricTargets=$MC" $CLICKS)
+fi
+
+# Click helper: waits for "SMOKE CLICK <display> <pid> <x> <y>" (window pixels) in the run output and clicks there.
+# Window lookup by _NET_WM_PID first: xdotool's --name cannot read SDL3's UTF-8 title (26.3); LWJGL 2 sets no PID.
+if [ -n "$CLICKS" ]; then
+  : > "$OUT/gradle.log"
+  (
+    # One click per run: poll (tail -F re-read the line after the redirect truncated the file, clicking twice).
+    while :; do
+      line=$(grep -m1 'SMOKE CLICK ' "$OUT/gradle.log" 2>/dev/null)
+      if [ -n "$line" ]; then
+        set -- ${line##*SMOKE CLICK }
+        win=$(DISPLAY="$1" xdotool search --onlyvisible --pid "$2" 2>/dev/null | head -1)
+        [ -z "$win" ] && win=$(DISPLAY="$1" xdotool search --onlyvisible --name 'Minecraft' 2>/dev/null | head -1)
+        [ -z "$win" ] && win=$(DISPLAY="$1" xdotool search --onlyvisible --class 'minecraft' 2>/dev/null | head -1)
+        [ -n "$win" ] && DISPLAY="$1" xdotool mousemove --window "$win" "$3" "$4" sleep 0.2 click 1
+        echo "clicked $* (window $win)" >> "$OUT/clicks.txt"
+        break
+      fi
+      sleep 0.5
+    done
+  ) &
+  CLICKER=$!
 fi
 
 echo "smoke $MC: launching (log: $OUT/gradle.log)"
 START=$(date +%s)
 xvfb-run -a -s "-screen 0 1280x720x24" env LIBGL_ALWAYS_SOFTWARE=1 timeout 1500 "${CMD[@]}" > "$OUT/gradle.log" 2>&1
 CODE=$?
+[ -n "${CLICKER:-}" ] && { kill "$CLICKER" 2>/dev/null; pkill -P "$CLICKER" 2>/dev/null; }
 echo "exit=$CODE after $(( $(date +%s) - START ))s" > "$OUT/result.txt"
 
 cp "$RUN/logs/latest.log" "$OUT/latest.log" 2>/dev/null || true

@@ -25,6 +25,8 @@ dependencies {
 
 // -Pkestrel.smoke=<seconds> makes the dev client drive itself (see core Smoke + scripts/smoke.sh).
 val smokeSeconds: String? = providers.gradleProperty("kestrel.smoke").orNull
+// -Pkestrel.smokeClicks=1: smoke.sh's xdotool helper will click the menu for real (Smoke.requestClick).
+val smokeClicks = providers.gradleProperty("kestrel.smokeClicks").isPresent
 
 loom {
     runConfigs.all {
@@ -37,6 +39,7 @@ loom {
         if (smokeSeconds != null) {
             jvmArguments.add("-Dkestrel.smoke=1")
             jvmArguments.add("-Dkestrel.smoke.seconds=$smokeSeconds")
+            if (smokeClicks) jvmArguments.add("-Dkestrel.smoke.clicks=true")
         }
     }
 }

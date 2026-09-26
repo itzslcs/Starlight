@@ -20,6 +20,7 @@ val coreJars = files("../core/build/libs/core.jar", "../api/build/libs/api.jar")
 
 // -Pkestrel.smoke=<seconds> makes the dev client drive itself (see core Smoke + scripts/smoke.sh).
 val smokeSeconds: String? = providers.gradleProperty("kestrel.smoke").orNull
+val smokeClicks = providers.gradleProperty("kestrel.smokeClicks").isPresent
 
 loom {
     runConfigs {
@@ -31,6 +32,7 @@ loom {
             if (smokeSeconds != null) {
                 property("kestrel.smoke", "1")
                 property("kestrel.smoke.seconds", smokeSeconds)
+                if (smokeClicks) property("kestrel.smoke.clicks", "true")
             }
         }
         remove(getByName("server"))

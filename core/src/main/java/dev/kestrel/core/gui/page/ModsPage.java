@@ -240,6 +240,20 @@ public final class ModsPage extends Page {
         (open != null ? settings : grid).reveal(w);
     }
 
+    /** Centre of a visible card's toggle in menu units, or null. The smoke run clicks it through the real OS input path. */
+    public float[] toggleCenter(String moduleId) {
+        for (dev.kestrel.core.gui.Widget w : grid.children) {
+            if (!(w instanceof CardRow)) continue;
+            CardRow row = (CardRow) w;
+            for (Card c : new Card[]{row.a, row.b}) {
+                if (c != null && c.s.module.id().equals(moduleId) && c.toggle.w > 0) {
+                    return new float[]{c.toggle.x + c.toggle.w / 2f, c.toggle.y + c.toggle.h / 2f};
+                }
+            }
+        }
+        return null;
+    }
+
     /** Two module cards side by side. */
     private final class CardRow extends Widget {
         private final Card a, b;

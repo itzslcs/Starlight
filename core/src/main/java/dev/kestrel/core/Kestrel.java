@@ -130,6 +130,7 @@ public final class Kestrel {
     }
 
     private void start() {
+        modules.holdUntilGameReady();
         BuiltinModules.registerAll(this);
         config.load();
         modules.setListener(new ModuleManager.Listener() {
@@ -270,6 +271,7 @@ public final class Kestrel {
     private final Runnable tickStart = new Runnable() {
         @Override
         public void run() {
+            modules.gameReady(); // no-op after the first tick
             scheduler.tick();
             tickEvent.end = false;
             events.post(tickEvent);

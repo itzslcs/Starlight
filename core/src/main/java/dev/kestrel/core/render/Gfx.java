@@ -14,6 +14,12 @@ public final class Gfx implements Renderer {
     private static final int DEPTH = 32;
 
     private RenderBackend b;
+    /**
+     * The last backend, kept after {@link #end()}: widgets measure text while handling input too, which happens
+     * between render passes. Drawing still requires an active pass ({@code b}). (debug-log 2026-09-26: every click on
+     * the Mods page threw because measuring used {@code b}.)
+     */
+    private RenderBackend measure;
     private long millis;
     private float gs = 1f;
     private float px = 1f; // GUI units per physical pixel
@@ -32,6 +38,7 @@ public final class Gfx implements Renderer {
     /** Starts a pass. Must be paired with {@link #end()}. */
     public Gfx begin(RenderBackend backend, long frameMillis) {
         this.b = backend;
+        this.measure = backend;
         this.millis = frameMillis;
         this.gs = Math.max(0.25f, backend.guiScale());
         this.px = 1f / gs;
@@ -263,12 +270,13 @@ public final class Gfx implements Renderer {
 
     @Override
     public float textWidth(String text) {
-        return text == null ? 0 : b.textWidth(text);
+        if (text == null) return 0;
+        return measure != null ? measure.textWidth(text) : text.length() * 6f; // estimate before the first frame
     }
 
     @Override
     public float lineHeight() {
-        return b.lineHeight();
+        return measure != null ? measure.lineHeight() : 9f;
     }
 
     /** Shortens {@code text} with an ellipsis to fit {@code maxWidth}. Allocates: GUI use only, never per HUD frame. */

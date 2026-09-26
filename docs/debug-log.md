@@ -86,3 +86,28 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
   Neither involves `dev.kestrel`.
 - **Fix:** the checker allowlists exactly that GLFW message together with its two frame records (any other GL error still
   fails) and the key-pair 401. Replayed against the 26.2 log (now PASS) and 26.1 (still PASS).
+
+## 2026-09-26 · Clicks in the Right Shift menu did nothing (owner report)
+- **Repro:** 1.21.11 dev client on Xvfb, real input with xdotool: open the menu, click the Ping toggle. Nothing changes;
+  log: `GUI click failed` → `NullPointerException: ... RenderBackend.textWidth(String) because "this.b" is null` at
+  `Gfx.textWidth` ← `ModsPage.mouseClicked:208` ← `KestrelScreen.mouseClicked` ← `MouseHandler.onButton`.
+- **Cause:** `Gfx.end()` drops its backend after each render pass, but widgets also measure text while handling input
+  (between passes). The Mods page measures its category chips before anything else, so **every** click on the default
+  page threw, and the guard swallowed it. This has been present since Phase 1. The smoke only rendered the menu and
+  never clicked it, so it never saw the failure.
+- **Fix:** `Gfx` keeps the last backend for measuring (`textWidth`/`lineHeight`); drawing still needs an active pass.
+  Verified with xdotool on 1.21.11: toggle, category chip, every sidebar page and a settings page all respond, and
+  there are 0 `GUI click failed`.
+- **Regression tests:** `GfxMeasureTest` (measuring after `end()`), and every smoke run now clicks the FPS toggle through
+  real X11 input (`Smoke.requestClick` + the xdotool helper in `smoke.sh`) and fails unless the module flips. It passes
+  through GLFW (1.21.11), SDL3 (26.3) and LWJGL 2 (1.8.9). xdotool's `--name` cannot read SDL3's UTF-8 window title,
+  so the helper finds the window by `_NET_WM_PID` first.
+
+## 2026-09-26 · Toggle Sprint/Sneak failed at startup when saved as enabled
+- **Repro:** the same session. With the modules enabled in the saved profile: `module toggle_sprint failed in enable (1/5)`,
+  `NullPointerException: Cannot invoke "Options.toggleSprint()" because "this.mc.options" is null`.
+- **Cause:** Fabric runs client entrypoints inside `Minecraft`'s constructor, before `options` exists, and loading the
+  profile ran `onEnable` immediately. Smoke runs start from a fresh profile, so they never enabled these at startup.
+- **Fix:** `ModuleManager.SUSPEND_STARTING` holds every module registered during startup until the first client tick
+  (`gameReady()`), so any module that touches game state in `onEnable` is covered, not only these two.
+- **Regression test:** `ModuleManagerTest.profileEnablesWaitForTheGame`.

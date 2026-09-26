@@ -16,6 +16,12 @@ import java.util.Map;
  */
 public final class ModuleManager {
     public static final int SUSPEND_SERVER = 1, SUSPEND_SAFE = 2, SUSPEND_FAILED = 4, SUSPEND_UNAVAILABLE = 8;
+    /**
+     * Held until the game is fully constructed. Fabric runs mod entrypoints before Minecraft has loaded its options,
+     * so a module enabled by the saved profile could not touch game state in onEnable (debug-log 2026-09-26).
+     */
+    public static final int SUSPEND_STARTING = 16;
+    private boolean starting;
     public static final int MAX_FAILURES = 5;
 
     public static final class State {
@@ -82,6 +88,7 @@ public final class ModuleManager {
         State s = new State(m, owner);
         // Starts disabled; the profile (or the module default via ConfigManager.applyTo) activates it.
         if (!safeAvailable(s)) s.suspend |= SUSPEND_UNAVAILABLE;
+        if (starting) s.suspend |= SUSPEND_STARTING;
         states.put(m.id(), s);
         order.add(s);
         return s;
@@ -145,6 +152,18 @@ public final class ModuleManager {
         if (next == s.suspend) return;
         s.suspend = next;
         apply(s);
+    }
+
+    /** Holds every module registered from now on until {@link #gameReady()} (the client calls this before loading). */
+    public void holdUntilGameReady() {
+        starting = true;
+    }
+
+    /** First client tick: the game exists, so modules the profile enabled start now. */
+    public void gameReady() {
+        if (!starting) return;
+        starting = false;
+        for (State s : order) setSuspended(s, SUSPEND_STARTING, false);
     }
 
     /** Clears FAILED on every module (e.g. after a profile switch, the user gets another try). */

@@ -74,4 +74,21 @@ class ModuleManagerTest {
         assertTrue(mm.all().isEmpty());
         assertThrows(IllegalArgumentException.class, () -> new TestModules.Plain("Bad Id", Rule.ALLOWED, false));
     }
+
+    @Test
+    void profileEnablesWaitForTheGame() {
+        // debug-log 2026-09-26: Fabric builds us before Minecraft has options; onEnable must wait for the first tick.
+        ModuleManager mm = new ModuleManager();
+        mm.holdUntilGameReady();
+        TestModules.Plain m = new TestModules.Plain("t", Rule.ALLOWED, true);
+        ModuleManager.State s = mm.register(m, "core");
+        mm.loadEnabled(s, true, false);
+        assertFalse(s.active());
+        assertEquals(0, m.enables, "no onEnable while the game is starting");
+        mm.gameReady();
+        assertTrue(s.active());
+        assertEquals(1, m.enables);
+        mm.gameReady();
+        assertEquals(1, m.enables, "idempotent");
+    }
 }

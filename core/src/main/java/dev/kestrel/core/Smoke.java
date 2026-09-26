@@ -17,6 +17,45 @@ final class Smoke {
     private final Kestrel k;
     private int stage;
     private String keyCps = "not run";
+    /** smoke.sh sets this when xdotool is available: a real OS click must toggle a module in the menu. */
+    private static final boolean CLICKS = Boolean.getBoolean("kestrel.smoke.clicks");
+    private dev.kestrel.core.module.ModuleManager.State clickTarget;
+    private boolean clickBefore;
+    private long clickTicks;
+    private String guiClick = CLICKS ? "pending" : "skipped (no xdotool)";
+
+    /**
+     * debug-log 2026-09-26: every click on the Mods page threw and the smoke never noticed, because it only rendered
+     * the menu. Now smoke.sh's xdotool helper clicks the FPS toggle through X11 -> GLFW/SDL/LWJGL -> Minecraft -> our
+     * screen, and the run fails unless the module actually flips.
+     */
+    private void requestClick() {
+        dev.kestrel.core.gui.page.ModsPage mods = (dev.kestrel.core.gui.page.ModsPage) k.gui().pages().get(0);
+        float[] c = mods.toggleCenter("fps");
+        clickTarget = k.modules.get("fps");
+        if (c == null || clickTarget == null) {
+            fail("FPS toggle not found on the Mods page");
+            return;
+        }
+        float px = k.gui().menuScale() * k.platform.screens().guiScale();
+        clickBefore = clickTarget.enabled();
+        clickTicks = 0;
+        String pid = java.lang.management.ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+        Log.info("SMOKE CLICK " + System.getenv("DISPLAY") + " " + pid + " " + Math.round(c[0] * px) + " " + Math.round(c[1] * px));
+    }
+
+    private void checkClick() {
+        if (clickTarget.enabled() != clickBefore) {
+            guiClick = "ok";
+            Log.info("SMOKE: a real mouse click toggled fps in the menu");
+            k.modules.setEnabled(clickTarget, clickBefore);
+            clickTarget = null;
+            stageTicks = 36; // continue the stage timeline
+        } else if (++clickTicks > 20 * 15) {
+            fail("a real mouse click on the FPS toggle did not change it (GUI input broken?)");
+            clickTarget = null;
+        }
+    }
     private long ticks, stageTicks, worldTicks, inWorldTotal;
 
     Smoke(Kestrel k) {
@@ -48,6 +87,10 @@ final class Smoke {
                 if (stageTicks == 30) {
                     if (screen != ScreenHost.Kind.OURS) fail("GUI did not open on title (screen=" + screen + ")");
                     else k.platform.screenshot("kestrel-smoke-1-title-gui");
+                } else if (stageTicks == 35 && CLICKS) {
+                    requestClick();
+                } else if (clickTarget != null) {
+                    checkClick();
                 } else if (stageTicks == 40) {
                     k.gui().openHudEditor();
                 } else if (stageTicks == 70) {
@@ -149,7 +192,7 @@ final class Smoke {
                 return;
             }
         }
-        Log.info("KESTREL SMOKE PASS hooks[" + k.hooks.describe() + "] keycps[" + keyCps + "] plugins[" + plugins.toString().trim() + "] modules["
+        Log.info("KESTREL SMOKE PASS hooks[" + k.hooks.describe() + "] guiClick[" + guiClick + "] keycps[" + keyCps + "] plugins[" + plugins.toString().trim() + "] modules["
                 + k.modules.describeEnabled() + "] avgFrameMs=" + k.perf.avgFrameMs() + " ownUsPerFrame=" + k.perf.avgOwnUs());
         k.config.flush();
         shutdownWatchdog();

@@ -133,6 +133,11 @@ public final class GuiRoot {
         page.onShow();
     }
 
+    /** Menu scale applied on top of the vanilla GUI scale (menu units x scale = vanilla GUI units). */
+    public float menuScale() {
+        return scale;
+    }
+
     public List<Page> pages() {
         return pages;
     }
