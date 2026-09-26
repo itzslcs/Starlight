@@ -75,9 +75,17 @@ final class Smoke {
         ScreenHost.Kind screen = k.platform.screens().current();
         if (stage >= 4 && k.platform.inWorld()) inWorldTotal++;
         switch (stage) {
-            case 0: // wait for a stable title screen
-                if (screen == ScreenHost.Kind.TITLE && stageTicks > 60) next();
-                else if (ticks > 20 * 180) fail("title screen never appeared (screen=" + screen + ")");
+            case 0: // stable title (the MW19 home screen), then Minecraft's own title once: its MW button is a hook too
+                if (screen != ScreenHost.Kind.TITLE) {
+                    if (ticks > 20 * 180) fail("title screen never appeared (screen=" + screen + ")");
+                    stageTicks = 0;
+                } else if (stageTicks == 60) {
+                    k.platform.screenshot("mw19-smoke-0-home");
+                } else if (stageTicks == 70) {
+                    k.platform.screens().openVanillaTitle();
+                } else if (stageTicks == 90) {
+                    next();
+                }
                 break;
             case 1:
                 k.openGui();

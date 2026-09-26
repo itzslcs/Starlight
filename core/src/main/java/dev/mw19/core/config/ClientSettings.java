@@ -26,6 +26,8 @@ public final class ClientSettings {
     public final BoolSetting blur = add(new BoolSetting("blur", "Background blur", "Blur the game behind menus where the game supports it (dim fallback)", true));
     public final NumberSetting uiScale = add(new NumberSetting("ui_scale", "Menu scale", "Size of the MW19 menu relative to the game's GUI scale", 1.0, 0.6, 1.6, 0.05, "x"));
     public final NumberSetting animSpeed = add(new NumberSetting("anim_speed", "Animation speed", "0 disables animations", 1.0, 0.0, 2.0, 0.1, "x"));
+    public final BoolSetting customTitle = add(new BoolSetting("custom_title", "Custom home screen",
+            "Replace Minecraft's title screen with the MW19 home screen", true));
     public final BoolSetting menuButtons = add(new BoolSetting("menu_buttons", "Title/pause button", "Show a MW19 button on the title and pause screens", true));
     public final BoolSetting competitiveSafe = add(new BoolSetting("competitive_safe", "Competitive-safe", "Disable every GRAY and server-restricted module everywhere", false));
     public final BoolSetting toasts = add(new BoolSetting("toasts", "Notifications", "Show toasts (module errors, server rules, profiles)", true));

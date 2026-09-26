@@ -259,6 +259,14 @@ public final class Mw19 {
     // ------------------------------------------------------------------ GUI
 
     /** The GUI tree, created on first open. */
+    private dev.mw19.core.gui.TitleUi home;
+
+    /** The home screen that replaces the title screen (created on first use; game thread). */
+    public dev.mw19.core.gui.TitleUi home() {
+        if (home == null) home = new dev.mw19.core.gui.TitleUi(this);
+        return home;
+    }
+
     public GuiRoot gui() {
         if (gui == null) gui = new GuiRoot(this);
         return gui;

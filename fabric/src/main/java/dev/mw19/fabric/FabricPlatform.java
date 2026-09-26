@@ -549,25 +549,55 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
     @Override
     public void openGui() {
         Screen s = FabricCompat.screen(mc);
-        if (!(s instanceof Mw19Screen)) FabricCompat.setScreen(mc, new Mw19Screen(s));
+        if (!(s instanceof Mw19Screen) || ((Mw19Screen) s).isHome()) FabricCompat.setScreen(mc, new Mw19Screen(s));
     }
 
     @Override
     public void closeGui() {
         Screen s = FabricCompat.screen(mc);
-        if (s instanceof Mw19Screen) s.onClose();
+        if (s instanceof Mw19Screen && !((Mw19Screen) s).isHome()) s.onClose();
     }
 
     @Override
     public Kind current() {
         Screen s = FabricCompat.screen(mc);
         if (s == null) return Kind.NONE;
-        if (s instanceof Mw19Screen) return Kind.OURS;
+        if (s instanceof Mw19Screen) return ((Mw19Screen) s).isHome() ? Kind.TITLE : Kind.OURS;
         if (s instanceof TitleScreen) return Kind.TITLE;
         if (s instanceof PauseScreen) return Kind.PAUSE;
         if (s instanceof ChatScreen) return Kind.CHAT;
         if (s instanceof AbstractContainerScreen) return Kind.INVENTORY;
         return Kind.OTHER;
+    }
+
+    @Override
+    public void openSingleplayer() {
+        FabricCompat.setScreen(mc, new net.minecraft.client.gui.screens.worldselection.SelectWorldScreen(FabricCompat.screen(mc)));
+    }
+
+    /** Same as vanilla's title screen: the online-play safety notice until the player has accepted it. */
+    @Override
+    public void openMultiplayer() {
+        Screen parent = FabricCompat.screen(mc);
+        FabricCompat.setScreen(mc, mc.options.skipMultiplayerWarning
+                ? new net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen(parent)
+                : new net.minecraft.client.gui.screens.multiplayer.SafetyScreen(parent));
+    }
+
+    @Override
+    public void openOptions() {
+        Screen parent = FabricCompat.screen(mc);
+        //? if >=26.1 && <26.3 {
+        /*FabricCompat.setScreen(mc, new net.minecraft.client.gui.screens.options.OptionsScreen(parent, mc.options, false));
+        *///?} else {
+        FabricCompat.setScreen(mc, new net.minecraft.client.gui.screens.options.OptionsScreen(parent, mc.options));
+        //?}
+    }
+
+    @Override
+    public void openVanillaTitle() {
+        Mw19Fabric.vanillaTitleOnce = true;
+        FabricCompat.setScreen(mc, new TitleScreen());
     }
 
     @Override

@@ -2,26 +2,42 @@ package dev.mw19.forge;
 
 import dev.mw19.core.Mw19;
 import dev.mw19.core.Keys;
-import dev.mw19.core.gui.GuiRoot;
+import dev.mw19.core.gui.Surface;
+import dev.mw19.core.gui.TitleUi;
 import net.minecraft.client.gui.GuiScreen;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
 
-/** 1.8.9 GuiScreen hosting core's GuiRoot. Mouse is read with sub-pixel precision straight from LWJGL events. */
+/**
+ * 1.8.9 GuiScreen hosting a core Surface: the MW19 menu (GuiRoot) or the home screen (TitleUi). Mouse is read with
+ * sub-pixel precision straight from LWJGL events.
+ */
 public final class Mw19GuiScreen extends GuiScreen {
     private final GuiScreen parent;
+    private final Surface surface;
     private final ForgeBackend backend = new ForgeBackend();
     private boolean opened;
     private int dragButton = -1;
 
+    /** The MW19 menu over {@code parent}. */
     public Mw19GuiScreen(GuiScreen parent) {
-        this.parent = parent;
+        this(parent, Mw19.get().gui());
     }
 
-    private GuiRoot root() {
-        return Mw19.get().gui();
+    public Mw19GuiScreen(GuiScreen parent, Surface surface) {
+        this.parent = parent;
+        this.surface = surface;
+    }
+
+    /** True for the home screen that replaced the main menu. */
+    public boolean isHome() {
+        return surface instanceof TitleUi;
+    }
+
+    private Surface root() {
+        return surface;
     }
 
     @Override
@@ -68,7 +84,7 @@ public final class Mw19GuiScreen extends GuiScreen {
                 | (Keyboard.isKeyDown(Keyboard.KEY_LMENU) || Keyboard.isKeyDown(Keyboard.KEY_RMENU) ? Keys.MOD_ALT : 0);
         boolean handled = key != Keys.NONE && root().keyPressed(key, mods);
         if (!handled && c >= 32 && c != 127) handled = root().charTyped(c);
-        if (!handled && keyCode == Keyboard.KEY_ESCAPE) close();
+        if (!handled && keyCode == Keyboard.KEY_ESCAPE && surface.closesOnEscape()) close();
     }
 
     public void close() {

@@ -30,6 +30,27 @@ public final class Mw19Fabric implements ClientModInitializer {
         Mw19.onTick(end);
     }
 
+    /** Set by "Vanilla menu": the next title screen is Minecraft's own. */
+    public static boolean vanillaTitleOnce;
+
+    /** TitleSwapMixin: vanilla's title screen becomes the MW19 home screen as it is shown (setting on). */
+    public static net.minecraft.client.gui.screens.Screen home(net.minecraft.client.gui.screens.Screen screen) {
+        if (screen == null || screen.getClass() != net.minecraft.client.gui.screens.TitleScreen.class) return screen;
+        if (vanillaTitleOnce) {
+            vanillaTitleOnce = false;
+            return screen;
+        }
+        try {
+            Mw19 k = Mw19.get();
+            return k == null || !k.client.customTitle.on() ? screen : new Mw19Screen(null, k.home());
+        } catch (VirtualMachineError e) {
+            throw e;
+        } catch (Throwable t) {
+            dev.mw19.core.Log.error("home screen unavailable, keeping the vanilla title", t);
+            return screen;
+        }
+    }
+
     //? if >=26.1 {
     /*public static void hud(GuiGraphicsExtractor g) {
     *///?} else {

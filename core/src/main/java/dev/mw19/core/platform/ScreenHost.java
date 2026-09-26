@@ -11,6 +11,16 @@ public interface ScreenHost {
 
     Kind current();
 
+    /** Vanilla screens the home screen opens, with the current screen as their parent. */
+    void openSingleplayer();
+
+    void openMultiplayer();
+
+    void openOptions();
+
+    /** Shows Minecraft's own title screen once, bypassing the home screen (buttons other mods add live there). */
+    void openVanillaTitle();
+
     /** Scaled (GUI-unit) screen size and physical pixels per unit. */
     int width();
 

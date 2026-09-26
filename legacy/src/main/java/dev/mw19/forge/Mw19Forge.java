@@ -29,6 +29,8 @@ import org.lwjgl.input.Keyboard;
 public final class Mw19Forge {
     public static final String VERSION = "0.1.0+mc1.8.9";
     private static final int BUTTON_ID = 0x4B53; // "KS"
+    /** Set by "Vanilla menu": the next main menu is Minecraft's own. */
+    static boolean vanillaTitleOnce;
     private static Handlers hooks;
 
     static Handlers hooks() {
@@ -162,10 +164,22 @@ public final class Mw19Forge {
             if (e.dwheel != 0 && Mw19.onScroll(e.dwheel > 0 ? 1 : -1)) e.setCanceled(true);
         }
 
+        /** The main menu becomes the MW19 home screen as it opens (setting on; "Vanilla menu" shows it once). */
+        @SubscribeEvent
+        public void onGuiOpen(net.minecraftforge.client.event.GuiOpenEvent e) {
+            if (e.gui == null || e.gui.getClass() != GuiMainMenu.class) return;
+            if (vanillaTitleOnce) {
+                vanillaTitleOnce = false;
+                return;
+            }
+            Mw19 k = Mw19.get();
+            if (k != null && k.client.customTitle.on()) e.gui = new Mw19GuiScreen(null, k.home());
+        }
+
         @SubscribeEvent
         public void onGuiInit(GuiScreenEvent.InitGuiEvent.Post e) {
             if ((e.gui instanceof GuiMainMenu || e.gui instanceof GuiIngameMenu) && Mw19.wantMenuButton()) {
-                e.buttonList.add(new GuiButton(BUTTON_ID, 6, 6, 20, 20, "K"));
+                e.buttonList.add(new GuiButton(BUTTON_ID, 6, 6, 20, 20, "MW"));
             }
         }
 

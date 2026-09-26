@@ -19,7 +19,8 @@
     "OverlayTextureAccessor",
     "ParticleEngineMixin",
     "PlayerTabOverlayMixin",
-    "ScreenEffectRendererMixin"
+    "ScreenEffectRendererMixin",
+    "TitleSwapMixin"
   ],
   "injectors": {
     "defaultRequire": 0

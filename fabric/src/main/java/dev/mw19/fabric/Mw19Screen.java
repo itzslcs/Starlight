@@ -2,7 +2,8 @@ package dev.mw19.fabric;
 
 import dev.mw19.core.Mw19;
 import dev.mw19.core.Keys;
-import dev.mw19.core.gui.GuiRoot;
+import dev.mw19.core.gui.Surface;
+import dev.mw19.core.gui.TitleUi;
 //? if >=26.1 {
 /*import net.minecraft.client.gui.GuiGraphicsExtractor;
 *///?} else {
@@ -16,19 +17,34 @@ import net.minecraft.client.input.MouseButtonEvent;
 //?}
 import net.minecraft.network.chat.Component;
 
-/** Vanilla Screen hosting core's GuiRoot; input and rendering are forwarded in GUI units. */
+/**
+ * Vanilla Screen hosting a core {@link Surface}: the MW19 menu (GuiRoot) or the home screen (TitleUi). Input and
+ * rendering are forwarded in GUI units, and every version-specific override lives here once.
+ */
 public final class Mw19Screen extends Screen {
     private final Screen parent;
+    private final Surface surface;
     private final FabricBackend backend = new FabricBackend();
     private boolean opened;
 
+    /** The MW19 menu over {@code parent}. */
     public Mw19Screen(Screen parent) {
-        super(Component.literal(Mw19.NAME));
-        this.parent = parent;
+        this(parent, Mw19.get().gui());
     }
 
-    private GuiRoot root() {
-        return Mw19.get().gui();
+    public Mw19Screen(Screen parent, Surface surface) {
+        super(Component.literal(Mw19.NAME));
+        this.parent = parent;
+        this.surface = surface;
+    }
+
+    /** True for the home screen that replaced the title screen. */
+    public boolean isHome() {
+        return surface instanceof TitleUi;
+    }
+
+    private Surface root() {
+        return surface;
     }
 
     @Override
@@ -46,8 +62,7 @@ public final class Mw19Screen extends Screen {
     //? if >=26.1 {
     /*@Override
     public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
-        Mw19 k = Mw19.get();
-        if (k.client.blur.on() && !k.gui().isHudEditorOpen()) super.extractBackground(g, mouseX, mouseY, delta);
+        if (surface.wantsVanillaBackground()) super.extractBackground(g, mouseX, mouseY, delta);
     }
 
     @Override
@@ -57,8 +72,7 @@ public final class Mw19Screen extends Screen {
     *///?} else {
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float delta) {
-        Mw19 k = Mw19.get();
-        if (k.client.blur.on() && !k.gui().isHudEditorOpen()) super.renderBackground(g, mouseX, mouseY, delta);
+        if (surface.wantsVanillaBackground()) super.renderBackground(g, mouseX, mouseY, delta);
     }
 
     @Override
@@ -131,7 +145,7 @@ public final class Mw19Screen extends Screen {
 
     private boolean key(int key, int mods) {
         if (root().keyPressed(key, mods)) return true;
-        if (key == Keys.ESCAPE) {
+        if (key == Keys.ESCAPE && surface.closesOnEscape()) {
             onClose();
             return true;
         }
@@ -151,5 +165,10 @@ public final class Mw19Screen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return surface.closesOnEscape();
     }
 }

@@ -484,19 +484,42 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
 
     @Override
     public void openGui() {
-        if (!(mc.currentScreen instanceof Mw19GuiScreen)) mc.displayGuiScreen(new Mw19GuiScreen(mc.currentScreen));
+        GuiScreen s = mc.currentScreen;
+        if (!(s instanceof Mw19GuiScreen) || ((Mw19GuiScreen) s).isHome()) mc.displayGuiScreen(new Mw19GuiScreen(s));
     }
 
     @Override
     public void closeGui() {
-        if (mc.currentScreen instanceof Mw19GuiScreen) ((Mw19GuiScreen) mc.currentScreen).close();
+        GuiScreen s = mc.currentScreen;
+        if (s instanceof Mw19GuiScreen && !((Mw19GuiScreen) s).isHome()) ((Mw19GuiScreen) s).close();
+    }
+
+    @Override
+    public void openSingleplayer() {
+        mc.displayGuiScreen(new net.minecraft.client.gui.GuiSelectWorld(mc.currentScreen));
+    }
+
+    @Override
+    public void openMultiplayer() {
+        mc.displayGuiScreen(new net.minecraft.client.gui.GuiMultiplayer(mc.currentScreen));
+    }
+
+    @Override
+    public void openOptions() {
+        mc.displayGuiScreen(new net.minecraft.client.gui.GuiOptions(mc.currentScreen, mc.gameSettings));
+    }
+
+    @Override
+    public void openVanillaTitle() {
+        Mw19Forge.vanillaTitleOnce = true;
+        mc.displayGuiScreen(new GuiMainMenu());
     }
 
     @Override
     public Kind current() {
         GuiScreen s = mc.currentScreen;
         if (s == null) return Kind.NONE;
-        if (s instanceof Mw19GuiScreen) return Kind.OURS;
+        if (s instanceof Mw19GuiScreen) return ((Mw19GuiScreen) s).isHome() ? Kind.TITLE : Kind.OURS;
         if (s instanceof GuiMainMenu) return Kind.TITLE;
         if (s instanceof GuiIngameMenu) return Kind.PAUSE;
         if (s instanceof GuiChat) return Kind.CHAT;

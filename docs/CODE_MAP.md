@@ -83,6 +83,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 ## core tests · `dev.mw19.core`
 
+- [ColorChromaTest.java](../core/src/test/java/dev/mw19/core/ColorChromaTest.java): debug-log 2026-09-26: chroma hue was computed in float from epoch millis and only moved every ~2 minutes.
 - [ConfigManagerTest.java](../core/src/test/java/dev/mw19/core/ConfigManagerTest.java)
 - [GfxMeasureTest.java](../core/src/test/java/dev/mw19/core/GfxMeasureTest.java): debug-log 2026-09-26: GUI clicks measure text between render passes; that must work (it threw before).
 - [HudLayoutTest.java](../core/src/test/java/dev/mw19/core/HudLayoutTest.java)
@@ -151,7 +152,9 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [Anim.java](../core/src/main/java/dev/mw19/core/gui/Anim.java): Eased value (ease-out cubic) that animates toward a target over a fixed duration.
 - [GuiRoot.java](../core/src/main/java/dev/mw19/core/gui/GuiRoot.java): The whole menu: sidebar + pages + popup layer + tooltips, or the full-screen HUD editor.
 - [Icons.java](../core/src/main/java/dev/mw19/core/gui/Icons.java): Original pixel icons drawn from rects in a 10x10 box (no bundled assets; DECISIONS D-009).
+- [Surface.java](../core/src/main/java/dev/mw19/core/gui/Surface.java): A full-screen UI the platform's screen class hosts: the MW19 menu (GuiRoot) or the home screen (TitleUi).
 - [Theme.java](../core/src/main/java/dev/mw19/core/gui/Theme.java): Colour tokens.
+- [TitleUi.java](../core/src/main/java/dev/mw19/core/gui/TitleUi.java): The MW19 home screen that replaces Minecraft's title screen (Themes → Custom home screen).
 - [Toasts.java](../core/src/main/java/dev/mw19/core/gui/Toasts.java): Corner notifications.
 - [Ui.java](../core/src/main/java/dev/mw19/core/gui/Ui.java): Per-frame GUI context handed to every widget.
 - [Widget.java](../core/src/main/java/dev/mw19/core/gui/Widget.java): Base of all GUI widgets.
@@ -262,6 +265,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [PlayerTabOverlayMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PlayerTabOverlayMixin.java): Plugin name decorations in the tab list.
 - [ScreenEffectRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ScreenEffectRendererMixin.java): Low fire: the overlay's vertical offset (-0.3) and alpha are plain constants.
 - [TitleScreenMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/TitleScreenMixin.java)
+- [TitleSwapMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/TitleSwapMixin.java): Home screen: vanilla's TitleScreen is swapped for MW19's as it is set (Minecraft.setScreen until 26.1, Gui.setScreen from 26.2).
 
 ## fabric · `dev.mw19.fabric`
 
@@ -272,7 +276,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [FabricPlatform.java](../fabric/src/main/java/dev/mw19/fabric/FabricPlatform.java): Platform for Fabric targets.
 - [Mw19Fabric.java](../fabric/src/main/java/dev/mw19/fabric/Mw19Fabric.java): Entrypoint + the static bridge the mixins call (keeps mixin bodies one line).
 - [Mw19MixinPlugin.java](../fabric/src/main/java/dev/mw19/fabric/Mw19MixinPlugin.java): Gate for mw19.optional.mixins.json: skips a feature mixin when a mod that does the same job is loaded, or when the user lists it in -Dmw19.mixins.disable=Nam...
-- [Mw19Screen.java](../fabric/src/main/java/dev/mw19/fabric/Mw19Screen.java): Vanilla Screen hosting core's GuiRoot; input and rendering are forwarded in GUI units.
+- [Mw19Screen.java](../fabric/src/main/java/dev/mw19/fabric/Mw19Screen.java): Vanilla Screen hosting a core Surface: the MW19 menu (GuiRoot) or the home screen (TitleUi).
 
 ## fabric · build and resources
 
@@ -301,7 +305,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [ForgePlatform.java](../legacy/src/main/java/dev/mw19/forge/ForgePlatform.java): Platform for Forge 1.8.9 (MCP names).
 - [LwjglKeys.java](../legacy/src/main/java/dev/mw19/forge/LwjglKeys.java): LWJGL2 Keyboard codes <-> GLFW codes (core's canonical codes).
 - [Mw19Forge.java](../legacy/src/main/java/dev/mw19/forge/Mw19Forge.java)
-- [Mw19GuiScreen.java](../legacy/src/main/java/dev/mw19/forge/Mw19GuiScreen.java): 1.8.9 GuiScreen hosting core's GuiRoot.
+- [Mw19GuiScreen.java](../legacy/src/main/java/dev/mw19/forge/Mw19GuiScreen.java): 1.8.9 GuiScreen hosting a core Surface: the MW19 menu (GuiRoot) or the home screen (TitleUi).
 
 ## legacy · build and resources
 

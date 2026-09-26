@@ -20,7 +20,7 @@ public abstract class TitleScreenMixin extends Screen {
     @Inject(method = "init", at = @At("TAIL"))
     private void mw19$button(CallbackInfo ci) {
         if (!Mw19.wantMenuButton()) return;
-        addRenderableWidget(Button.builder(Component.literal("K"), b -> Mw19.get().openGui())
+        addRenderableWidget(Button.builder(Component.literal("MW"), b -> Mw19.get().openGui())
                 .bounds(6, 6, 20, 20).tooltip(Tooltip.create(Component.literal(Mw19.NAME + " menu"))).build());
     }
 }

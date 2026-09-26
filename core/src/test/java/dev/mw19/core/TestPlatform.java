@@ -99,6 +99,10 @@ final class TestPlatform implements Platform, ScreenHost, ChatAccess, ModList {
     public void openGui() {}
     public void closeGui() {}
     public Kind current() { return Kind.NONE; }
+    public void openSingleplayer() {}
+    public void openMultiplayer() {}
+    public void openOptions() {}
+    public void openVanillaTitle() {}
     public int width() { return 400; }
     public int height() { return 240; }
     public float guiScale() { return 2f; }

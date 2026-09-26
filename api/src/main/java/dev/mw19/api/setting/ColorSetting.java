@@ -45,7 +45,8 @@ public final class ColorSetting extends Setting<Integer> {
     /** The colour to draw right now (chroma cycles the hue, keeping the stored alpha/saturation feel). */
     public int argb(long millis) {
         if (!chroma) return value;
-        float hue = (millis * chromaSpeed % 4000L) / 4000f;
+        // double: epoch millis (~1.8e12) times a float has a float ulp of ~131072 ms, which froze the hue (debug-log 2026-09-26)
+        float hue = (float) (millis * (double) chromaSpeed % 4000.0 / 4000.0);
         return (value & 0xFF000000) | (Colors.hsb(hue, 0.75f, 1f) & 0xFFFFFF);
     }
 

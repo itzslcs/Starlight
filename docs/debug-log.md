@@ -114,3 +114,12 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
 - **Fix:** `ModuleManager.SUSPEND_STARTING` holds every module registered during startup until the first client tick
   (`gameReady()`), so any module that touches game state in `onEnable` is covered, not only these two.
 - **Regression test:** `ModuleManagerTest.profileEnablesWaitForTheGame`.
+
+## 2026-09-26 · Chroma colours (and the new home screen's embers) did not animate
+- **Repro:** the home-screen smoke screenshot showed no embers. Code review found the same pattern in `ColorSetting.argb`.
+- **Cause:** time was computed in `float` from epoch milliseconds (`now / 1000f`, `millis * chromaSpeed % 4000L`). At
+  ~1.79e12 ms a float's ulp is ~131 072 ms, so the fractional part is constant for about two minutes: the embers sat
+  off-screen, and chroma hues jumped roughly every two minutes instead of cycling every 4 s. Chroma had been broken
+  since Phase 4.
+- **Fix:** relative time for the home screen (`now - start`), `double` arithmetic for chroma.
+- **Regression test:** [`ColorChromaTest`](../core/src/test/java/dev/mw19/core/ColorChromaTest.java) (the hue changes within 250 ms at a 2026 timestamp, and a cycle is 4 s).

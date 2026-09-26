@@ -28,7 +28,7 @@ import java.util.List;
  * The whole menu: sidebar + pages + popup layer + tooltips, or the full-screen HUD editor.
  * The platform's Screen forwards render/input here in vanilla GUI units; we apply our own menu scale.
  */
-public final class GuiRoot {
+public final class GuiRoot implements Surface {
     public static final float SIDEBAR = 112;
 
     public final Mw19 k;
@@ -72,6 +72,17 @@ public final class GuiRoot {
     // ------------------------------------------------------------------ lifecycle
 
     /** Our screen was opened. */
+    @Override
+    public boolean closesOnEscape() {
+        return true;
+    }
+
+    @Override
+    public boolean wantsVanillaBackground() {
+        return k.client.blur.on() && !isHudEditorOpen();
+    }
+
+    @Override
     public void onOpen() {
         open.snap(0);
         open.to(1, 200, System.currentTimeMillis());
@@ -92,6 +103,7 @@ public final class GuiRoot {
     }
 
     /** Our screen is closing (any reason). */
+    @Override
     public void onClose() {
         editing = false;
         popup = popupOwner = captured = null;
@@ -175,6 +187,7 @@ public final class GuiRoot {
 
     // ------------------------------------------------------------------ render
 
+    @Override
     public void render(RenderBackend backend, int screenW, int screenH, float mouseX, float mouseY) {
         long now = System.currentTimeMillis();
         scale = k.client.uiScale.floatValue();
@@ -350,6 +363,7 @@ public final class GuiRoot {
 
     // ------------------------------------------------------------------ input (vanilla GUI units in)
 
+    @Override
     public boolean mouseClicked(float mx, float my, int button) {
         ui.mx = mx / scale;
         ui.my = my / scale;
@@ -405,6 +419,7 @@ public final class GuiRoot {
         return page.mouseClicked(ui, button);
     }
 
+    @Override
     public boolean mouseReleased(float mx, float my, int button) {
         ui.mx = mx / scale;
         ui.my = my / scale;
@@ -429,6 +444,7 @@ public final class GuiRoot {
         }
     }
 
+    @Override
     public boolean mouseDragged(float mx, float my, int button) {
         ui.mx = mx / scale;
         ui.my = my / scale;
@@ -443,6 +459,7 @@ public final class GuiRoot {
         }
     }
 
+    @Override
     public boolean mouseScrolled(float mx, float my, double amount) {
         ui.mx = mx / scale;
         ui.my = my / scale;
@@ -459,6 +476,7 @@ public final class GuiRoot {
     }
 
     /** Returns false when the key should fall through (e.g. Esc closes the screen). */
+    @Override
     public boolean keyPressed(int key, int mods) {
         try {
             if (focused != null && focused.keyPressed(ui, key, mods)) return true;
@@ -502,6 +520,7 @@ public final class GuiRoot {
         }
     }
 
+    @Override
     public boolean charTyped(char c) {
         try {
             if (focused != null && focused.charTyped(ui, c)) return true;
