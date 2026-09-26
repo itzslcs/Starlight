@@ -10,6 +10,9 @@ RUN="$ROOT/run/$MC"
 OUT="$ROOT/smoke-out/$MC"
 rm -rf "$OUT" && mkdir -p "$OUT" "$RUN"
 rm -rf "$RUN/saves/mw19-smoke" "$RUN"/screenshots/mw19-smoke-* "$RUN/logs/latest.log" "$RUN/MW19"
+# WITH_MODS="sodium ..." adds those mods from Modrinth to the dev run (compatibility/perf checks); cleared otherwise.
+rm -rf "$RUN/mods" && mkdir -p "$RUN/mods"
+if [ -n "${WITH_MODS:-}" ] && [ "$MC" != "1.8.9" ]; then python3 "$ROOT/scripts/testmods.py" "$MC" "$RUN/mods" $WITH_MODS || exit 1; fi
 
 # Fresh MW19 config with the addon plugins installed and pre-approved (consent is keyed by the jar's SHA-256).
 mkdir -p "$RUN/MW19/plugins"

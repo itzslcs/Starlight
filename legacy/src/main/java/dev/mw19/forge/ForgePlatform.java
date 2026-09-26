@@ -494,6 +494,68 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
         if (s instanceof Mw19GuiScreen && !((Mw19GuiScreen) s).isHome()) ((Mw19GuiScreen) s).close();
     }
 
+    /** FPS Boost on 1.8.9: GameSettings fields, then a renderer reload (fast/fancy and smooth lighting need one). */
+    @Override
+    public java.util.Map<String, String> applyFpsBoost() {
+        net.minecraft.client.settings.GameSettings g = mc.gameSettings;
+        java.util.Map<String, String> b = new java.util.LinkedHashMap<String, String>();
+        b.put("clouds", String.valueOf(g.clouds));
+        g.clouds = 0;
+        b.put("particles", String.valueOf(g.particleSetting));
+        g.particleSetting = 1;
+        b.put("entityShadows", String.valueOf(g.entityShadows));
+        g.entityShadows = false;
+        b.put("smoothLighting", String.valueOf(g.ambientOcclusion));
+        g.ambientOcclusion = 0;
+        b.put("fancyGraphics", String.valueOf(g.fancyGraphics));
+        g.fancyGraphics = false;
+        b.put("vsync", String.valueOf(g.enableVsync));
+        g.enableVsync = false;
+        b.put("maxFps", String.valueOf(g.limitFramerate));
+        g.limitFramerate = 260;
+        b.put("vbo", String.valueOf(g.useVbo));
+        g.useVbo = true;
+        if (g.renderDistanceChunks > 12) {
+            b.put("renderDistance", String.valueOf(g.renderDistanceChunks));
+            g.renderDistanceChunks = 12; // only ever lowered
+        }
+        applyGameSettings();
+        return b;
+    }
+
+    @Override
+    public void restoreOptions(java.util.Map<String, String> p) {
+        net.minecraft.client.settings.GameSettings g = mc.gameSettings;
+        try {
+            if (p.containsKey("clouds")) g.clouds = Integer.parseInt(p.get("clouds"));
+            if (p.containsKey("particles")) g.particleSetting = Integer.parseInt(p.get("particles"));
+            if (p.containsKey("entityShadows")) g.entityShadows = Boolean.parseBoolean(p.get("entityShadows"));
+            if (p.containsKey("smoothLighting")) g.ambientOcclusion = Integer.parseInt(p.get("smoothLighting"));
+            if (p.containsKey("fancyGraphics")) g.fancyGraphics = Boolean.parseBoolean(p.get("fancyGraphics"));
+            if (p.containsKey("vsync")) g.enableVsync = Boolean.parseBoolean(p.get("vsync"));
+            if (p.containsKey("maxFps")) g.limitFramerate = Integer.parseInt(p.get("maxFps"));
+            if (p.containsKey("vbo")) g.useVbo = Boolean.parseBoolean(p.get("vbo"));
+            if (p.containsKey("renderDistance")) g.renderDistanceChunks = Integer.parseInt(p.get("renderDistance"));
+        } catch (NumberFormatException e) {
+            logger.warn("FPS Boost undo: bad saved value (" + e.getMessage() + ")");
+        }
+        applyGameSettings();
+    }
+
+    private void applyGameSettings() {
+        mc.gameSettings.saveOptions();
+        org.lwjgl.opengl.Display.setVSyncEnabled(mc.gameSettings.enableVsync);
+        if (mc.renderGlobal != null) mc.renderGlobal.loadRenderers();
+    }
+
+    @Override
+    public String graphicsApi() {
+        return null; // 1.8.9 is OpenGL only
+    }
+
+    @Override
+    public void setGraphicsApi(String api) {}
+
     @Override
     public void openSingleplayer() {
         mc.displayGuiScreen(new net.minecraft.client.gui.GuiSelectWorld(mc.currentScreen));
@@ -507,6 +569,16 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
     @Override
     public void openOptions() {
         mc.displayGuiScreen(new net.minecraft.client.gui.GuiOptions(mc.currentScreen, mc.gameSettings));
+    }
+
+    @Override
+    public boolean hasModList() {
+        return true;
+    }
+
+    @Override
+    public void openModList() {
+        mc.displayGuiScreen(new net.minecraftforge.fml.client.GuiModList(mc.currentScreen));
     }
 
     @Override

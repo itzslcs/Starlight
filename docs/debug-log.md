@@ -27,7 +27,7 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
   consecutive rows with the same inset into one fill (a key box goes from ~25 fills to ~5).
 - **Result (same smoke scenario):** 1.21.11 **219.6 → 75.6 µs/frame**; 1.8.9 354.3 → 275.4 µs/frame. What remains on
   1.8.9 is mostly vanilla `FontRenderer` immediate-mode glyph draws, which llvmpipe executes on the CPU. These numbers come
-  from software GL; real-GPU numbers are Phase 5 (docs/PERF.md).
+  from software GL; real-GPU numbers are Phase 5 ([PERF.md](PERF.md)).
 
 ## 2026-09-25 · smoke-all: every 1.21.x run failed in 3–8 s
 - **Repro:** `scripts/smoke-all.sh 1.21 … 1.21.10`. All exit=1, no game log.
@@ -123,3 +123,11 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
   since Phase 4.
 - **Fix:** relative time for the home screen (`now - start`), `double` arithmetic for chroma.
 - **Regression test:** [`ColorChromaTest`](../core/src/test/java/dev/mw19/core/ColorChromaTest.java) (the hue changes within 250 ms at a 2026 timestamp, and a cycle is 4 s).
+
+## 2026-09-26 · Benchmark phases capped at 30 FPS
+- **Repro:** `scripts/bench.sh 1.21.11`. Every phase after the first minute measured about 29.5 FPS, and the culling counters were
+  identical across runs (3540 of 3870 per second = 118 and 129 entities × 30 frames).
+- **Cause:** vanilla's inactivity limiter (1.21.2+, `FramerateLimitTracker`: `AFK_LIMIT = 30` after
+  `AFK_THRESHOLD_MS = 60000`), and a benchmark gives no input. A methodology bug in the harness, not an MW19 cost.
+- **Fix:** the bench writes `inactivityFpsLimit:"minimized"` into its options. FPS Boost does not touch that option,
+  because it is the player's power-saving choice.

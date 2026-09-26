@@ -39,6 +39,21 @@ public interface Platform extends Game {
     /** Canonical code currently bound to {@code b} (GLFW key or {@code Keys.mouse(button)}), or {@code Keys.NONE}. */
     int bindingKey(Binding b);
 
+    /**
+     * FPS Boost: switches the vanilla options that cost the most frames to their fast values and saves the options file.
+     * Returns the previous values (option id -> value text) so {@link #restoreOptions} can undo it, even after a restart.
+     */
+    java.util.Map<String, String> applyFpsBoost();
+
+    /** Puts back values returned by {@link #applyFpsBoost()} (unknown ids are ignored). */
+    void restoreOptions(java.util.Map<String, String> previous);
+
+    /** The game's graphics API preference where it has one (26.2+: "default", "opengl", "vulkan"), else null. */
+    String graphicsApi();
+
+    /** Sets that preference; the game applies it on the next start and falls back to OpenGL if Vulkan fails. */
+    void setGraphicsApi(String api);
+
     /** Opens a folder in the OS file manager (best effort). */
     void openFolder(Path dir);
 

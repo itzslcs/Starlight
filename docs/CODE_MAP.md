@@ -85,11 +85,13 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 - [ColorChromaTest.java](../core/src/test/java/dev/mw19/core/ColorChromaTest.java): debug-log 2026-09-26: chroma hue was computed in float from epoch millis and only moved every ~2 minutes.
 - [ConfigManagerTest.java](../core/src/test/java/dev/mw19/core/ConfigManagerTest.java)
+- [FpsBoostTest.java](../core/src/test/java/dev/mw19/core/FpsBoostTest.java): FPS Boost keeps the player's original options (first snapshot wins) and Undo puts them back.
 - [GfxMeasureTest.java](../core/src/test/java/dev/mw19/core/GfxMeasureTest.java): debug-log 2026-09-26: GUI clicks measure text between render passes; that must work (it threw before).
 - [HudLayoutTest.java](../core/src/test/java/dev/mw19/core/HudLayoutTest.java)
 - [InputRatesTest.java](../core/src/test/java/dev/mw19/core/InputRatesTest.java): KeyCPS counting: per binding (TestPlatform binds attack to LMB and use to RMB), one-second window.
 - [JsonTest.java](../core/src/test/java/dev/mw19/core/JsonTest.java)
 - [ModuleManagerTest.java](../core/src/test/java/dev/mw19/core/ModuleManagerTest.java)
+- [OcclusionTest.java](../core/src/test/java/dev/mw19/core/OcclusionTest.java): Entity culling must hide only what is fully behind solid blocks, and always fail open.
 - [PluginDescriptorTest.java](../core/src/test/java/dev/mw19/core/PluginDescriptorTest.java)
 - [PluginManagerTest.java](../core/src/test/java/dev/mw19/core/PluginManagerTest.java): Loads real plugin jars (compiled on the fly) through a MW19 instance backed by the test platform.
 - [ProfileCodecTest.java](../core/src/test/java/dev/mw19/core/ProfileCodecTest.java)
@@ -175,12 +177,16 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [ArmorModule.java](../core/src/main/java/dev/mw19/core/modules/ArmorModule.java): Armor pieces and durability (listed as allowed by Hypixel: "Armor Status").
 - [BuiltinModules.java](../core/src/main/java/dev/mw19/core/modules/BuiltinModules.java): Every built-in module (order = default order in the Mods page).
 - [ChatModule.java](../core/src/main/java/dev/mw19/core/modules/ChatModule.java): Display-only chat tools: timestamps, stacking duplicates, filters, mention highlights, and search.
+- [ClearWeatherModule.java](../core/src/main/java/dev/mw19/core/modules/ClearWeatherModule.java): Client-side clear skies: no rain or thunder rendering or sounds.
 - [ClockModule.java](../core/src/main/java/dev/mw19/core/modules/ClockModule.java): Real-world or in-game time.
 - [ComboModule.java](../core/src/main/java/dev/mw19/core/modules/ComboModule.java): Consecutive hits you land without taking damage.
 - [CoordsModule.java](../core/src/main/java/dev/mw19/core/modules/CoordsModule.java): XYZ (same as F3).
 - [CrosshairModule.java](../core/src/main/java/dev/mw19/core/modules/CrosshairModule.java): Replaces the vanilla crosshair with a configurable one (same position, same purpose).
 - [DirectionModule.java](../core/src/main/java/dev/mw19/core/modules/DirectionModule.java): Compass tape: marks slide with your yaw (same information as F3 facing).
+- [DurabilityAlertModule.java](../core/src/main/java/dev/mw19/core/modules/DurabilityAlertModule.java): A notification (and a ping) once when a worn armor piece or the held item drops below the threshold.
 - [EffectsModule.java](../core/src/main/java/dev/mw19/core/modules/EffectsModule.java): Active potion effects outside the inventory (listed as allowed by Hypixel: "Effect Status").
+- [EntityCullingModule.java](../core/src/main/java/dev/mw19/core/modules/EntityCullingModule.java): Skips drawing mobs, items and other entities that are fully hidden behind solid blocks (Occlusion).
+- [FpsGraphModule.java](../core/src/main/java/dev/mw19/core/modules/FpsGraphModule.java): Live frame-time graph: one bar per recent frame, green under 16.7 ms, yellow under 33 ms, red above.
 - [FpsModule.java](../core/src/main/java/dev/mw19/core/modules/FpsModule.java)
 - [FreelookModule.java](../core/src/main/java/dev/mw19/core/modules/FreelookModule.java): Look around without turning your player.
 - [InputRates.java](../core/src/main/java/dev/mw19/core/modules/InputRates.java): Presses per second for each vanilla binding, counted from input events (KeyCPS semantics): a mouse press, a key press and every OS key-repeat of a held key c...
@@ -188,7 +194,9 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [KeyCpsModule.java](../core/src/main/java/dev/mw19/core/modules/KeyCpsModule.java): KeyCPS: the owner's own keystrokes + CPS mod (KeyCPS 1.6.1), ported into MW19 with the author's permission (DECISIONS D-018).
 - [PingModule.java](../core/src/main/java/dev/mw19/core/modules/PingModule.java): Your own latency to the server (the tab list shows the same as bars).
 - [ScreenshotModule.java](../core/src/main/java/dev/mw19/core/modules/ScreenshotModule.java): After you take a screenshot: a toast plus keys to open the folder or copy the file path.
+- [ServerAddressModule.java](../core/src/main/java/dev/mw19/core/modules/ServerAddressModule.java): The server you are on (as typed in the server list), or "Singleplayer".
 - [SimpleVisuals.java](../core/src/main/java/dev/mw19/core/modules/SimpleVisuals.java): Small visual tweaks whose whole effect is one Hooks value read by the platform mixins.
+- [SpeedModule.java](../core/src/main/java/dev/mw19/core/modules/SpeedModule.java): Horizontal speed in blocks per second, averaged over half a second.
 - [SystemModule.java](../core/src/main/java/dev/mw19/core/modules/SystemModule.java): Memory use of the game JVM and process CPU load.
 - [TextHud.java](../core/src/main/java/dev/mw19/core/modules/TextHud.java): Single-line text HUD.
 - [ToggleModule.java](../core/src/main/java/dev/mw19/core/modules/ToggleModule.java): Toggle Sprint / Toggle Sneak with a status line.
@@ -197,6 +205,10 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 ## core · `dev.mw19.core.net`
 
 - [HttpClient.java](../core/src/main/java/dev/mw19/core/net/HttpClient.java): Background JSON GETs with an LRU+TTL cache, request coalescing, per-host spacing and Retry-After backoff.
+
+## core · `dev.mw19.core.perf`
+
+- [Occlusion.java](../core/src/main/java/dev/mw19/core/perf/Occlusion.java): Entity culling: an entity is hidden only when every ray from the camera to its box (centre + 8 corners) hits a solid opaque block first.
 
 ## core · `dev.mw19.core.platform`
 
@@ -225,7 +237,9 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 ## core · `dev.mw19.core`
 
+- [Bench.java](../core/src/main/java/dev/mw19/core/Bench.java): Benchmark (scripts/bench.sh, -Dmw19.bench=1): one fixed scene measured in phases, so every optimisation gets before/after numbers (docs/PERF.md).
 - [Compat.java](../core/src/main/java/dev/mw19/core/Compat.java): Runtime compat.* flags from the loaded mod list.
+- [FpsBoost.java](../core/src/main/java/dev/mw19/core/FpsBoost.java): FPS Boost (Performance page): one click switches the costliest vanilla options to fast values.
 - [Guard.java](../core/src/main/java/dev/mw19/core/Guard.java): Wraps every call that crosses from Minecraft into our code so an exception can never take the game down.
 - [HookWatchdog.java](../core/src/main/java/dev/mw19/core/HookWatchdog.java): Records which platform hooks have fired, so a silently failed mixin shows up in the UI and the smoke log.
 - [Hooks.java](../core/src/main/java/dev/mw19/core/Hooks.java): Values written by modules on the game thread and read by platform mixins every frame.
@@ -245,6 +259,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 - [CameraMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/CameraMixin.java): Freelook: the camera takes its angles from Hooks while active (every getView*Rot read).
 - [ChatComponentMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ChatComponentMixin.java): Chat Tools + plugin chat events: filter, timestamp, highlight, stack duplicates.
+- [EntityCullingMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/EntityCullingMixin.java): Entity Culling: after vanilla's frustum test passes, entities fully hidden behind blocks are skipped.
 - [EntityTurnMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/EntityTurnMixin.java): Freelook: mouse movement turns the camera instead of the player.
 - [FovMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/FovMixin.java): Zoom: scales the final field of view.
 - [GameRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/GameRendererMixin.java): Damage tilt strength (zoom lives in FovMixin).
@@ -266,6 +281,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [ScreenEffectRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ScreenEffectRendererMixin.java): Low fire: the overlay's vertical offset (-0.3) and alpha are plain constants.
 - [TitleScreenMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/TitleScreenMixin.java)
 - [TitleSwapMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/TitleSwapMixin.java): Home screen: vanilla's TitleScreen is swapped for MW19's as it is set (Minecraft.setScreen until 26.1, Gui.setScreen from 26.2).
+- [WeatherMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/WeatherMixin.java): Clear Weather: the client's level reports no rain or thunder (a singleplayer server keeps its real weather).
 
 ## fabric · `dev.mw19.fabric`
 
@@ -295,8 +311,10 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [GuiPlayerTabOverlayMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/GuiPlayerTabOverlayMixin.java): Plugin name decorations in the 1.8.9 tab list.
 - [ItemRendererMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/ItemRendererMixin.java): Low fire: renderFireInFirstPerson's vertical offset (-0.3) and alpha (0.9).
 - [MinecraftMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/MinecraftMixin.java)
+- [RenderManagerMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/RenderManagerMixin.java): Entity Culling on 1.8.9: after the frustum test passes, entities fully hidden behind blocks are skipped.
 - [RenderMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/RenderMixin.java): Plugin name decorations on 1.8.9 nametags.
 - [RendererLivingEntityMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/RendererLivingEntityMixin.java): Hit colour (the four puts of the hurt tint: 1, 0, 0, 0.3) and show-own-nametag.
+- [WorldMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/WorldMixin.java): Clear Weather on 1.8.9: the client world reports no rain or thunder.
 
 ## legacy · `dev.mw19.forge`
 
@@ -335,10 +353,13 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 ## scripts
 
+- [bench.sh](../scripts/bench.sh): Benchmark one target headless (core Bench): fixed scene, phases baseline / culling / culling+boost.
 - [docs-graph.py](../scripts/docs-graph.py): Keeps the docs a linked graph (the repo root is also an Obsidian vault; the links work on GitHub too).
 - [mixin-audit.py](../scripts/mixin-audit.py): Proves MW19's injections were applied: disassembles the classes Mixin exported during a dev run
+- [mrpack.py](../scripts/mrpack.py): Builds "MW19 Performance" Modrinth packs (.mrpack) for Prism Launcher, the Modrinth app and ATLauncher.
 - [smoke-all.sh](../scripts/smoke-all.sh): Runs scripts/smoke.sh for each given version (default: every target in versions.json) and prints a summary.
 - [smoke.sh](../scripts/smoke.sh): Smoke test one target headless: title -> our GUI -> HUD editor -> world -> GUI -> N seconds -> quit.
+- [testmods.py](../scripts/testmods.py): Test-only: put other mods (e.g.
 
 ## gradle
 

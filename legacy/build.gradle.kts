@@ -21,6 +21,7 @@ val coreJars = files("../core/build/libs/core.jar", "../api/build/libs/api.jar")
 // -Pmw19.smoke=<seconds> makes the dev client drive itself (see core Smoke + scripts/smoke.sh).
 val smokeSeconds: String? = providers.gradleProperty("mw19.smoke").orNull
 val smokeClicks = providers.gradleProperty("mw19.smokeClicks").isPresent
+val bench = providers.gradleProperty("mw19.bench").isPresent
 
 loom {
     runConfigs {
@@ -34,6 +35,7 @@ loom {
                 property("mw19.smoke.seconds", smokeSeconds)
                 if (smokeClicks) property("mw19.smoke.clicks", "true")
             }
+            if (bench) property("mw19.bench", "1")
         }
         remove(getByName("server"))
     }

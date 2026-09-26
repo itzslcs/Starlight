@@ -27,6 +27,8 @@ dependencies {
 val smokeSeconds: String? = providers.gradleProperty("mw19.smoke").orNull
 // -Pmw19.smokeClicks=1: smoke.sh's xdotool helper will click the menu for real (Smoke.requestClick).
 val smokeClicks = providers.gradleProperty("mw19.smokeClicks").isPresent
+// -Pmw19.bench=1: the dev client runs the benchmark scene and quits (core Bench + scripts/bench.sh).
+val bench = providers.gradleProperty("mw19.bench").isPresent
 
 loom {
     runConfigs.all {
@@ -41,6 +43,7 @@ loom {
             jvmArguments.add("-Dmw19.smoke.seconds=$smokeSeconds")
             if (smokeClicks) jvmArguments.add("-Dmw19.smoke.clicks=true")
         }
+        if (bench) jvmArguments.add("-Dmw19.bench=1")
     }
 }
 

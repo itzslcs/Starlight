@@ -10,8 +10,10 @@
     "GuiPlayerTabOverlayMixin",
     "ItemRendererMixin",
     "MinecraftMixin",
+    "RenderManagerMixin",
     "RenderMixin",
-    "RendererLivingEntityMixin"
+    "RendererLivingEntityMixin",
+    "WorldMixin"
   ],
   "injectors": {
     "defaultRequire": 1

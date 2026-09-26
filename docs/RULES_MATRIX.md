@@ -5,7 +5,7 @@ See also: [ARCHITECTURE](ARCHITECTURE.md) (how server rules suspend modules), [P
 Policy source: https://support.hypixel.net/hc/en-us/articles/6472550754962 (fetched 2026-09-25 through the
 Zendesk API, article `updated_at 2025-02-24`). Its permitted categories:
 
-- **PERF**: Client Performance Improvement ("improve the performance … without making changes to the game itself")
+- **[PERF](PERF.md)**: Client Performance Improvement ("improve the performance … without making changes to the game itself")
 - **AESTHETIC**: Aesthetic ("change only the look and feel … must not … change the player's perspective")
 - **HUD**: Cosmetic HUD ("without adding extra information which would normally be unavailable to the player … mini-maps, other player health/armor indicators, player distance/range … are not")
 - **BRIGHT**: Brightness & Gamma Adjustment
@@ -27,6 +27,7 @@ truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/mw19/core/
 |---|---|---|---|---|---|---|
 | fps | FPS | all | HUD | ALLOWED | on | Own client performance, not game info |
 | keycps | KeyCPS (keystrokes + CPS, display only) | all | HUD | ALLOWED | on | The player's own inputs and click/key-repeat rate from real input events. Never generates input |
+| speed | Speed | all | HUD? | GRAY | off | Blocks per second from your own position. Vanilla shows no speed, and Hypixel HUD rules forbid extra info, so it is GRAY |
 | ping | Ping | all | HUD | ALLOWED | off | The player's own latency (the tab list already shows bars) |
 | coords | Coordinates | all | HUD | ALLOWED | off | Same as F3. **Hidden while the server sets reducedDebugInfo** |
 | direction | Direction | all | HUD | ALLOWED | off | Same as F3 facing |
@@ -35,6 +36,8 @@ truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/mw19/core/
 | item_counter | Item Counter | all | HUD | ALLOWED | off | Counts items already visible in your inventory |
 | clock | Clock | all | HUD | ALLOWED | off | Not game info |
 | system | Memory / CPU | all | HUD | ALLOWED | off | Not game info |
+| fps_graph | FPS Graph | all | PERF | ALLOWED | off | Your own frame times |
+| server_address | Server Address | all | HUD | ALLOWED | off | The address you typed |
 | combo | Combo Counter | all | HUD | GRAY | off | A number derived from your own hits that vanilla never shows |
 | crosshair | Custom Crosshair | all | AESTHETIC | ALLOWED | off | Look only. Same position and function |
 | zoom | Zoom | all | listed example (OptiFine) | ALLOWED | on | OptiFine is an explicitly allowed mod and ships a zoom key |
@@ -47,6 +50,9 @@ truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/mw19/core/
 | shield_overlay | Shield Overlay | 1.21+ | AESTHETIC | ALLOWED | off | Lowers or fades a raised shield in first person |
 | particles | Particle Multiplier | all | AESTHETIC | ALLOWED | off | Client-side extra crit/sharpness particles |
 | chat | Chat Tools | all | AESTHETIC | ALLOWED | off | Timestamps, compacting, search, filters, highlights. Display only; never sends chat |
+| entity_culling | Entity Culling | all | PERF | ALLOWED | on | Draws less, never more: hides only entities fully behind solid blocks. Players, glowing and named entities always drawn |
+| clear_weather | Clear Weather | all | AESTHETIC | ALLOWED | off | Client-side only: the server weather is unchanged |
+| durability_alert | Durability Alert | all | HUD | ALLOWED | off | Durability already shows on the items; this only notifies (like Armor Status) |
 | screenshot | Screenshot Tools | all | none (not gameplay) | ALLOWED | off | Copy to clipboard, open folder. No uploads |
 | freelook | Freelook | all | fails AESTHETIC ("perspective") | DISALLOWED@hypixel | off | Server-gated by serverrules.json |
 | own_nametag | Show Own Nametag | all | AESTHETIC | ALLOWED | off | Your own name in third person |

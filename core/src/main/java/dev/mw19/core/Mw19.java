@@ -54,6 +54,8 @@ public final class Mw19 {
     public final HookWatchdog hooks = new HookWatchdog();
     public final Compat compat;
     public final dev.mw19.core.modules.InputRates rates = new dev.mw19.core.modules.InputRates();
+    public final FpsBoost fpsBoost = new FpsBoost(this);
+    public final dev.mw19.core.perf.Occlusion occlusion = new dev.mw19.core.perf.Occlusion();
     public final dev.mw19.core.plugin.NameTagRegistry nameTags = new dev.mw19.core.plugin.NameTagRegistry();
     public final dev.mw19.core.plugin.PanelRegistry panels = new dev.mw19.core.plugin.PanelRegistry();
     public final dev.mw19.core.net.HttpClient http;
@@ -87,6 +89,7 @@ public final class Mw19 {
     }
     private final KeyPressEvent keyEvent = new KeyPressEvent();
     private Smoke smoke;
+    private Bench bench;
     private boolean started;
 
     private Mw19(Platform platform, String modVersion) {
@@ -173,6 +176,7 @@ public final class Mw19 {
             toast("KeyCPS is built in", "MW19 includes KeyCPS (Mods → KeyCPS). Remove the standalone KeyCPS mod to avoid two overlays.", theme.warn);
         }
         if ("1".equals(System.getProperty("mw19.smoke"))) smoke = new Smoke(this);
+        if ("1".equals(System.getProperty("mw19.bench"))) bench = new Bench(this);
         started = true;
     }
 
@@ -304,6 +308,7 @@ public final class Mw19 {
             tickEvent.end = true;
             events.post(tickEvent);
             if (smoke != null) smoke.tick();
+            if (bench != null) bench.tick();
         }
     };
 
@@ -313,6 +318,8 @@ public final class Mw19 {
         if (k == null) return;
         long t0 = System.nanoTime();
         k.hooks.hud = true;
+        if (k.bench != null) k.bench.frame();
+        k.occlusion.newFrame(System.currentTimeMillis());
         Gfx g = k.hudGfx;
         try {
             g.begin(backend, System.currentTimeMillis());

@@ -30,6 +30,36 @@ public final class Mw19Fabric implements ClientModInitializer {
         Mw19.onTick(end);
     }
 
+    private static final net.minecraft.core.BlockPos.MutableBlockPos PROBE = new net.minecraft.core.BlockPos.MutableBlockPos();
+    private static final dev.mw19.core.perf.Occlusion.Blocks BLOCKS = (x, y, z) -> {
+        net.minecraft.client.multiplayer.ClientLevel level = Minecraft.getInstance().level;
+        if (level == null) return false;
+        net.minecraft.world.level.block.state.BlockState s = level.getBlockState(PROBE.set(x, y, z));
+        //? if >=1.21.2 {
+        return s.isSolidRender();
+        //?} else {
+        /*return s.isSolidRender(level, PROBE);
+        *///?}
+    };
+
+    /** EntityCullingMixin: false when the entity is fully hidden behind blocks (module on). Fails open. */
+    public static boolean drawEntity(net.minecraft.world.entity.Entity e, double cx, double cy, double cz) {
+        if (!dev.mw19.core.Hooks.entityCulling) return true;
+        try {
+            if (e == Minecraft.getInstance().getCameraEntity() || e instanceof net.minecraft.world.entity.player.Player
+                    || e.isCurrentlyGlowing() || e.shouldShowName()) return true;
+            Mw19 k = Mw19.get();
+            if (k == null) return true;
+            net.minecraft.world.phys.AABB b = e.getBoundingBox();
+            return k.occlusion.visible(BLOCKS, e.getId(), b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ, cx, cy, cz,
+                    System.currentTimeMillis());
+        } catch (RuntimeException ex) {
+            dev.mw19.core.Hooks.entityCulling = false; // stop culling rather than risk the render loop
+            dev.mw19.core.Log.error("entity culling disabled after an error", ex);
+            return true;
+        }
+    }
+
     /** Set by "Vanilla menu": the next title screen is Minecraft's own. */
     public static boolean vanillaTitleOnce;
 

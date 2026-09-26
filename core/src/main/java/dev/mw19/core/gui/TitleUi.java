@@ -26,7 +26,7 @@ public final class TitleUi implements Surface {
     private final Mw19 k;
     private final Gfx g = new Gfx();
     private final Ui ui = new Ui();
-    private final Item[] items;
+    private Item[] items;
     private final Button vanilla;
     private final Anim intro = new Anim(0);
     private final float[] ex = new float[EMBERS], speed = new float[EMBERS], phase = new float[EMBERS], size = new float[EMBERS];
@@ -68,6 +68,17 @@ public final class TitleUi implements Surface {
                 }
             }),
         };
+        if (k.platform.screens().hasModList()) {
+            Item[] withMods = java.util.Arrays.copyOf(items, items.length + 1);
+            System.arraycopy(withMods, 3, withMods, 4, items.length - 3);
+            withMods[3] = new Item("Mods", new Runnable() {
+                @Override
+                public void run() {
+                    k.platform.screens().openModList();
+                }
+            });
+            items = withMods;
+        }
         vanilla = new Button("Vanilla menu", Button.Style.GHOST, new Runnable() {
             @Override
             public void run() {

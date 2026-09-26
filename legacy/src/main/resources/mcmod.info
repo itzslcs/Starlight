@@ -7,7 +7,7 @@
     "mcversion": "1.8.9",
     "authorList": ["MW19 contributors"],
     "credits": "",
-    "logoFile": "",
+    "logoFile": "assets/mw19/icon.png",
     "screenshots": [],
     "dependencies": []
   }

@@ -51,6 +51,16 @@ final class TestPlatform implements Platform, ScreenHost, ChatAccess, ModList {
     public String clipboard() { return ""; }
     public void setClipboard(String text) {}
     public void vanillaBindings(BindingSink sink) {}
+    final java.util.Map<String, String> options = new java.util.HashMap<String, String>();
+    public java.util.Map<String, String> applyFpsBoost() {
+        java.util.Map<String, String> prev = new java.util.LinkedHashMap<String, String>();
+        prev.put("clouds", options.containsKey("clouds") ? options.get("clouds") : "FANCY");
+        options.put("clouds", "OFF");
+        return prev;
+    }
+    public void restoreOptions(java.util.Map<String, String> previous) { options.putAll(previous); }
+    public String graphicsApi() { return null; }
+    public void setGraphicsApi(String api) {}
     public int bindingKey(Binding b) { return b == Binding.ATTACK ? Keys.mouse(0) : b == Binding.USE ? Keys.mouse(1) : Keys.NONE; }
     public void openFolder(Path dir) {}
     public void screenshot(String name) {}
@@ -103,6 +113,8 @@ final class TestPlatform implements Platform, ScreenHost, ChatAccess, ModList {
     public void openMultiplayer() {}
     public void openOptions() {}
     public void openVanillaTitle() {}
+    public boolean hasModList() { return false; }
+    public void openModList() {}
     public int width() { return 400; }
     public int height() { return 240; }
     public float guiScale() { return 2f; }

@@ -136,3 +136,17 @@ plugins existed yet), mod id `mw19`, mixin configs `mw19.*.json`, jars `MW19-<ve
 `MW19/` on first launch, and old `KESTREL-P1:` profile codes still import ([`RenameCompatTest`](../core/src/test/java/dev/mw19/core/RenameCompatTest.java)). "MW19" is also the
 common nickname for Call of Duty: Modern Warfare (2019). That is fine as a name, but the Modrinth page should not
 use Call of Duty branding.
+
+## D-020 "Max FPS client": performance packs by reference, native Vulkan, no bundling (owner request, 2026-09-26)
+The owner pointed at Frost Client (frostclient.eu) as the bar. From its public site: Minecraft 1.21+, **Sodium and
+VulkanMod bundled**, "Vulkan by default", 50+ bundled mods, capes and badges, a paid tier, and a claim of 85 → 810 FPS
+(RTX 3060 Ti, 4K, 20 chunks). That gain comes from Sodium and VulkanMod, not from client code. Frost's launcher and files
+were not unpacked, run or copied. Its config folder holds account logins and was not opened.
+- **MW19's own work:** Entity Culling, FPS Boost, the Vulkan switch on 26.2+ (Minecraft's own RenderPearl Vulkan backend,
+  which falls back to OpenGL), and an allocation-free HUD. Measured in [PERF](PERF.md).
+- **Other people's performance mods ship by reference:** [`scripts/mrpack.py`](../scripts/mrpack.py) writes `MW19 Performance` Modrinth packs
+  (`.mrpack`) per version. Their index lists Modrinth CDN URLs and hashes for Sodium, ImmediatelyFast, FerriteCore and
+  Lithium, and the launcher downloads them from Modrinth, so no third-party jar is redistributed. Only mods tested with MW19
+  ([COMPAT_MATRIX](COMPAT_MATRIX.md)) go in.
+- **VulkanMod** (LGPL-3.0) exists for 1.21–1.21.5, 1.21.9–1.21.11 and 26.1.x. It replaces the renderer and conflicts with
+  Sodium, so it is not in the default pack. On 26.2+ Minecraft's own Vulkan backend makes it unnecessary.

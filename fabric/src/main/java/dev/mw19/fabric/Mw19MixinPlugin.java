@@ -24,6 +24,7 @@ public final class Mw19MixinPlugin implements IMixinConfigPlugin {
     static {
         CONFLICTS.put("CameraMixin", Arrays.asList("freelook", "perspectivemod"));
         CONFLICTS.put("EntityTurnMixin", Arrays.asList("freelook", "perspectivemod"));
+        CONFLICTS.put("EntityCullingMixin", Arrays.asList("entityculling")); // one culler at a time
     }
 
     private Set<String> userDisabled = new HashSet<String>();

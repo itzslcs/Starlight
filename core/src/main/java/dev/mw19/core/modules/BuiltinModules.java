@@ -16,6 +16,7 @@ public final class BuiltinModules {
         // HUD
         m.add(new FpsModule());
         m.add(new KeyCpsModule(rates));
+        m.add(new SpeedModule());
         m.add(new PingModule());
         m.add(new CoordsModule());
         m.add(new DirectionModule());
@@ -24,6 +25,8 @@ public final class BuiltinModules {
         m.add(new ItemCounterModule());
         m.add(new ClockModule());
         m.add(new SystemModule());
+        m.add(new FpsGraphModule());
+        m.add(new ServerAddressModule());
         m.add(new ComboModule());
         // visual / utility
         m.add(new CrosshairModule());
@@ -37,6 +40,9 @@ public final class BuiltinModules {
         m.add(new SimpleVisuals.ShieldOverlay());
         m.add(new SimpleVisuals.Particles());
         m.add(new ChatModule());
+        m.add(new EntityCullingModule());
+        m.add(new ClearWeatherModule());
+        m.add(new DurabilityAlertModule());
         m.add(new ScreenshotModule());
         m.add(new FreelookModule());
         m.add(new SimpleVisuals.OwnNametag());

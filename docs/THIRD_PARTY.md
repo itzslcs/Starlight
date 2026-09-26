@@ -37,6 +37,17 @@ checked by listing the built jars. The addon jars contain only their own classes
 GPL-2.0 (pack200) and LGPL-3.0 (Stonecutter) apply only to the build tools themselves. We neither link them into nor
 ship them with our jars, so they place no obligations on MW19's output.
 
+## Referenced by the MW19 Performance packs (not redistributed)
+The `.mrpack` files ([`scripts/mrpack.py`](../scripts/mrpack.py)) list these by Modrinth CDN URL and hash, and the launcher downloads them from
+Modrinth when you import the pack. They are not included in MW19's jars.
+
+| Mod | License (Modrinth) |
+|---|---|
+| Sodium | PolyForm Shield 1.0.0 |
+| ImmediatelyFast | LGPL-3.0-or-later |
+| FerriteCore | MIT |
+| Lithium | LGPL-3.0-only |
+
 ## Online services (runtime, only when the user turns them on)
 | Service | Used by | When |
 |---|---|---|

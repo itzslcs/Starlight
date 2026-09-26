@@ -18,8 +18,40 @@ public final class PerfPage extends Page {
     private String line1 = "", line2 = "";
     private final List<ModuleManager.State> sorted = new ArrayList<ModuleManager.State>();
 
-    public PerfPage(GuiRoot root) {
+    private final dev.mw19.core.gui.widget.Button boost, undo;
+    private final dev.mw19.core.gui.widget.Toggle vulkan;
+    private String boostNote = "";
+
+    public PerfPage(final GuiRoot root) {
         super(root);
+        boost = new dev.mw19.core.gui.widget.Button("FPS Boost", dev.mw19.core.gui.widget.Button.Style.PRIMARY, new Runnable() {
+            @Override
+            public void run() {
+                int n = root.k.fpsBoost.apply();
+                boostNote = n + " settings switched to fast values";
+                root.k.toast("FPS Boost", "Fast settings applied (clouds, particles, shadows, smooth lighting, ...). Undo restores yours.", root.k.theme.good);
+            }
+        });
+        boost.tooltip = "Clouds off, fewer particles, no entity shadows or smooth lighting, fast leaves, no VSync, unlimited FPS, render distance at most 12";
+        undo = new dev.mw19.core.gui.widget.Button("Undo", dev.mw19.core.gui.widget.Button.Style.SECONDARY, new Runnable() {
+            @Override
+            public void run() {
+                root.k.fpsBoost.undo();
+                boostNote = "your previous settings are back";
+            }
+        });
+        vulkan = new dev.mw19.core.gui.widget.Toggle(new dev.mw19.core.gui.widget.Toggle.Model() {
+            @Override
+            public boolean get() {
+                return "vulkan".equals(root.k.platform.graphicsApi());
+            }
+
+            @Override
+            public void set(boolean v) {
+                root.k.platform.setGraphicsApi(v ? "vulkan" : "default");
+                root.k.toast("Renderer", (v ? "Vulkan" : "OpenGL") + " takes effect after a restart (Vulkan falls back to OpenGL if the GPU cannot run it).", root.k.theme.warn);
+            }
+        });
     }
 
     @Override
@@ -51,10 +83,31 @@ public final class PerfPage extends Page {
             });
         }
         heading(ui, "Performance", "Measured while the HUD renders (the menu itself is excluded from the budget)");
+        undo.enabled = root.k.fpsBoost.active();
+        boost.bounds(x + w - 128, y, 76, 16).render(ui);
+        undo.bounds(x + w - 48, y, 48, 16).render(ui);
         ui.g.text(line1, x, y + 26, ui.t.text, false);
         ui.g.text(line2, x, y + 37, p.avgOwnUs() > 300 ? ui.t.bad : ui.t.textDim, false);
+        float top = y + 50;
+        if (!boostNote.isEmpty() || root.k.fpsBoost.active()) {
+            ui.g.text("FPS Boost: " + (boostNote.isEmpty() ? "on (Undo restores your settings)" : boostNote), x, top, ui.t.good, false);
+            top += 12;
+        }
+        if (dev.mw19.core.Hooks.entityCulling && root.k.occlusion.calls > 0) {
+            dev.mw19.core.perf.Occlusion oc = root.k.occlusion;
+            ui.g.text("Entity culling: " + (oc.culled * 100 / oc.calls) + "% of entity draws skipped (" + oc.culled + " of " + oc.calls
+                    + " in the last second)", x, top, ui.t.textDim, false);
+            top += 12;
+        }
+        if (root.k.platform.graphicsApi() != null) {
+            ui.g.roundRect(x, top, w, 18, 4, ui.t.surface);
+            ui.g.text("Vulkan renderer", x + 6, top + 5, ui.t.text, false);
+            ui.g.text("after restart · falls back to OpenGL", x + 90, top + 5, ui.t.textDim, false);
+            vulkan.bounds(x + w - 30, top + 3, 24, 12).render(ui);
+            top += 22;
+        }
         // graph
-        float gx = x, gy = y + 50, gw = w, gh = 70;
+        float gx = x, gy = top, gw = w, gh = 70;
         ui.g.roundRect(gx, gy, gw, gh, 4, ui.t.surface);
         int n = Math.min(p.count, (int) gw);
         float max = 50f; // ms at the top of the graph
@@ -78,5 +131,11 @@ public final class PerfPage extends Page {
             ui.g.textRight(String.format(Locale.ROOT, "%.1f  /  %.1f", s.renderNanos / 1000.0, s.tickNanos / 1000.0), x + w - 4, ty, ui.t.text, false);
             ty += 10;
         }
+    }
+
+    @Override
+    public boolean mouseClicked(Ui ui, int button) {
+        return boost.mouseClicked(ui, button) || undo.mouseClicked(ui, button)
+                || (root.k.platform.graphicsApi() != null && vulkan.mouseClicked(ui, button));
     }
 }

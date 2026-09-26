@@ -41,6 +41,16 @@
 - All 18 jars build. The dev smoke passes on 17 of 18 ([COMPAT_MATRIX](COMPAT_MATRIX.md)); mixin audits are fully wired.
 - **Open:** 26.1.1 hangs in JVM exit after a passing run (2/2 runs; [debug-log](debug-log.md)).
 
+## 2026-09-26: MW19 (0.2.0)
+- **Renamed** Kestrel → MW19 (packages `dev.mw19`, mod id `mw19`, plugin API 2.0). Settings and profile codes migrate ([DECISIONS](DECISIONS.md) D-019).
+- **Fixed (owner report):** clicks in the Right Shift menu did nothing (every Mods-page click threw). Toggle Sprint/Sneak
+  failed after a restart (onEnable ran before Minecraft had options). Chroma colours froze (float time). All three have
+  regression tests, and every smoke run now clicks the menu through real X11 input ([debug-log](debug-log.md)).
+- **Home screen** replaces the title screen on every target (Surface + TitleSwapMixin / GuiOpenEvent).
+- **Phase 5 started:** the benchmark harness ([`scripts/bench.sh`](../scripts/bench.sh)), Entity Culling (on by default), FPS Boost with Undo, and the
+  Vulkan switch on 26.2+. Numbers are in [PERF](PERF.md).
+- New modules: Speed, FPS Graph, Server Address, Clear Weather, Durability Alert.
+
 ## Release status (2026-09-25)
 - **Modrinth:** draft project `mw19` with all 18 jars as `0.1.0+mc<mc>` alpha versions (uploaded hashes match `dist/`).
   It is not submitted for review yet: the owner checks the page (the name is still the D-001 placeholder) and submits.

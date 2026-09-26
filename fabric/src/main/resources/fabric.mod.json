@@ -6,6 +6,7 @@
   "description": "Client-side HUD, GUI, modules and plugins. Legit features only.",
   "authors": ["MW19 contributors"],
   "license": "MIT",
+  "icon": "assets/mw19/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": ["dev.mw19.fabric.Mw19Fabric"]

@@ -23,6 +23,10 @@ public final class Hooks {
     public static double gamma = Double.NaN;
     /** Custom crosshair active: hide the vanilla one. */
     public static boolean hideCrosshair;
+    /** Entity Culling module: the platform's entity pass asks {@code Mw19.get().occlusion} before drawing. */
+    public static boolean entityCulling;
+    /** Clear Weather module: the client level reports no rain or thunder. */
+    public static boolean clearWeather;
     /** Render your own nametag in third person. */
     public static boolean ownNametag;
     /** Extra copies of crit / enchanted-hit particles (0 = vanilla). */

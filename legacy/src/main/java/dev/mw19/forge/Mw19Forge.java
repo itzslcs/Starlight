@@ -25,10 +25,38 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 
-@Mod(modid = "mw19", name = "MW19", version = Mw19Forge.VERSION, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
+@Mod(modid = "mw19", name = "MW19", version = Mw19Forge.VERSION, useMetadata = true, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
 public final class Mw19Forge {
-    public static final String VERSION = "0.1.0+mc1.8.9";
+    /** Placeholder only: useMetadata makes Forge take the real version from mcmod.info (filled from gradle.properties). */
+    public static final String VERSION = "dev";
     private static final int BUTTON_ID = 0x4B53; // "KS"
+    private static final net.minecraft.util.BlockPos.MutableBlockPos PROBE = new net.minecraft.util.BlockPos.MutableBlockPos();
+    private static final dev.mw19.core.perf.Occlusion.Blocks BLOCKS = new dev.mw19.core.perf.Occlusion.Blocks() {
+        @Override
+        public boolean occludes(int x, int y, int z) {
+            net.minecraft.client.multiplayer.WorldClient w = net.minecraft.client.Minecraft.getMinecraft().theWorld;
+            return w != null && w.getBlockState(PROBE.set(x, y, z)).getBlock().isOpaqueCube();
+        }
+    };
+
+    /** RenderManagerMixin: false when the entity is fully hidden behind blocks (Entity Culling on). Fails open. */
+    public static boolean drawEntity(net.minecraft.entity.Entity e, double cx, double cy, double cz) {
+        if (!Hooks.entityCulling) return true;
+        try {
+            if (e == net.minecraft.client.Minecraft.getMinecraft().getRenderViewEntity() || e instanceof net.minecraft.entity.player.EntityPlayer
+                    || (e.hasCustomName() && e.getAlwaysRenderNameTagForRender())) return true;
+            Mw19 k = Mw19.get();
+            if (k == null) return true;
+            net.minecraft.util.AxisAlignedBB b = e.getEntityBoundingBox();
+            return k.occlusion.visible(BLOCKS, e.getEntityId(), b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ, cx, cy, cz,
+                    System.currentTimeMillis());
+        } catch (RuntimeException ex) {
+            Hooks.entityCulling = false; // stop culling rather than risk the render loop
+            dev.mw19.core.Log.error("entity culling disabled after an error", ex);
+            return true;
+        }
+    }
+
     /** Set by "Vanilla menu": the next main menu is Minecraft's own. */
     static boolean vanillaTitleOnce;
     private static Handlers hooks;
@@ -41,7 +69,7 @@ public final class Mw19Forge {
     public void init(FMLInitializationEvent event) {
         hooks = new Handlers(new ForgePlatform());
         hooks.platform().refreshResolution();
-        Mw19.init(hooks.platform(), VERSION);
+        Mw19.init(hooks.platform(), net.minecraftforge.fml.common.Loader.instance().activeModContainer().getVersion());
         MinecraftForge.EVENT_BUS.register(hooks);
         FMLCommonHandler.instance().bus().register(hooks);
         FMLCommonHandler.instance().registerCrashCallable(new ICrashCallable() {

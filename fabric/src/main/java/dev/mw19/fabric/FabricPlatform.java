@@ -15,6 +15,11 @@ import dev.mw19.fabric.mixin.KeyMappingAccessor;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.CameraType;
+//? if >=1.21.2 {
+import net.minecraft.server.level.ParticleStatus;
+//?} else {
+/*import net.minecraft.client.ParticleStatus;
+*///?}
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
@@ -544,6 +549,92 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
         mc.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.NOTE_BLOCK_PLING, 1.5f));
     }
 
+    // ------------------------------------------------------------------ FPS Boost / graphics API
+
+    private static <T> void tweak(Map<String, String> backup, String id, net.minecraft.client.OptionInstance<T> opt, T fast) {
+        T old = opt.get();
+        backup.put(id, old instanceof Enum ? ((Enum<?>) old).name() : String.valueOf(old));
+        opt.set(fast);
+    }
+
+    private <T> void restore(Map<String, String> previous, String id, net.minecraft.client.OptionInstance<T> opt,
+                                    java.util.function.Function<String, T> parse) {
+        String v = previous.get(id);
+        if (v == null) return;
+        try {
+            opt.set(parse.apply(v));
+        } catch (RuntimeException e) {
+            log.warn("FPS Boost undo: could not restore {}={}: {}", id, v, e.toString());
+        }
+    }
+
+    @Override
+    public Map<String, String> applyFpsBoost() {
+        net.minecraft.client.Options o = mc.options;
+        Map<String, String> b = new java.util.LinkedHashMap<String, String>();
+        tweak(b, "clouds", o.cloudStatus(), net.minecraft.client.CloudStatus.OFF);
+        tweak(b, "particles", o.particles(), ParticleStatus.DECREASED);
+        tweak(b, "entityShadows", o.entityShadows(), false);
+        tweak(b, "biomeBlend", o.biomeBlendRadius(), 0);
+        tweak(b, "smoothLighting", o.ambientOcclusion(), false);
+        tweak(b, "entityDistance", o.entityDistanceScaling(), 0.75);
+        tweak(b, "vsync", o.enableVsync(), false);
+        tweak(b, "maxFps", o.framerateLimit(), 260);
+        if (o.renderDistance().get() > 12) tweak(b, "renderDistance", o.renderDistance(), 12); // only ever lowered
+        //? if >=1.21.11 {
+        tweak(b, "cutoutLeaves", o.cutoutLeaves(), false);
+        tweak(b, "improvedTransparency", o.improvedTransparency(), false);
+        tweak(b, "vignette", o.vignette(), false);
+        tweak(b, "weatherRadius", o.weatherRadius(), 5);
+        //?} else {
+        /*tweak(b, "graphics", o.graphicsMode(), net.minecraft.client.GraphicsStatus.FAST);
+        *///?}
+        o.save();
+        return b;
+    }
+
+    @Override
+    public void restoreOptions(Map<String, String> p) {
+        net.minecraft.client.Options o = mc.options;
+        restore(p, "clouds", o.cloudStatus(), net.minecraft.client.CloudStatus::valueOf);
+        restore(p, "particles", o.particles(), ParticleStatus::valueOf);
+        restore(p, "entityShadows", o.entityShadows(), Boolean::valueOf);
+        restore(p, "biomeBlend", o.biomeBlendRadius(), Integer::valueOf);
+        restore(p, "smoothLighting", o.ambientOcclusion(), Boolean::valueOf);
+        restore(p, "entityDistance", o.entityDistanceScaling(), Double::valueOf);
+        restore(p, "vsync", o.enableVsync(), Boolean::valueOf);
+        restore(p, "maxFps", o.framerateLimit(), Integer::valueOf);
+        restore(p, "renderDistance", o.renderDistance(), Integer::valueOf);
+        //? if >=1.21.11 {
+        restore(p, "cutoutLeaves", o.cutoutLeaves(), Boolean::valueOf);
+        restore(p, "improvedTransparency", o.improvedTransparency(), Boolean::valueOf);
+        restore(p, "vignette", o.vignette(), Boolean::valueOf);
+        restore(p, "weatherRadius", o.weatherRadius(), Integer::valueOf);
+        //?} else {
+        /*restore(p, "graphics", o.graphicsMode(), net.minecraft.client.GraphicsStatus::valueOf);
+        *///?}
+        o.save();
+    }
+
+    @Override
+    public String graphicsApi() {
+        //? if >=26.2 {
+        /*return mc.options.preferredGraphicsBackend().get().getSerializedName();
+        *///?} else {
+        return null;
+        //?}
+    }
+
+    @Override
+    public void setGraphicsApi(String api) {
+        //? if >=26.2 {
+        /*for (net.minecraft.client.PreferredGraphicsApi a : net.minecraft.client.PreferredGraphicsApi.values()) {
+            if (a.getSerializedName().equals(api)) mc.options.preferredGraphicsBackend().set(a);
+        }
+        mc.options.save();
+        *///?}
+    }
+
     // ------------------------------------------------------------------ ScreenHost
 
     @Override
@@ -592,6 +683,26 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
         *///?} else {
         FabricCompat.setScreen(mc, new net.minecraft.client.gui.screens.options.OptionsScreen(parent, mc.options));
         //?}
+    }
+
+    private static final String MOD_MENU_SCREEN = "com.terraformersmc.modmenu.gui.ModsScreen";
+
+    @Override
+    public boolean hasModList() {
+        return FabricLoader.getInstance().isModLoaded("modmenu");
+    }
+
+    /** Mod Menu's screen by reflection (no compile dependency); falls back to vanilla's title screen, which has its button. */
+    @Override
+    public void openModList() {
+        Screen parent = FabricCompat.screen(mc);
+        try {
+            Screen s = (Screen) Class.forName(MOD_MENU_SCREEN).getConstructor(Screen.class).newInstance(parent);
+            FabricCompat.setScreen(mc, s);
+        } catch (ReflectiveOperationException | ClassCastException | LinkageError e) {
+            log.warn("Mod Menu screen unavailable ({}), showing the vanilla title screen", e.toString());
+            openVanillaTitle();
+        }
     }
 
     @Override

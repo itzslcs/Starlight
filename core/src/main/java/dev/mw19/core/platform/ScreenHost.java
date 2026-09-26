@@ -18,6 +18,11 @@ public interface ScreenHost {
 
     void openOptions();
 
+    /** A mod list if one exists (Mod Menu on Fabric, Forge's own on 1.8.9); false when there is none. */
+    boolean hasModList();
+
+    void openModList();
+
     /** Shows Minecraft's own title screen once, bypassing the home screen (buttons other mods add live there). */
     void openVanillaTitle();
 

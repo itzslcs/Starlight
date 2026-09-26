@@ -22,6 +22,11 @@ build for Forge 1.8.9. `addons/`: plugin jars. `scripts/`: smoke/prod tests. `do
 - `./gradlew :fabric:<mc>:build -Pmw19.fabricTargets=<mc>`: one Fabric target (the property limits configuration to it).
 - `cd legacy && ./gradlew build`: 1.8.9 (needs `./gradlew :api:jar :core:jar` in the root first).
 - `scripts/smoke.sh <mc> [seconds]`: headless smoke (Xvfb + llvmpipe). Evidence goes to `smoke-out/<mc>/`.
+- `scripts/bench.sh <mc>`: fixed-scene benchmark (baseline / culling / boost / both). The machine must be otherwise idle,
+  because llvmpipe uses every core. Results go in [PERF.md](docs/PERF.md).
+- `WITH_MODS="sodium immediatelyfast ferrite-core lithium" scripts/smoke.sh <mc>`: compatibility run with other mods
+  (fetched from Modrinth by [`scripts/testmods.py`](scripts/testmods.py), never bundled).
+- `scripts/mrpack.py dist [mc ...]`: MW19 Performance `.mrpack` packs, which reference the performance mods by Modrinth URL.
 - Signatures, never from memory: javap against Loom's mapped jars in `~/.gradle/caches/fabric-loom/minecraftMaven/...`
   (Mojang names) and `~/.gradle/caches/essential-loom/minecraftMaven/...` (MCP names for 1.8.9).
 

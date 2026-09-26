@@ -2,7 +2,7 @@
 
 See also: [README](../README.md) (install table), [DECISIONS](DECISIONS.md) (D-017), [COMPAT_MATRIX](COMPAT_MATRIX.md) (Prism column).
 
-MW19 is an ordinary mod jar, so Prism needs nothing special. There are two ways to set it up.
+MW19 is an ordinary mod jar, so Prism needs nothing special. There are three ways to set it up.
 
 ## A. Import a ready-made instance (easiest)
 `./gradlew buildAll` writes one instance zip per Minecraft version to `dist/prism/MW19-<mc>.zip`.
@@ -22,7 +22,12 @@ Each zip contains:
 MW19 needs the same Java as its Minecraft version: 8 for 1.8.9, 21 for 1.21.x, 25 for 26.x. With Prism's automatic
 Java setting on, Prism downloads it; otherwise pick one under **Edit → Settings → Java**.
 
-## B. Add the jar to an instance you already have
+## B. MW19 Performance pack (most FPS on 1.21+)
+`scripts/mrpack.py dist` writes `dist/modrinth/MW19-Performance-<mc>.mrpack`: MW19 plus Sodium, ImmediatelyFast,
+FerriteCore and Lithium. In Prism: **Add Instance → Import**, pick the `.mrpack`, then **OK**. Prism downloads those mods from
+Modrinth itself; the pack only lists them ([DECISIONS](DECISIONS.md) D-020). The Modrinth app imports `.mrpack` too.
+
+## C. Add the jar to an instance you already have
 1. **Edit** the instance → **Version**. It needs *Fabric Loader* (0.16 or newer, 0.18 or newer for 26.x), or *Forge*
    11.15.1.2318 for 1.8.9. **Fabric API is not needed.**
 2. **Mods → Add file**, then pick `MW19-<version>+mc<mc>.jar` for exactly that Minecraft version.

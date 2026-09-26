@@ -17,7 +17,9 @@ if mc == "1.8.9":
               ("net.minecraft.entity.Entity", "setAngles", "mw19$turn"),
               ("net.minecraft.client.renderer.entity.Render", "renderLivingLabel", "mw19$label"),
               ("net.minecraft.client.gui.GuiPlayerTabOverlay", "getPlayerName", "mw19$decorate"),
-              ("net.minecraft.client.Minecraft", "shutdownMinecraftApplet", "mw19$shutdown")]
+              ("net.minecraft.client.Minecraft", "shutdownMinecraftApplet", "mw19$shutdown"),
+              ("net.minecraft.client.renderer.entity.RenderManager", "shouldRender", "mw19$cull"),
+              ("net.minecraft.world.World", "getRainStrength", "mw19$rain")]
     jars = [j for j in glob.glob(os.path.expanduser("~/.gradle/caches/essential-loom/minecraftMaven/**/*.jar"), recursive=True)
             if "sources" not in j and "-srg-" not in j and "-intermediary-" not in j]
 else:
@@ -50,7 +52,9 @@ else:
               ("net.minecraft.client.particle.ParticleEngine", "createTrackingEmitter", "mw19$more"),
               ("net.minecraft.client.renderer.entity.LivingEntityRenderer", "shouldShowName", "mw19$own"),
               ("net.minecraft.client.multiplayer.MultiPlayerGameMode", "attack", "mw19$attack"),
-              ("net.minecraft.client.gui.Gui" if V >= (26, 2) else "net.minecraft.client.Minecraft", "setScreen", "mw19$home")]
+              ("net.minecraft.client.gui.Gui" if V >= (26, 2) else "net.minecraft.client.Minecraft", "setScreen", "mw19$home"),
+              ("net.minecraft.client.renderer.entity.EntityRenderDispatcher", "shouldRender", "mw19$cull"),
+              ("net.minecraft.world.level.Level", "getRainLevel", "mw19$rain")]
     M = os.path.expanduser("~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft")
     jars = [j for p in (f"{M}/minecraft-clientonly/{mc}-loom.mappings.*/*.jar", f"{M}/minecraft-common/{mc}-loom.mappings.*/*.jar",
                         f"{M}/minecraft-merged/{mc}/*.jar", f"{M}/minecraft-clientonly/{mc}/*.jar", f"{M}/minecraft-common/{mc}/*.jar")
