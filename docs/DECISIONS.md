@@ -4,12 +4,11 @@ See also: [PLAN](PLAN.md), [ARCHITECTURE](ARCHITECTURE.md), [debug-log](debug-lo
 
 Newest last. Each entry states the decision, why, and what would change it.
 
-## D-001 Placeholder names (rename later)
-- CLIENT_NAME = **Kestrel**, MOD_ID = **kestrel**, BASE_PACKAGE = **dev.kestrel**, LICENSE = **MIT**.
-- Config/plugin dir: `<gameDir>/Kestrel/` (spec: `<gameDir>/[CLIENT_NAME]/plugins/`).
-- The display name, mod id and version live in [`gradle.properties`](../gradle.properties), so renaming touches that file plus the
-  package directories. No existing Minecraft client uses this name as far as a quick search shows.
-  It is still a placeholder.
+## D-001 Name: MW19 (was the placeholder "Kestrel")
+- CLIENT_NAME = **MW19** ("MW19 Client" in full), MOD_ID = **mw19**, BASE_PACKAGE = **dev.mw19**, LICENSE = **MIT**.
+  The owner picked the name on 2026-09-26 (D-019). "Kestrel" was a placeholder until then.
+- Config/plugin dir: `<gameDir>/MW19/` (spec: `<gameDir>/[CLIENT_NAME]/plugins/`).
+- The display name, mod id and version live in [`gradle.properties`](../gradle.properties).
 
 ## D-002 1.8.9 loader = Forge 1.8.9-11.15.1.2318
 Dawn/Feather's own 1.8.9 deployment is Forge 11.15.1.2318 with FMLTweaker and MixinTweaker ([FEATHER.md](FEATHER.md) §2).
@@ -35,9 +34,9 @@ Side effect: mod assets are not loaded without Fabric API's resource loader, so 
 This follows the spec: names then line up with unobfuscated 26.x, which minimises Stonecutter conditionals.
 
 ## D-006 Mixin failure policy (to be verified empirically in Phase 1)
-- [`kestrel.mixins.json`](../fabric/src/main/resources/kestrel.mixins.json) holds core hooks with `"required": false` and `defaultRequire: 1`. A failed hook is logged loudly,
+- [`mw19.mixins.json`](../fabric/src/main/resources/mw19.mixins.json) holds core hooks with `"required": false` and `defaultRequire: 1`. A failed hook is logged loudly,
   which the smoke test catches, but does not stop the game.
-- [`kestrel.optional.mixins.json`](../fabric/src/main/resources/kestrel.optional.mixins.json) holds feature mixins with `"required": false` and `defaultRequire: 0`, gated by an
+- [`mw19.optional.mixins.json`](../fabric/src/main/resources/mw19.optional.mixins.json) holds feature mixins with `"required": false` and `defaultRequire: 0`, gated by an
   `IMixinConfigPlugin` that checks loaded mods (e.g. skips our culling when Sodium/EntityCulling is present).
 - A runtime **hook watchdog** records which hooks have fired. If a core hook has not fired after the first world load,
   a toast and the About/Compat page report it.
@@ -65,7 +64,7 @@ applies to any publicly available mod, regardless of it being allowed on the Hyp
 1. The default stats provider uses **only data the client already receives**: tab-list/nametag prefixes (e.g. Bedwars
    stars), scoreboard, and chat (session final kills/beds). It needs no key and no network.
 2. An **API-key provider** exists for a developer's *own* registered Hypixel application in a *private* build. It is compiled in
-   only with `-Pkestrel.privateHypixelApi=true`, so release jars from `buildAll` do not contain it. When present it shows
+   only with `-Pmw19.privateHypixelApi=true`, so release jars from `buildAll` do not contain it. When present it shows
    the policy text before accepting a key, and it caches for hours (policy: "caching that expires either hours, or even
    days later") and honours `RateLimit-*` headers and 429s.
 If the owner registers a Hypixel production application for this client, flip the flag and document the approval.
@@ -105,27 +104,35 @@ nameplate decorations apply to it too.
 
 ## D-017 Prism Launcher (user request)
 Standard jars work in Prism (Fabric Loader component, or the Forge 11.15.1.2318 component for 1.8.9). `buildAll` also
-emits importable Prism instance zips (`dist/prism/Kestrel-<mc>.zip`) and [`docs/PRISM.md`](PRISM.md). Verification uses a
+emits importable Prism instance zips (`dist/prism/MW19-<mc>.zip`) and [`docs/PRISM.md`](PRISM.md). Verification uses a
 production-layout launch (remapped jar, real Fabric Loader/Forge, no Gradle dev runtime) because driving the user's
 Prism install would use their Microsoft accounts.
 
 ## D-018 KeyCPS replaces the CPS counter (user request, 2026-09-25)
-The owner asked for Kestrel's CPS counter to be replaced by **KeyCPS** (modrinth.com/mod/keycps), their own
-keystrokes + CPS mod, and for it to appear in Kestrel's Mods GUI in place of KeyCPS's own settings screen. Authorship
+The owner asked for MW19's CPS counter to be replaced by **KeyCPS** (modrinth.com/mod/keycps), their own
+keystrokes + CPS mod, and for it to appear in MW19's Mods GUI in place of KeyCPS's own settings screen. Authorship
 was checked: the local KeyCPS repository (`~/Desktop/KeyCPS`, 1.6.1) is committed by the owner's address. Its
 fabric.mod.json declares MIT while the Modrinth page lists All-Rights-Reserved. Either way, the copyright holder asked
-for this integration. If the standalone mod (id `keycps`) is also installed, Kestrel shows a startup notice to remove it,
+for this integration. If the standalone mod (id `keycps`) is also installed, MW19 shows a startup notice to remove it,
 because two overlays would draw.
-- **Ported, not bundled.** [`KeyCpsModule`](../core/src/main/java/dev/kestrel/core/modules/KeyCpsModule.java) (core, Java 8) re-implements KeyCPS 1.6.1's HUD (layout, fade, space-bar line,
-  CPS inside the mouse keys, CPS warning, rainbow, always-LMB/RMB, per-key rates) and its counting ([`InputRates`](../core/src/main/java/dev/kestrel/core/modules/InputRates.java): per
-  binding, from input events, key repeat included) on Kestrel's platform API. Nesting the KeyCPS jar was rejected: it
-  needs Fabric API (Kestrel is Fabric-API-free), it has its own Right Shift settings screen and move screen (a second GUI
+- **Ported, not bundled.** [`KeyCpsModule`](../core/src/main/java/dev/mw19/core/modules/KeyCpsModule.java) (core, Java 8) re-implements KeyCPS 1.6.1's HUD (layout, fade, space-bar line,
+  CPS inside the mouse keys, CPS warning, rainbow, always-LMB/RMB, per-key rates) and its counting ([`InputRates`](../core/src/main/java/dev/mw19/core/modules/InputRates.java): per
+  binding, from input events, key repeat included) on MW19's platform API. Nesting the KeyCPS jar was rejected: it
+  needs Fabric API (MW19 is Fabric-API-free), it has its own Right Shift settings screen and move screen (a second GUI
   and a key clash), it would sit outside profiles, server rules and the HUD editor, and it does not exist for 1.8.9.
 - **Mapping of KeyCPS's UI:** module settings (Mods page) replace the settings screen; the HUD editor replaces "Move HUD"
-  and the scale slider and supplies text colour and shadow; the module toggle and Kestrel's keybinds replace "Toggle HUD".
-  Not ported: the first-join chat tip and the 14 translations (Kestrel's UI is English-only for now).
+  and the scale slider and supplies text colour and shadow; the module toggle and MW19's keybinds replace "Toggle HUD".
+  Not ported: the first-join chat tip and the 14 translations (MW19's UI is English-only for now).
 - The old `cps` and `keystrokes` modules and `ClickTracker` were removed. KeyCPS draws keystrokes and CPS in one element,
   and the first all-modules smoke run showed the old keystrokes element drawn on top of it.
-- The ported code is part of Kestrel and so falls under Kestrel's MIT licence. The standalone KeyCPS mod keeps its own
+- The ported code is part of MW19 and so falls under MW19's MIT licence. The standalone KeyCPS mod keeps its own
   licence.
 - 1.8.9 limitation: LWJGL 2 sends no key-repeat events in game, so held keyboard keys count once there.
+
+## D-019 Rename to MW19 (owner request, 2026-09-26)
+Everything was renamed from the placeholder: packages `dev.kestrel` → `dev.mw19` (including the plugin API; no third-party
+plugins existed yet), mod id `mw19`, mixin configs `mw19.*.json`, jars `MW19-<version>+mc<mc>.jar`, config folder
+`MW19/`, smoke markers `MW19 SMOKE PASS`. Compatibility for the owner's existing setup: a `Kestrel/` folder is moved to
+`MW19/` on first launch, and old `KESTREL-P1:` profile codes still import ([`RenameCompatTest`](../core/src/test/java/dev/mw19/core/RenameCompatTest.java)). "MW19" is also the
+common nickname for Call of Duty: Modern Warfare (2019). That is fine as a name, but the Modrinth page should not
+use Call of Duty branding.

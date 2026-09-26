@@ -18,10 +18,10 @@ It closes with: "If a modification does not fit clearly into any of the allowed 
 **Verdicts**
 - `ALLOWED`: clearly inside a category or a listed example. May ship default-on.
 - `GRAY`: not clearly inside a category. **Ships default-off**, and is switched off by *competitive-safe*.
-- `DISALLOWED@hypixel`: outside the policy on Hypixel. Default-off, and [`serverrules.json`](../core/src/main/resources/kestrel/serverrules.json) force-disables it on Hypixel.
+- `DISALLOWED@hypixel`: outside the policy on Hypixel. Default-off, and [`serverrules.json`](../core/src/main/resources/mw19/serverrules.json) force-disables it on Hypixel.
 
 The engine reads each module's verdict from code (`Module.rule()`). This table is the human-readable source of
-truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/kestrel/core/RulesMatrixTest.java)) checks that every registered module appears here with the same verdict.
+truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/mw19/core/RulesMatrixTest.java)) checks that every registered module appears here with the same verdict.
 
 | id | Module | Targets | Category | Verdict | Default | Notes |
 |---|---|---|---|---|---|---|
@@ -70,5 +70,5 @@ truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/kestrel/co
   "disallow": ["freelook", "tiertags"], "note": "Allowed Modifications policy, perspective + extra player info" } ] }
 ```
 
-The user can update `<gameDir>/Kestrel/serverrules.json` without a new jar (it is merged over the bundled default).
+The user can update `<gameDir>/MW19/serverrules.json` without a new jar (it is merged over the bundled default).
 The **competitive-safe** toggle disables every GRAY and DISALLOWED module on every server.

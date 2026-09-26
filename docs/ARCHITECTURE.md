@@ -13,33 +13,33 @@ legacy/  Separate Gradle build: Forge 1.8.9 platform adapters + mixins. Consumes
 addons/  Plugin jars built against api/ only: sample plugin, tiertags (TierTagger-style tier display).
 ```
 
-`buildAll` → `dist/Kestrel-<modver>+mc<mc>.jar` ×18, `dist/plugins/*.jar`, `dist/prism/*.zip`, `dist/SHA256SUMS`.
+`buildAll` → `dist/MW19-<modver>+mc<mc>.jar` ×18, `dist/plugins/*.jar`, `dist/prism/*.zip`, `dist/SHA256SUMS`.
 
 ## Layering rule
 `platform → core → api`. Core never imports a Minecraft class, and the build fails if it does: `core` and `api` have no
 Minecraft on their compile classpath. Everything version-specific sits behind the interfaces below, and Stonecutter
 `//? if` blocks live **only** in `fabric/src` adapter classes and mixins.
 
-## Platform contract (core/src/main/java/dev/kestrel/core/platform)
+## Platform contract (core/src/main/java/dev/mw19/core/platform)
 
 It was designed against 1.8.9 (LWJGL2, immediate-mode GL, MCP names, Forge events) and 26.x (Blaze3D, retained GUI
 extraction, no raw GL) at the same time.
 
 | Interface | Responsibility | 1.8.9 | 1.21.x | 26.x |
 |---|---|---|---|---|
-| [`Renderer`](../api/src/main/java/dev/kestrel/api/render/Renderer.java) (api) | rect, gradient, text, item icon, clip, push/pop/translate/scale, guiScale | `Gui.drawRect`, `FontRenderer`, `GlStateManager`, `RenderItem` | `GuiGraphics` (+ pose) | `GuiGraphicsExtractor` |
-| [`ScreenHost`](../core/src/main/java/dev/kestrel/core/platform/ScreenHost.java) | open/close our screen, screen kind, scaled size | `GuiScreen` subclass | `Screen` subclass | `Screen` subclass (`gui.setScreen` on 26.2+) |
+| [`Renderer`](../api/src/main/java/dev/mw19/api/render/Renderer.java) (api) | rect, gradient, text, item icon, clip, push/pop/translate/scale, guiScale | `Gui.drawRect`, `FontRenderer`, `GlStateManager`, `RenderItem` | `GuiGraphics` (+ pose) | `GuiGraphicsExtractor` |
+| [`ScreenHost`](../core/src/main/java/dev/mw19/core/platform/ScreenHost.java) | open/close our screen, screen kind, scaled size | `GuiScreen` subclass | `Screen` subclass | `Screen` subclass (`gui.setScreen` on 26.2+) |
 | `InputBackend` | key/mouse state, key names, vanilla binds (conflicts), clipboard | LWJGL2 `Keyboard`/`Mouse` (codes mapped to GLFW) | GLFW via `InputConstants` | same |
 | `PlayerAccess` | pos/rot, ping, armor/hands/inventory counts, effects, hurt state, reducedDebugInfo | `EntityPlayerSP` | `LocalPlayer` | `LocalPlayer` |
 | `WorldAccess` | loaded?, server address, dimension, time, tab players, scoreboard lines | `WorldClient` | `ClientLevel` | `ClientLevel` |
-| [`ChatAccess`](../core/src/main/java/dev/kestrel/core/platform/ChatAccess.java) | local message, explicit send (user-initiated only) | `GuiNewChat` | `ChatComponent` | same |
+| [`ChatAccess`](../core/src/main/java/dev/mw19/core/platform/ChatAccess.java) | local message, explicit send (user-initiated only) | `GuiNewChat` | `ChatComponent` | same |
 | `GameOptions` | gamma, fov, hideGui, perspective, guiScale, sensitivity | `GameSettings` | `Options` | `Options` |
-| [`ModList`](../core/src/main/java/dev/kestrel/core/platform/ModList.java) | loaded mod ids and versions → `compat.*` flags | `Loader` | `FabricLoader` | `FabricLoader` |
+| [`ModList`](../core/src/main/java/dev/mw19/core/platform/ModList.java) | loaded mod ids and versions → `compat.*` flags | `Loader` | `FabricLoader` | `FabricLoader` |
 
 Key codes are **GLFW constants** everywhere in core. The 1.8.9 adapter translates LWJGL2 codes through a table. Mouse
 buttons are `1000 + button`.
 
-**Hooks in (platform → core)** are plain static calls on `dev.kestrel.core.Kestrel`. They cost nothing when no module is
+**Hooks in (platform → core)** are plain static calls on `dev.mw19.core.Mw19`. They cost nothing when no module is
 interested. Each wraps its work in the guard described below.
 - events: `tick(start/end)`, `renderHud(Renderer, partial)`, `key(code, action, mods)`, `mouse(button, action)`,
   `scroll(delta) → consumed?`, `chat(ChatLine) → keep/modify`, `joinServer(addr)`, `leaveServer()`, `screenOpened(kind)`,
@@ -49,7 +49,7 @@ interested. Each wraps its work in the guard described below.
 
 ## Error isolation
 Every module callback (`onEnable/onTick/onRender/...`) runs inside `Guard.run(module, phase, fn)`:
-- It catches `Throwable` (except VirtualMachineError), logs `[Kestrel] module <id> failed in <phase>` with the stack
+- It catches `Throwable` (except VirtualMachineError), logs `[MW19] module <id> failed in <phase>` with the stack
   trace, and increments the module's failure counter.
 - At **5 failures** the module is disabled for the session with a toast "‹name› was disabled after repeated errors" and
   a log line. It is not persisted, so a restart retries.
@@ -61,45 +61,45 @@ Listeners are indexed by exact event class into pre-sized arrays, and dispatch i
 (`RenderHudEvent`, `TickEvent`) are **singleton mutable objects reused every frame**, so dispatch allocates nothing.
 
 ## Config
-`<gameDir>/Kestrel/config.json` (global) + `profiles/<name>.json`, both carrying `"schema": N`.
+`<gameDir>/MW19/config.json` (global) + `profiles/<name>.json`, both carrying `"schema": N`.
 - **Migrations**: an ordered list `N → N+1` of pure functions over the JSON tree, unit-tested with fixtures.
 - **Atomic writes**: write `name.json.tmp`, fsync, `Files.move(ATOMIC_MOVE, REPLACE_EXISTING)`. If the platform lacks
   atomic move, fall back to a non-atomic replace.
 - **Debounced autosave**: a dirty flag plus one background thread. It saves 1.5 s after the last change and flushes on shutdown.
 - **Rolling backups**: `backups/<file>.<yyyyMMdd-HHmmss>.json`, newest 10 kept. A corrupt file on load is moved to
   `*.corrupt-<ts>` and the newest backup is loaded.
-- **Profiles**: unlimited; switching is instant (in memory). Export = `KESTREL-P1:` + base64(deflate(json)) + `:` + crc32.
+- **Profiles**: unlimited; switching is instant (in memory). Export = `MW19-P1:` + base64(deflate(json)) + `:` + crc32.
   Import validates the CRC and schema, then migrates. Auto-switch maps a server pattern to a profile name.
 
 ## Plugins
-`<gameDir>/Kestrel/plugins/*.jar` + `plugin.json` `{id, name, version, api, main, depends{}, authors, description}`.
+`<gameDir>/MW19/plugins/*.jar` + `plugin.json` `{id, name, version, api, main, depends{}, authors, description}`.
 Load order: parse → API check (same major, minor ≤ host) → dependency resolution (topological, cycle = error) →
-first-run consent (D-014) → `URLClassLoader(parent = Kestrel's loader)` → `main.onEnable(PluginContext)`.
+first-run consent (D-014) → `URLClassLoader(parent = MW19's loader)` → `main.onEnable(PluginContext)`.
 A plugin that throws during enable is disabled and reported on the Plugins page. The loader never crashes the game.
 
 ## GUI
-A retained widget tree in core ([`Widget`](../core/src/main/java/dev/kestrel/core/gui/Widget.java): bounds, children, `render(Renderer, mouse, dt)`, input handlers, focus).
+A retained widget tree in core ([`Widget`](../core/src/main/java/dev/mw19/core/gui/Widget.java): bounds, children, `render(Renderer, mouse, dt)`, input handlers, focus).
 Pages: Mods, HUD Editor, Profiles, Keybinds, Plugins, Server Rules, Performance, Themes, About/Compat.
-Animations use [`Anim`](../core/src/main/java/dev/kestrel/core/gui/Anim.java) (value, target, 150–250 ms, ease-out-cubic) and are ticked with frame dt, which allocates nothing.
+Animations use [`Anim`](../core/src/main/java/dev/mw19/core/gui/Anim.java) (value, target, 150–250 ms, ease-out-cubic) and are ticked with frame dt, which allocates nothing.
 Themes are token sets (bg, surface, surface2, border, text, textDim, accent, good, warn, bad) with presets and a
 user accent colour. Blur comes from vanilla `Screen` background rendering (1.20.5+). The 1.8.9 fallback is a dim overlay.
 
 ## HUD
-[`HudModule`](../api/src/main/java/dev/kestrel/api/module/HudModule.java) has a [`HudElement`](../core/src/main/java/dev/kestrel/core/hud/HudElement.java) (anchor ∈ 9 points, offset in GUI units or % of screen, scale, opacity, colours,
-background, border, shadow, radius). Layout math ([`HudLayout`](../core/src/main/java/dev/kestrel/core/hud/HudLayout.java)) is pure and unit-tested: anchor → absolute rect,
+[`HudModule`](../api/src/main/java/dev/mw19/api/module/HudModule.java) has a [`HudElement`](../core/src/main/java/dev/mw19/core/hud/HudElement.java) (anchor ∈ 9 points, offset in GUI units or % of screen, scale, opacity, colours,
+background, border, shadow, radius). Layout math ([`HudLayout`](../core/src/main/java/dev/mw19/core/hud/HudLayout.java)) is pure and unit-tested: anchor → absolute rect,
 clamping, snapping (edges/centres of other elements and screen guides, 4-unit threshold), and grid.
 The editor supports drag, resize (scale), anchor picking, undo/redo (snapshot stack, 64 deep) and reset.
 Text is cached per element and rebuilt only when the underlying value changes, so there is no per-frame string building.
 
 ## Threads
 - Main/render thread: all Minecraft access.
-- `Kestrel-IO` (1 thread): config saves and backups.
-- `Kestrel-Net` (2 threads): HTTP. Results return to the main thread through `Scheduler.runOnMain`, drained at tick start.
+- `MW19-IO` (1 thread): config saves and backups.
+- `MW19-Net` (2 threads): HTTP. Results return to the main thread through `Scheduler.runOnMain`, drained at tick start.
 
 ## Performance budget
 Own overhead < 0.3 ms/frame with default modules. Each hook is timed (`System.nanoTime` pairs, ~20 ns). Per-module
 cost appears on the Performance page and is exported by the benchmark harness (Phase 5). No steady-state allocation
-in our code: reused event objects, cached strings, pooled `EffectInfo`/[`ItemRef`](../api/src/main/java/dev/kestrel/api/render/ItemRef.java) handles.
+in our code: reused event objects, cached strings, pooled `EffectInfo`/[`ItemRef`](../api/src/main/java/dev/mw19/api/render/ItemRef.java) handles.
 
 ## Fabric version groups (hypothesis; confirmed with `javap` against each mapped jar in Phases 1–3)
 | Group | Versions | Breaking points for us |

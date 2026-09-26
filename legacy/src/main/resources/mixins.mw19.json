@@ -1,0 +1,19 @@
+{
+  "required": false,
+  "minVersion": "0.7",
+  "package": "dev.mw19.forge.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "EffectRendererMixin",
+    "EntityMixin",
+    "EntityRendererMixin",
+    "GuiPlayerTabOverlayMixin",
+    "ItemRendererMixin",
+    "MinecraftMixin",
+    "RenderMixin",
+    "RendererLivingEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -23,10 +23,10 @@ dependencies {
     bundle(project(":core"))
 }
 
-// -Pkestrel.smoke=<seconds> makes the dev client drive itself (see core Smoke + scripts/smoke.sh).
-val smokeSeconds: String? = providers.gradleProperty("kestrel.smoke").orNull
-// -Pkestrel.smokeClicks=1: smoke.sh's xdotool helper will click the menu for real (Smoke.requestClick).
-val smokeClicks = providers.gradleProperty("kestrel.smokeClicks").isPresent
+// -Pmw19.smoke=<seconds> makes the dev client drive itself (see core Smoke + scripts/smoke.sh).
+val smokeSeconds: String? = providers.gradleProperty("mw19.smoke").orNull
+// -Pmw19.smokeClicks=1: smoke.sh's xdotool helper will click the menu for real (Smoke.requestClick).
+val smokeClicks = providers.gradleProperty("mw19.smokeClicks").isPresent
 
 loom {
     runConfigs.all {
@@ -37,9 +37,9 @@ loom {
         // so a silently skipped optional mixin fails the smoke test.
         jvmArguments.add("-Dmixin.debug.countInjections=true")
         if (smokeSeconds != null) {
-            jvmArguments.add("-Dkestrel.smoke=1")
-            jvmArguments.add("-Dkestrel.smoke.seconds=$smokeSeconds")
-            if (smokeClicks) jvmArguments.add("-Dkestrel.smoke.clicks=true")
+            jvmArguments.add("-Dmw19.smoke=1")
+            jvmArguments.add("-Dmw19.smoke.seconds=$smokeSeconds")
+            if (smokeClicks) jvmArguments.add("-Dmw19.smoke.clicks=true")
         }
     }
 }
@@ -73,7 +73,7 @@ tasks.processResources {
 tasks.named<Jar>("jar") {
     dependsOn(bundle)
     from({ bundle.map { zipTree(it) } }) { exclude("META-INF/MANIFEST.MF") }
-    from(rootProject.file("LICENSE")) { rename { "LICENSE_kestrel" } }
+    from(rootProject.file("LICENSE")) { rename { "LICENSE_mw19" } }
 }
 
 // Copies the final (remapped on <=1.21.11) jar to <root>/dist.

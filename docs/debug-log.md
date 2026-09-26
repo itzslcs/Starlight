@@ -1,5 +1,8 @@
 # Debug log
 
+> The client was called **Kestrel** until 2026-09-26 and is now **MW19** ([DECISIONS](DECISIONS.md) D-019). Entries before that date keep
+> the old names (`Kestrel`, `dev.kestrel`, `Kestrel/`) as they appeared at the time.
+
 See also: [COMPAT_MATRIX](COMPAT_MATRIX.md), [PROGRESS](PROGRESS.md), and the debugging protocol in [CLAUDE.md](../CLAUDE.md).
 
 Every entry follows the protocol: reproduce, state a hypothesis (and what would refute it), isolate, then fix with evidence.
@@ -95,10 +98,10 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
   (between passes). The Mods page measures its category chips before anything else, so **every** click on the default
   page threw, and the guard swallowed it. This has been present since Phase 1. The smoke only rendered the menu and
   never clicked it, so it never saw the failure.
-- **Fix:** `Gfx` keeps the last backend for measuring (`textWidth`/`lineHeight`); drawing still needs an active pass.
+- **Fix:** [`Gfx`](../core/src/main/java/dev/mw19/core/render/Gfx.java) keeps the last backend for measuring (`textWidth`/`lineHeight`); drawing still needs an active pass.
   Verified with xdotool on 1.21.11: toggle, category chip, every sidebar page and a settings page all respond, and
   there are 0 `GUI click failed`.
-- **Regression tests:** `GfxMeasureTest` (measuring after `end()`), and every smoke run now clicks the FPS toggle through
+- **Regression tests:** [`GfxMeasureTest`](../core/src/test/java/dev/mw19/core/GfxMeasureTest.java) (measuring after `end()`), and every smoke run now clicks the FPS toggle through
   real X11 input (`Smoke.requestClick` + the xdotool helper in `smoke.sh`) and fails unless the module flips. It passes
   through GLFW (1.21.11), SDL3 (26.3) and LWJGL 2 (1.8.9). xdotool's `--name` cannot read SDL3's UTF-8 window title,
   so the helper finds the window by `_NET_WM_PID` first.

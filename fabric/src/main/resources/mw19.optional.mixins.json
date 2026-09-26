@@ -1,0 +1,27 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "dev.mw19.fabric.mixin",
+  "plugin": "dev.mw19.fabric.Mw19MixinPlugin",
+  "compatibilityLevel": "${java}",
+  "client": [
+    "CameraMixin",
+    "ChatComponentMixin",
+    "EntityTurnMixin",
+    "FovMixin",
+    "GameRendererMixin",
+    "ItemInHandRendererMixin",
+    "ItemSwapMixin",
+    "LightTextureMixin",
+    "LivingEntityRendererMixin",
+    "MultiPlayerGameModeMixin",
+    "NameTagMixin",
+    "OverlayTextureAccessor",
+    "ParticleEngineMixin",
+    "PlayerTabOverlayMixin",
+    "ScreenEffectRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

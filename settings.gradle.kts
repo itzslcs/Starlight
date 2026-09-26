@@ -15,15 +15,15 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-rootProject.name = "Kestrel"
+rootProject.name = "MW19"
 include("api", "core", "addons:sample", "addons:tiertags")
 
-// versions.json is the single source of truth for targets. -Pkestrel.fabricTargets=1.21.11,26.3 narrows it for dev.
+// versions.json is the single source of truth for targets. -Pmw19.fabricTargets=1.21.11,26.3 narrows it for dev.
 @Suppress("UNCHECKED_CAST")
 val allFabric = ((groovy.json.JsonSlurper().parse(file("versions.json")) as Map<String, Any>)["targets"] as List<Map<String, Any>>)
     .filter { it["loader"] == "fabric" }
     .map { it["mc"] as String }
-val only = providers.gradleProperty("kestrel.fabricTargets").orNull
+val only = providers.gradleProperty("mw19.fabricTargets").orNull
     ?.split(',')?.map(String::trim)?.filter(String::isNotEmpty).orEmpty()
 // Stonecutter requires its active version (fabric/stonecutter.gradle.kts) to stay registered, even when narrowed.
 val activeVersion = Regex("stonecutter active \"([^\"]+)\"").find(file("fabric/stonecutter.gradle.kts").readText())?.groupValues?.get(1)

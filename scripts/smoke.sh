@@ -9,13 +9,14 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RUN="$ROOT/run/$MC"
 OUT="$ROOT/smoke-out/$MC"
 rm -rf "$OUT" && mkdir -p "$OUT" "$RUN"
-rm -rf "$RUN/saves/kestrel-smoke" "$RUN"/screenshots/kestrel-smoke-* "$RUN/logs/latest.log" "$RUN/Kestrel"
+rm -rf "$RUN/saves/mw19-smoke" "$RUN"/screenshots/mw19-smoke-* "$RUN/logs/latest.log" "$RUN/MW19"
 
-# Fresh Kestrel config with the addon plugins installed and pre-approved (consent is keyed by the jar's SHA-256).
-mkdir -p "$RUN/Kestrel/plugins"
+# Fresh MW19 config with the addon plugins installed and pre-approved (consent is keyed by the jar's SHA-256).
+mkdir -p "$RUN/MW19/plugins"
+rm -f "$ROOT"/addons/*/build/libs/*.jar  # stale jars (e.g. from before a rename) would be installed too
 (cd "$ROOT" && ./gradlew -q :addons:sample:jar :addons:tiertags:jar) || { echo "FAIL build addons" | tee "$OUT/result.txt"; exit 1; }
-cp "$ROOT"/addons/*/build/libs/*.jar "$RUN/Kestrel/plugins/"
-python3 - "$RUN/Kestrel" <<'PY'
+cp "$ROOT"/addons/*/build/libs/*.jar "$RUN/MW19/plugins/"
+python3 - "$RUN/MW19" <<'PY'
 import hashlib, json, os, sys, zipfile
 root = sys.argv[1]; consent = {}
 for f in os.listdir(os.path.join(root, "plugins")):
@@ -45,12 +46,12 @@ cp "$RUN/options.txt" "$RUN/optionsof.txt" 2>/dev/null || true
 
 # With xdotool, the run also clicks the menu through real X11 input (Smoke.requestClick logs where).
 CLICKS=""
-command -v xdotool >/dev/null && CLICKS="-Pkestrel.smokeClicks=1"
+command -v xdotool >/dev/null && CLICKS="-Pmw19.smokeClicks=1"
 if [ "$MC" = "1.8.9" ]; then
   (cd "$ROOT" && ./gradlew :api:jar :core:jar -q) || { echo "FAIL build core" | tee "$OUT/result.txt"; exit 1; }
-  CMD=(bash -c "cd '$ROOT/legacy' && ./gradlew runClient --console=plain -Pkestrel.smoke=$SECS $CLICKS")
+  CMD=(bash -c "cd '$ROOT/legacy' && ./gradlew runClient --console=plain -Pmw19.smoke=$SECS $CLICKS")
 else
-  CMD=("$ROOT/gradlew" -p "$ROOT" ":fabric:$MC:runClient" --console=plain "-Pkestrel.smoke=$SECS" "-Pkestrel.fabricTargets=$MC" $CLICKS)
+  CMD=("$ROOT/gradlew" -p "$ROOT" ":fabric:$MC:runClient" --console=plain "-Pmw19.smoke=$SECS" "-Pmw19.fabricTargets=$MC" $CLICKS)
 fi
 
 # Click helper: waits for "SMOKE CLICK <display> <pid> <x> <y>" (window pixels) in the run output and clicks there.
@@ -84,7 +85,7 @@ CODE=$?
 echo "exit=$CODE after $(( $(date +%s) - START ))s" > "$OUT/result.txt"
 
 cp "$RUN/logs/latest.log" "$OUT/latest.log" 2>/dev/null || true
-cp "$RUN"/screenshots/kestrel-smoke-*.png "$OUT/" 2>/dev/null || true
+cp "$RUN"/screenshots/mw19-smoke-*.png "$OUT/" 2>/dev/null || true
 LOG="$OUT/latest.log"
 [ -s "$LOG" ] || LOG="$OUT/gradle.log"
 
@@ -103,8 +104,8 @@ for i, l in enumerate(text.splitlines()):
         records.append(cur)
     else:
         cur[2].append(l)
-bad = [r"KESTREL SMOKE FAIL", r"Mixin apply .*failed", r"InvalidInjectionException", r"MixinApplyError",
-       r"InjectionError", r"\(Kestrel\).*(failed|ERROR)", r"/ERROR\]", r"Exception", r"^\s+at "]
+bad = [r"MW19 SMOKE FAIL", r"Mixin apply .*failed", r"InvalidInjectionException", r"MixinApplyError",
+       r"InjectionError", r"\(MW19\).*(failed|ERROR)", r"/ERROR\]", r"Exception", r"^\s+at "]
 # Dev-environment noise that is not ours: the fake dev account (authlib 401, Realms JWT) and missing
 # text-to-speech natives under Xvfb. Matched against the record HEAD only.
 allow = [r"Failed to fetch user properties", r"Realms", r"realms", r"Narrator", r"narrator", r"text2speech",
@@ -127,7 +128,7 @@ for i, (ln, head, cont) in enumerate(records):
     if any(re.search(p, body, re.M) for p in bad) and not any(re.search(a, head) for a in allow):
         hits.append(f"{ln}: {head[:200]}" + (f"  [+{len(cont)} lines]" if cont else ""))
 fail = []
-if "KESTREL SMOKE PASS" not in text: fail.append("no PASS marker")
+if "MW19 SMOKE PASS" not in text: fail.append("no PASS marker")
 # A clean PASS must also exit cleanly: a crash or hang after the marker (see the shutdown watchdog) is a failure.
 code = re.search(r"exit=(\d+)", open(res).read())
 if code and code.group(1) != "0": fail.append("process exit code " + code.group(1))
@@ -137,7 +138,7 @@ if audit != "0": fail.append("mixin audit: " + (audit_lines[-1] if audit_lines e
 with open(res, "a") as f:
     f.write(("PASS" if not fail else "FAIL: " + "; ".join(fail)) + "\n")
     for h in hits[:40]: f.write("  " + h + "\n")
-    m = re.search(r"KESTREL SMOKE PASS.*", text)
+    m = re.search(r"MW19 SMOKE PASS.*", text)
     if m: f.write(m.group(0)[:900] + "\n")
     if audit_lines: f.write(audit_lines[-1] + "\n")
 print(open(res).read())

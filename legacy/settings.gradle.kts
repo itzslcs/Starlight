@@ -16,4 +16,4 @@ plugins {
 
 // Separate build on purpose (DECISIONS D-003): Essential's architectury-loom fork and Fabric Loom share
 // net.fabricmc.loom.* class names and must not meet in one Gradle build.
-rootProject.name = "Kestrel-legacy"
+rootProject.name = "MW19-legacy"

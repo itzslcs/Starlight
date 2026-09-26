@@ -63,14 +63,14 @@ project(":fabric").subprojects {
 }
 
 /**
- * Importable Prism Launcher instances (DECISIONS D-017, docs/PRISM.md): dist/prism/Kestrel-<mc>.zip holds instance.cfg,
+ * Importable Prism Launcher instances (DECISIONS D-017, docs/PRISM.md): dist/prism/MW19-<mc>.zip holds instance.cfg,
  * mmc-pack.json (component uids/versions as in Prism's own meta) and the mod jar, plus the Tier Tags addon, which stays
  * off until the user approves it. Fixed entry times keep the zips byte-identical across builds.
  */
 fun writePrismInstances(root: File, fabricLoader: String) {
     val out = root.resolve("prism").apply { mkdirs() }
-    val addons = root.resolve("plugins").listFiles { f -> f.name.startsWith("Kestrel-addon-tiertags-") }.orEmpty()
-    val jars = root.listFiles { f -> f.name.matches(Regex("Kestrel-.+\\+mc.+\\.jar")) }.orEmpty().sortedBy { it.name }
+    val addons = root.resolve("plugins").listFiles { f -> f.name.startsWith("MW19-addon-tiertags-") }.orEmpty()
+    val jars = root.listFiles { f -> f.name.matches(Regex("MW19-.+\\+mc.+\\.jar")) }.orEmpty().sortedBy { it.name }
     for (jar in jars) {
         val mc = Regex("\\+mc(.+)\\.jar$").find(jar.name)!!.groupValues[1]
         val components = if (mc == "1.8.9") {
@@ -82,8 +82,8 @@ fun writePrismInstances(root: File, fabricLoader: String) {
                 """{"uid": "net.fabricmc.fabric-loader", "version": "$fabricLoader"}""")
         }
         val pack = "{\n    \"formatVersion\": 1,\n    \"components\": [\n        " + components.joinToString(",\n        ") + "\n    ]\n}\n"
-        val cfg = "[General]\nInstanceType=OneSix\nname=Kestrel $mc\niconKey=default\n"
-        ZipOutputStream(out.resolve("Kestrel-$mc.zip").outputStream()).use { zip ->
+        val cfg = "[General]\nInstanceType=OneSix\nname=MW19 $mc\niconKey=default\n"
+        ZipOutputStream(out.resolve("MW19-$mc.zip").outputStream()).use { zip ->
             fun put(name: String, bytes: ByteArray) {
                 zip.putNextEntry(ZipEntry(name).apply { time = 315532800000L }) // 1980-01-01
                 zip.write(bytes)
@@ -92,7 +92,7 @@ fun writePrismInstances(root: File, fabricLoader: String) {
             put("instance.cfg", cfg.toByteArray())
             put("mmc-pack.json", pack.toByteArray())
             put("minecraft/mods/${jar.name}", jar.readBytes())
-            for (a in addons) put("minecraft/Kestrel/plugins/${a.name}", a.readBytes())
+            for (a in addons) put("minecraft/MW19/plugins/${a.name}", a.readBytes())
         }
     }
     logger.lifecycle("dist/prism/: ${jars.size} Prism instance zips")

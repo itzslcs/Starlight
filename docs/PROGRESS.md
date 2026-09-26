@@ -10,7 +10,7 @@
 ## Phase 1: walking skeleton (done 2026-09-25)
 - Build: Gradle 9.8.0 (daemon pinned to JDK 25 via [`gradle/gradle-daemon-jvm.properties`](../gradle/gradle-daemon-jvm.properties)), Stonecutter 0.9.8 +
   loom-back-compat 0.4.2 (Loom 1.18.2) for `fabric/`, and a separate `legacy/` build (Essential architectury-loom 1.15.50) for Forge 1.8.9.
-  `./gradlew buildAll` → `dist/Kestrel-0.1.0+mc{1.21.11,1.8.9}.jar` + `SHA256SUMS`.
+  `./gradlew buildAll` → `dist/MW19-0.1.0+mc{1.21.11,1.8.9}.jar` + `SHA256SUMS`.
 - `api` (plugin surface) + `core` (module system, event bus, config/profiles/migrations/backups, HUD layout + manager,
   full GUI shell: Mods, HUD editor, Profiles, Keybinds, Plugins stub, Server Rules, Performance, Themes, About).
 - Modules: FPS, Keystrokes, Armor Status. 31 core unit tests pass.
@@ -27,7 +27,7 @@
 ## Phase 4: features (done 2026-09-25, commit dbeb9f1 + this commit)
 - Full module set, plugin API + loader with per-jar consent, the Tier Tags addon and the Session Stats sample, own nametag.
 - **KeyCPS** (the owner's own mod) replaced the CPS and Keystrokes modules ([DECISIONS](DECISIONS.md) D-018). It counts per
-  binding from input events ([`InputRates`](../core/src/main/java/dev/kestrel/core/modules/InputRates.java)), and every smoke run feeds it 7 attack + 4 use presses and asserts the counts.
+  binding from input events ([`InputRates`](../core/src/main/java/dev/mw19/core/modules/InputRates.java)), and every smoke run feeds it 7 attack + 4 use presses and asserts the counts.
 - Docs: [README](../README.md) (hub + privacy/network list), [PLUGIN_API](PLUGIN_API.md), [THIRD_PARTY](THIRD_PARTY.md) (licences
   checked from artifacts/repos; Mixin's MIT notice now ships in the 1.8.9 jar), [PRISM](PRISM.md), and a generated
   [CODE_MAP](CODE_MAP.md). The docs are a linked graph (repo root = Obsidian vault; [`scripts/docs-graph.py`](../scripts/docs-graph.py)).
@@ -37,12 +37,12 @@
 - 26.x API seams from javap on the unobfuscated jars: GuiGraphics→GuiGraphicsExtractor (26.1), Gui→Hud and screen/chat
   moved under `mc.gui` (26.2), render-state extraction (lightmap, camera FOV/angles, damage tilt), private chat
   `addMessage` with GuiMessageSource, world clocks, and **26.3's switch from GLFW to SDL3** (scancodes, SDL_Keymod,
-  1-based mouse buttons). Kestrel keeps GLFW codes as its canonical key space via [`SdlKeys`](../core/src/main/java/dev/kestrel/core/SdlKeys.java), so profiles stay portable.
+  1-based mouse buttons). MW19 keeps GLFW codes as its canonical key space via [`SdlKeys`](../core/src/main/java/dev/mw19/core/SdlKeys.java), so profiles stay portable.
 - All 18 jars build. The dev smoke passes on 17 of 18 ([COMPAT_MATRIX](COMPAT_MATRIX.md)); mixin audits are fully wired.
 - **Open:** 26.1.1 hangs in JVM exit after a passing run (2/2 runs; [debug-log](debug-log.md)).
 
 ## Release status (2026-09-25)
-- **Modrinth:** draft project `kestrel` with all 18 jars as `0.1.0+mc<mc>` alpha versions (uploaded hashes match `dist/`).
+- **Modrinth:** draft project `mw19` with all 18 jars as `0.1.0+mc<mc>` alpha versions (uploaded hashes match `dist/`).
   It is not submitted for review yet: the owner checks the page (the name is still the D-001 placeholder) and submits.
 - **GitHub:** not pushed. The repo has no remote yet.
 

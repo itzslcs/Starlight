@@ -1,15 +1,15 @@
 # Third-party components and licenses
 
-Kestrel itself is MIT ([`LICENSE`](../LICENSE), shipped in every jar as `LICENSE_kestrel`). Licenses below were checked on 2026-09-25
+MW19 itself is MIT ([`LICENSE`](../LICENSE), shipped in every jar as `LICENSE_mw19`). Licenses below were checked on 2026-09-25
 from the artifact itself (POM `<licenses>` or a license file in the jar) or, if the artifact declares none, from the
 project's source repository. The *Evidence* column names the source.
 
-## Shipped inside Kestrel jars
+## Shipped inside MW19 jars
 | Component | Version | Where | License | Evidence | How we comply |
 |---|---|---|---|---|---|
 | SpongePowered Mixin | 0.7.11-SNAPSHOT | shaded into the **1.8.9** jar only (`org/spongepowered/asm`) | MIT | POM: "MIT license"; jar: `LICENSE.txt` (The MIT License) | notice shipped as `LICENSE_mixin` in the jar; the build-only `org/spongepowered/tools` part is not shipped |
 
-Nothing else is bundled. The Fabric jars contain only Kestrel classes (`dev/kestrel/{api,core,fabric}`) and resources,
+Nothing else is bundled. The Fabric jars contain only MW19 classes (`dev/mw19/{api,core,fabric}`) and resources,
 checked by listing the built jars. The addon jars contain only their own classes.
 
 ## Provided by the player's install (not shipped by us)
@@ -35,7 +35,7 @@ checked by listing the built jars. The addon jars contain only their own classes
 | MCP mappings `stable_22` | 1.8.9 build | MCP terms (mod development use) | applied by Loom at build time and not redistributed |
 
 GPL-2.0 (pack200) and LGPL-3.0 (Stonecutter) apply only to the build tools themselves. We neither link them into nor
-ship them with our jars, so they place no obligations on Kestrel's output.
+ship them with our jars, so they place no obligations on MW19's output.
 
 ## Online services (runtime, only when the user turns them on)
 | Service | Used by | When |
@@ -44,15 +44,15 @@ ship them with our jars, so they place no obligations on Kestrel's output.
 | SubTiers API v2 `https://subtiers.net/api/v2/profile/{uuid}` | Tier Tags addon | same, if the user picks SubTiers |
 | A user-entered `https://` v2-compatible URL | Tier Tags addon | same, if the user enters one |
 
-No other network access exists in Kestrel (see [README](../README.md) → Privacy).
+No other network access exists in MW19 (see [README](../README.md) → Privacy).
 
 ## KeyCPS (owner's own mod)
-[`core/.../modules/KeyCpsModule.java`](../core/src/main/java/dev/kestrel/core/modules/KeyCpsModule.java) and [`InputRates.java`](../core/src/main/java/dev/kestrel/core/modules/InputRates.java) port KeyCPS 1.6.1 (modrinth.com/mod/keycps). Its
-fabric.mod.json declares MIT, while the Modrinth page lists All Rights Reserved. KeyCPS's author is Kestrel's owner, who
-asked for the port ([DECISIONS](DECISIONS.md) D-018). No KeyCPS binary is bundled, and the ported code is covered by Kestrel's MIT licence.
+[`core/.../modules/KeyCpsModule.java`](../core/src/main/java/dev/mw19/core/modules/KeyCpsModule.java) and [`InputRates.java`](../core/src/main/java/dev/mw19/core/modules/InputRates.java) port KeyCPS 1.6.1 (modrinth.com/mod/keycps). Its
+fabric.mod.json declares MIT, while the Modrinth page lists All Rights Reserved. KeyCPS's author is MW19's owner, who
+asked for the port ([DECISIONS](DECISIONS.md) D-018). No KeyCPS binary is bundled, and the ported code is covered by MW19's MIT licence.
 
 ## Original work
-Apart from the KeyCPS port above, all Kestrel code, UI, icons (drawn from rectangles in code, [`core/.../gui/Icons.java`](../core/src/main/java/dev/kestrel/core/gui/Icons.java), D-009), themes and texts are original. No code or
+Apart from the KeyCPS port above, all MW19 code, UI, icons (drawn from rectangles in code, [`core/.../gui/Icons.java`](../core/src/main/java/dev/mw19/core/gui/Icons.java), D-009), themes and texts are original. No code or
 assets were copied or decompiled from other clients or mods. TierTagger (MPL-2.0) and Tiers (GPL-3.0) were used only
-to identify which public tier lists exist (DECISIONS D-015). Their code was never read or copied. Kestrel renders text
+to identify which public tier lists exist (DECISIONS D-015). Their code was never read or copied. MW19 renders text
 with Minecraft's own font and bundles no fonts.

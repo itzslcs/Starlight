@@ -4,13 +4,13 @@
   "version": "${version}",
   "name": "${name}",
   "description": "Client-side HUD, GUI, modules and plugins. Legit features only.",
-  "authors": ["Kestrel contributors"],
+  "authors": ["MW19 contributors"],
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
-    "client": ["dev.kestrel.fabric.KestrelFabric"]
+    "client": ["dev.mw19.fabric.Mw19Fabric"]
   },
-  "mixins": ["kestrel.mixins.json", "kestrel.optional.mixins.json"],
+  "mixins": ["mw19.mixins.json", "mw19.optional.mixins.json"],
   "depends": {
     "fabricloader": "${loader}",
     "minecraft": "${minecraft}",

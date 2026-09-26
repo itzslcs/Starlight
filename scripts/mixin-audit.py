@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Proves Kestrel's injections were applied: disassembles the classes Mixin exported during a dev run
+"""Proves MW19's injections were applied: disassembles the classes Mixin exported during a dev run
 (-Dmixin.debug.export) and checks each target method calls our handler.
 usage: scripts/mixin-audit.py <run-dir> <mc-version>   (exit 1 if anything is not wired)"""
 import glob, os, re, subprocess, sys
@@ -8,16 +8,16 @@ run, mc = sys.argv[1], sys.argv[2]
 def ver(v): return tuple(int(x) for x in re.findall(r'\d+', v))
 V = ver(mc)
 if mc == "1.8.9":
-    checks = [("net.minecraft.client.renderer.entity.RendererLivingEntity", "setBrightness", "kestrel$r"),
-              ("net.minecraft.client.renderer.entity.RendererLivingEntity", "canRenderName", "kestrel$own"),
-              ("net.minecraft.client.renderer.EntityRenderer", "hurtCameraEffect", "kestrel$tilt"),
-              ("net.minecraft.client.renderer.EntityRenderer", "orientCamera", "kestrel$yaw"),
-              ("net.minecraft.client.renderer.ItemRenderer", "renderFireInFirstPerson", "kestrel$fireAlpha"),
-              ("net.minecraft.client.particle.EffectRenderer", "emitParticleAtEntity", "kestrel$more"),
-              ("net.minecraft.entity.Entity", "setAngles", "kestrel$turn"),
-              ("net.minecraft.client.renderer.entity.Render", "renderLivingLabel", "kestrel$label"),
-              ("net.minecraft.client.gui.GuiPlayerTabOverlay", "getPlayerName", "kestrel$decorate"),
-              ("net.minecraft.client.Minecraft", "shutdownMinecraftApplet", "kestrel$shutdown")]
+    checks = [("net.minecraft.client.renderer.entity.RendererLivingEntity", "setBrightness", "mw19$r"),
+              ("net.minecraft.client.renderer.entity.RendererLivingEntity", "canRenderName", "mw19$own"),
+              ("net.minecraft.client.renderer.EntityRenderer", "hurtCameraEffect", "mw19$tilt"),
+              ("net.minecraft.client.renderer.EntityRenderer", "orientCamera", "mw19$yaw"),
+              ("net.minecraft.client.renderer.ItemRenderer", "renderFireInFirstPerson", "mw19$fireAlpha"),
+              ("net.minecraft.client.particle.EffectRenderer", "emitParticleAtEntity", "mw19$more"),
+              ("net.minecraft.entity.Entity", "setAngles", "mw19$turn"),
+              ("net.minecraft.client.renderer.entity.Render", "renderLivingLabel", "mw19$label"),
+              ("net.minecraft.client.gui.GuiPlayerTabOverlay", "getPlayerName", "mw19$decorate"),
+              ("net.minecraft.client.Minecraft", "shutdownMinecraftApplet", "mw19$shutdown")]
     jars = [j for j in glob.glob(os.path.expanduser("~/.gradle/caches/essential-loom/minecraftMaven/**/*.jar"), recursive=True)
             if "sources" not in j and "-srg-" not in j and "-intermediary-" not in j]
 else:
@@ -26,30 +26,30 @@ else:
     hud = "net.minecraft.client.gui.Hud" if V >= (26, 2) else "net.minecraft.client.gui.Gui"
     hands = "net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer" if V >= (26, 3) else "net.minecraft.client.renderer.ItemInHandRenderer"
     swap = "net.minecraft.client.player.FirstPersonHandsAndItems" if V >= (26, 3) else "net.minecraft.client.renderer.ItemInHandRenderer"
-    fire = ([("net.minecraft.client.renderer.ScreenEffectRenderer", "lambda$submitFire$0", "kestrel$fireY"),
-             ("net.minecraft.client.renderer.ScreenEffectRenderer", "buildFireQuad", "kestrel$fireAlpha")] if V >= (26, 2) else
-            [("net.minecraft.client.renderer.ScreenEffectRenderer", "renderFire", "kestrel$fireAlpha")])
-    checks = [(hud, "extractRenderState" if unobf else "render", "kestrel$hud"),
-              (hud, "extractCrosshair" if unobf else "renderCrosshair", "kestrel$crosshair"),
-              ("net.minecraft.client.Minecraft", "tick", "kestrel$tickStart"),
-              ("net.minecraft.client.KeyboardHandler", "keyPress", "kestrel$key"),
-              ("net.minecraft.client.MouseHandler", "onScroll", "kestrel$scroll"),
-              ("net.minecraft.client.renderer.LightmapRenderStateExtractor", "extract", "kestrel$gamma") if unobf else
-              ("net.minecraft.client.renderer.LightTexture", "updateLightTexture", "kestrel$gamma"),
-              ("net.minecraft.client.Camera", "calculateFov", "kestrel$zoom") if unobf else
-              ("net.minecraft.client.renderer.GameRenderer", "getFov", "kestrel$zoom"),
-              ("net.minecraft.client.renderer.GameRenderer", "bobHurt", "kestrel$tilt"),
+    fire = ([("net.minecraft.client.renderer.ScreenEffectRenderer", "lambda$submitFire$0", "mw19$fireY"),
+             ("net.minecraft.client.renderer.ScreenEffectRenderer", "buildFireQuad", "mw19$fireAlpha")] if V >= (26, 2) else
+            [("net.minecraft.client.renderer.ScreenEffectRenderer", "renderFire", "mw19$fireAlpha")])
+    checks = [(hud, "extractRenderState" if unobf else "render", "mw19$hud"),
+              (hud, "extractCrosshair" if unobf else "renderCrosshair", "mw19$crosshair"),
+              ("net.minecraft.client.Minecraft", "tick", "mw19$tickStart"),
+              ("net.minecraft.client.KeyboardHandler", "keyPress", "mw19$key"),
+              ("net.minecraft.client.MouseHandler", "onScroll", "mw19$scroll"),
+              ("net.minecraft.client.renderer.LightmapRenderStateExtractor", "extract", "mw19$gamma") if unobf else
+              ("net.minecraft.client.renderer.LightTexture", "updateLightTexture", "mw19$gamma"),
+              ("net.minecraft.client.Camera", "calculateFov", "mw19$zoom") if unobf else
+              ("net.minecraft.client.renderer.GameRenderer", "getFov", "mw19$zoom"),
+              ("net.minecraft.client.renderer.GameRenderer", "bobHurt", "mw19$tilt"),
               *fire,
-              (swap, "tick", "kestrel$noDip"),
-              (hands, "submitArmWithItem" if V >= (26, 2) else "renderArmWithItem", "kestrel$shieldDown"),
-              ("net.minecraft.client.Camera", "alignWithEntity" if unobf else "setup", "kestrel$pitch"),
-              ("net.minecraft.world.entity.Entity", "turn", "kestrel$turn"),
-              ("net.minecraft.client.gui.components.ChatComponent", "addMessage", "kestrel$chat"),
-              ("net.minecraft.client.renderer.entity.EntityRenderer", nametag, "kestrel$decorate"),
-              ("net.minecraft.client.gui.components.PlayerTabOverlay", "getNameForDisplay", "kestrel$decorate"),
-              ("net.minecraft.client.particle.ParticleEngine", "createTrackingEmitter", "kestrel$more"),
-              ("net.minecraft.client.renderer.entity.LivingEntityRenderer", "shouldShowName", "kestrel$own"),
-              ("net.minecraft.client.multiplayer.MultiPlayerGameMode", "attack", "kestrel$attack")]
+              (swap, "tick", "mw19$noDip"),
+              (hands, "submitArmWithItem" if V >= (26, 2) else "renderArmWithItem", "mw19$shieldDown"),
+              ("net.minecraft.client.Camera", "alignWithEntity" if unobf else "setup", "mw19$pitch"),
+              ("net.minecraft.world.entity.Entity", "turn", "mw19$turn"),
+              ("net.minecraft.client.gui.components.ChatComponent", "addMessage", "mw19$chat"),
+              ("net.minecraft.client.renderer.entity.EntityRenderer", nametag, "mw19$decorate"),
+              ("net.minecraft.client.gui.components.PlayerTabOverlay", "getNameForDisplay", "mw19$decorate"),
+              ("net.minecraft.client.particle.ParticleEngine", "createTrackingEmitter", "mw19$more"),
+              ("net.minecraft.client.renderer.entity.LivingEntityRenderer", "shouldShowName", "mw19$own"),
+              ("net.minecraft.client.multiplayer.MultiPlayerGameMode", "attack", "mw19$attack")]
     M = os.path.expanduser("~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft")
     jars = [j for p in (f"{M}/minecraft-clientonly/{mc}-loom.mappings.*/*.jar", f"{M}/minecraft-common/{mc}-loom.mappings.*/*.jar",
                         f"{M}/minecraft-merged/{mc}/*.jar", f"{M}/minecraft-clientonly/{mc}/*.jar", f"{M}/minecraft-common/{mc}/*.jar")
