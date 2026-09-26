@@ -42,6 +42,13 @@ public final class BuiltinModules {
         m.add(new ChatModule());
         m.add(new EntityCullingModule());
         m.add(new ClearWeatherModule());
+        m.add(new ExploitProtectionModule());
+        m.add(new MoreHud.Saturation());
+        m.add(new MoreHud.SessionTime());
+        m.add(new MoreHud.PackDisplay());
+        m.add(new MoreHud.Stopwatch());
+        m.add(new MoreHud.DayCounter());
+        m.add(new MoreHud.LowHealth());
         m.add(new DurabilityAlertModule());
         m.add(new ScreenshotModule());
         m.add(new FreelookModule());

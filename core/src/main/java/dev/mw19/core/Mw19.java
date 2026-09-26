@@ -59,6 +59,10 @@ public final class Mw19 {
     public final dev.mw19.core.plugin.NameTagRegistry nameTags = new dev.mw19.core.plugin.NameTagRegistry();
     public final dev.mw19.core.plugin.PanelRegistry panels = new dev.mw19.core.plugin.PanelRegistry();
     public final dev.mw19.core.net.HttpClient http;
+    public final dev.mw19.core.host.WorldHost host = new dev.mw19.core.host.WorldHost(this);
+    public final dev.mw19.core.skin.SkinLibrary skins;
+    /** Set by the home screen's Host World: open the Host page once a singleplayer world has loaded. */
+    public boolean hostWhenWorldOpens;
     public final dev.mw19.core.plugin.PluginManager plugins;
     public Theme theme = Theme.preset("MW19");
     public String currentServer;
@@ -98,6 +102,7 @@ public final class Mw19 {
         this.compat = new Compat(platform.mods());
         this.config = new ConfigManager(configDir(platform.gameDir()), modules, hud, client, scheduler);
         this.http = new dev.mw19.core.net.HttpClient(scheduler, modVersion);
+        this.skins = new dev.mw19.core.skin.SkinLibrary(configDir(platform.gameDir()).resolve("skins"));
         this.plugins = new dev.mw19.core.plugin.PluginManager(this, config.pluginsDir);
     }
 
@@ -305,6 +310,16 @@ public final class Mw19 {
         @Override
         public void run() {
             modules.tick();
+            host.tick();
+            if (hostWhenWorldOpens) {
+                dev.mw19.core.platform.ScreenHost.Kind screen = platform.screens().current();
+                if (!platform.inWorld() && screen == dev.mw19.core.platform.ScreenHost.Kind.TITLE) {
+                    hostWhenWorldOpens = false; // backed out of the world list
+                } else if (host.available() && platform.inWorld() && screen == dev.mw19.core.platform.ScreenHost.Kind.NONE) {
+                    hostWhenWorldOpens = false;
+                    gui().openHost();
+                }
+            }
             tickEvent.end = true;
             events.post(tickEvent);
             if (smoke != null) smoke.tick();
@@ -522,6 +537,24 @@ public final class Mw19 {
         }
     }
 
+    private volatile long lastProbeToast;
+
+    /** Exploit Protection stopped a probe (any thread). Tells the player at most once a minute. */
+    public static void onProbeBlocked(final String what) {
+        final Mw19 k = instance;
+        if (k == null) return;
+        long now = System.currentTimeMillis();
+        Log.info("exploit protection: blocked " + what);
+        if (now - k.lastProbeToast < 60_000) return;
+        k.lastProbeToast = now;
+        k.scheduler.runOnMain(new Runnable() {
+            @Override
+            public void run() {
+                k.toast("Exploit Protection", "This server tried " + what + ". MW19 answered like a client without mods.", k.theme.warn);
+            }
+        });
+    }
+
     /** A vanilla title/pause screen finished init: returns whether to add our menu button. */
     public static boolean wantMenuButton() {
         Mw19 k = instance;
@@ -538,6 +571,7 @@ public final class Mw19 {
             @Override
             public void run() {
                 k.plugins.shutdown();
+                k.host.shutdown();
                 k.config.shutdown();
                 k.scheduler.shutdown();
                 k.http.shutdown();

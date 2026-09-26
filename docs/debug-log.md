@@ -80,6 +80,9 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
 - **Next:** isolate Kestrel's share. (1) Leave the world first, then quit from the title screen. (2) Run the same flow with
   every Kestrel module disabled. (3) Capture native stacks with a ptrace-capable run (e.g. launch under `gdb -batch`) if
   both still hang.
+- **Not seen since (2026-09-26):** 26.1.1 exited cleanly in both later full runs (9473849: exit 0 after 101 s; 420a474:
+  exit 0 after 80 s) and in every targeted run. Still OPEN, because nothing explains the two hangs; the watchdog and
+  smoke.sh's exit-code check stay in place to catch a recurrence.
 
 ## 2026-09-25 · 26.2 smoke flagged 4 records after a PASS
 - **Repro:** [`smoke-all.sh`](../scripts/smoke-all.sh) on snapshot 848598d; 26.2 printed `KESTREL SMOKE PASS` (audit 20/20) but the checker found 4 records.
@@ -131,3 +134,16 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
   `AFK_THRESHOLD_MS = 60000`), and a benchmark gives no input. A methodology bug in the harness, not an MW19 cost.
 - **Fix:** the bench writes `inactivityFpsLimit:"minimized"` into its options. FPS Boost does not touch that option,
   because it is the player's power-saving choice.
+
+## 2026-09-26 · Config save failed at exit ("could not save config.json")
+- **Repro:** `scripts/smoke.sh 1.8.9 30` (0.3.0 work in progress): the run passed, but the checker flagged
+  `could not save config.json` and `could not save Default.json`, both `NoSuchFileException: ./MW19/config.json.tmp -> ./MW19/config.json`,
+  logged in the same second as the exit.
+- **Hypothesis:** two writers used the same `.tmp` file at once: the smoke's `flush()` on the game thread and a
+  debounced background save (or the shutdown hook's `flush()`). The first `move` took the tmp file; the second found
+  none. A queued background save could also overwrite a newer `flush()` with an older snapshot.
+- **Isolate:** [`ConfigRaceTest`](../core/src/test/java/dev/mw19/core/ConfigRaceTest.java) runs `flush()` from 4 threads
+  40 times each. Against the 0.2.0 [`ConfigManager`](../core/src/main/java/dev/mw19/core/config/ConfigManager.java) it fails (errors logged); with the fix it passes.
+- **Fix:** `ConfigManager.writeBoth` writes under one lock and skips snapshots older than the last one written;
+  profile writes take the same lock.
+- **Regression test:** `ConfigRaceTest`.

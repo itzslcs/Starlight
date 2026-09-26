@@ -128,4 +128,16 @@ public final class ForgeBackend implements RenderBackend {
     public float guiScale() {
         return gs;
     }
+
+    @Override
+    public void image(int handle, float x1, float y1, float x2, float y2, float u0, float v0, float u1, float v1, float alpha) {
+        flush();
+        ForgeMedia.INSTANCE.blit(handle, x1, y1, x2, y2, u0, v0, u1, v1, alpha);
+    }
+
+    @Override
+    public void player(float x1, float y1, float x2, float y2, int skin, boolean slim, float yaw, float pitch) {
+        flush();
+        ForgeMedia.INSTANCE.player(x1, y1, x2, y2, skin, slim, yaw, pitch);
+    }
 }

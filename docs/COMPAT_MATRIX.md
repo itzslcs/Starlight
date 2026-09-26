@@ -6,26 +6,27 @@ Legend: **pass** / **fail** / **not-run**. Each cell links to or names its evide
 
 | Target | Build (`buildAll`) | Dev smoke ([`scripts/smoke.sh`](../scripts/smoke.sh)) | Production-layout launch | Prism | Dawn/Feather |
 |---|---|---|---|---|---|
-| 1.8.9 (Forge 11.15.1.2318) | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 10/10) | not-run | not-run | not-run |
-| 1.21 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 1.21.1 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 1.21.2 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 1.21.3 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 1.21.4 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 1.21.5 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 1.21.6 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 1.21.7 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 1.21.8 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 1.21.9 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 1.21.10 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 1.21.11 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 26.1 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 26.1.1 | pass (2026-09-25 20:04) | **fail** on f82c0d6 and 848598d: PASS marker and audit 19/19, then the JVM hung at exit (2/2 runs; [debug-log](debug-log.md), open) | not-run | not-run | not-run |
-| 26.1.2 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 19/19) | not-run | not-run | not-run |
-| 26.2 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 20/20) | not-run | not-run | not-run |
-| 26.3 | pass (2026-09-25 20:04) | pass on f82c0d6 (KeyCPS build; `keycps[lmb=7 rmb=4]`, audit 20/20) | not-run | not-run | not-run |
+| 1.8.9 (Forge 11.15.1.2318) | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 13/13) | not-run | not-run | not-run |
+| 1.21 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.1 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.2 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.3 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.4 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.5 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.6 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.7 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.8 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.9 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.10 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 1.21.11 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 26.1 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 26.1.1 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 26.1.2 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 27/27) | not-run | not-run | not-run |
+| 26.2 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 28/28) | not-run | not-run | not-run |
+| 26.3 | pass (0.3.0, 2026-09-26) | pass on 420a474 (0.3.0; packs 20 results, LAN port opened, exploit self-test ok; audit 28/28) | not-run | not-run | not-run |
 
-Snapshots: dbeb9f1 = Phase 4 commit; 848598d = Phase 3 (26.x) work tree; f82c0d6 = KeyCPS build (the code in the
+Snapshots: 420a474 = 0.3.0 (these jars); 9473849 = 0.2.0 (18/18 pass, 2026-09-26); dbeb9f1 = Phase 4 commit; 848598d = Phase 3 (26.x) work tree; f82c0d6 = KeyCPS build (the code in the
 0.1.0 jars). Every run enables all modules and both plugins, checks the log with the allowlist in `smoke.sh`, and runs the
-mixin audit (19/19 wired on 1.21.x–26.1.x, 20/20 on 26.2+, 10/10 on 1.8.9). Evidence lives in `smoke-out/<mc>/` (gitignored,
+mixin audit (0.3.0: 27/27 wired on 1.21.x–26.1.x, 28/28 on 26.2+, 13/13 on 1.8.9). Since 0.3.0 every run also opens
+the Skins, Packs and Host World pages, searches Modrinth, opens the world to LAN and runs the exploit self-test. Evidence lives in `smoke-out/<mc>/` (gitignored,
 regenerated by the script). Smoke runs use Xvfb and Mesa llvmpipe, so FPS figures from them are not performance claims.

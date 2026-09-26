@@ -54,6 +54,10 @@ Modrinth when you import the pack. They are not included in MW19's jars.
 | MCTiers API v2 `https://mctiers.com/api/v2/profile/{uuid}` | Tier Tags addon | only while the Tier Tags module is enabled (GRAY, default off) and the plugin is approved |
 | SubTiers API v2 `https://subtiers.net/api/v2/profile/{uuid}` | Tier Tags addon | same, if the user picks SubTiers |
 | A user-entered `https://` v2-compatible URL | Tier Tags addon | same, if the user enters one |
+| Modrinth API v2 `https://api.modrinth.com/v2` (search, project versions) and CDN `https://cdn.modrinth.com` | Packs page | while the player uses the Packs page (search, icons, *Install*) |
+| Minecraft Services `https://api.minecraftservices.com/minecraft/profile/skins` | Skins page | the player presses *Use this skin* (sends the session token, D-022) |
+| Mojang profile APIs `https://api.mojang.com/users/profiles/minecraft/{name}`, `https://sessionserver.mojang.com/session/minecraft/profile/{id}`, `https://textures.minecraft.net` | Skins page (*Copy*), Host World (*Invite*) | the player presses those buttons |
+| The player's router (UPnP IGD: SSDP multicast, then SOAP on the local network) | Host World | the player switches on *Over the internet* |
 
 No other network access exists in MW19 (see [README](../README.md) → Privacy).
 
@@ -61,6 +65,11 @@ No other network access exists in MW19 (see [README](../README.md) → Privacy).
 [`core/.../modules/KeyCpsModule.java`](../core/src/main/java/dev/mw19/core/modules/KeyCpsModule.java) and [`InputRates.java`](../core/src/main/java/dev/mw19/core/modules/InputRates.java) port KeyCPS 1.6.1 (modrinth.com/mod/keycps). Its
 fabric.mod.json declares MIT, while the Modrinth page lists All Rights Reserved. KeyCPS's author is MW19's owner, who
 asked for the port ([DECISIONS](DECISIONS.md) D-018). No KeyCPS binary is bundled, and the ported code is covered by MW19's MIT licence.
+
+## ExploitPreventer (idea list only)
+Exploit Protection covers the exploits listed on [ExploitPreventer](https://modrinth.com/mod/exploitpreventer)'s Modrinth
+page (NikOverflow, MIT). Only that public description was read; the implementation is MW19's own ([DECISIONS](DECISIONS.md) D-021),
+so no ExploitPreventer code or licence notice ships with MW19.
 
 ## Original work
 Apart from the KeyCPS port above, all MW19 code, UI, icons (drawn from rectangles in code, [`core/.../gui/Icons.java`](../core/src/main/java/dev/mw19/core/gui/Icons.java), D-009), themes and texts are original. No code or

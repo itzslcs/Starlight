@@ -15,6 +15,8 @@ import java.util.UUID;
 /** Headless Platform for tests: no world, no screen, everything inert. */
 final class TestPlatform implements Platform, ScreenHost, ChatAccess, ModList {
     private final Path gameDir;
+    /** Errors logged by any test instance (tests that care reset it). */
+    static final java.util.concurrent.atomic.AtomicInteger ERRORS = new java.util.concurrent.atomic.AtomicInteger();
 
     TestPlatform(Path gameDir) {
         this.gameDir = gameDir;
@@ -37,12 +39,39 @@ final class TestPlatform implements Platform, ScreenHost, ChatAccess, ModList {
         return new Logger() {
             public void info(String msg) { System.out.println("[test] " + msg); }
             public void warn(String msg) { System.out.println("[test] WARN " + msg); }
-            public void error(String msg, Throwable t) { System.out.println("[test] ERROR " + msg + (t == null ? "" : " " + t)); }
+            public void error(String msg, Throwable t) { ERRORS.incrementAndGet(); System.out.println("[test] ERROR " + msg + (t == null ? "" : " " + t)); }
         };
     }
 
     public Path gameDir() { return gameDir; }
     public ScreenHost screens() { return this; }
+    public dev.mw19.core.platform.Skins skins() { return skins; }
+    public float health() { return 0; }
+    public float maxHealth() { return 0; }
+    public int food() { return 0; }
+    public float saturation() { return 0; }
+    public dev.mw19.core.platform.Packs packs() { return packs; }
+    public dev.mw19.core.platform.Host host() { return host; }
+    final dev.mw19.core.platform.Skins skins = new dev.mw19.core.platform.Skins() {
+        public int loadImage(byte[] png) { return 0; }
+        public void releaseImage(int handle) {}
+        public boolean ownSkinSlim() { return false; }
+        public String accessToken() { return null; }
+    };
+    final java.util.List<String> enabledPacks = new java.util.ArrayList<String>();
+    final dev.mw19.core.platform.Packs packs = new dev.mw19.core.platform.Packs() {
+        public Path folder() { return gameDir.resolve("resourcepacks"); }
+        public java.util.List<String> enabled() { return enabledPacks; }
+        public boolean enable(String fileName) { enabledPacks.add(0, fileName); return true; }
+    };
+    final dev.mw19.core.platform.Host host = new dev.mw19.core.platform.Host() {
+        public boolean available() { return false; }
+        public int port() { return -1; }
+        public int open(int gameMode, boolean commands) { return -1; }
+        public void setWhitelist(boolean on) {}
+        public void allow(UUID id, String name) {}
+        public void disallow(UUID id, String name) {}
+    };
     public ChatAccess chat() { return this; }
     public ModList mods() { return this; }
     public boolean reducedDebugInfo() { return false; }

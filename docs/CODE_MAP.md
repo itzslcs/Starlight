@@ -81,10 +81,19 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 - [build.gradle.kts](../api/build.gradle.kts)
 
+## core tests · `dev.mw19.core.net`
+
+- [NetTest.java](../core/src/test/java/dev/mw19/core/net/NetTest.java): UPnP, skin upload and local-address checks against a local fake server (no real network).
+
+## core tests · `dev.mw19.core.skin`
+
+- [SkinServiceAccess.java](../core/src/test/java/dev/mw19/core/skin/SkinServiceAccess.java): Test access to SkinService's endpoint-taking upload (the real one only talks to Mojang).
+
 ## core tests · `dev.mw19.core`
 
 - [ColorChromaTest.java](../core/src/test/java/dev/mw19/core/ColorChromaTest.java): debug-log 2026-09-26: chroma hue was computed in float from epoch millis and only moved every ~2 minutes.
 - [ConfigManagerTest.java](../core/src/test/java/dev/mw19/core/ConfigManagerTest.java)
+- [ConfigRaceTest.java](../core/src/test/java/dev/mw19/core/ConfigRaceTest.java): debug-log 2026-09-26: saves from two threads shared config.json.tmp and one failed (seen at exit on 1.8.9).
 - [FpsBoostTest.java](../core/src/test/java/dev/mw19/core/FpsBoostTest.java): FPS Boost keeps the player's original options (first snapshot wins) and Undo puts them back.
 - [GfxMeasureTest.java](../core/src/test/java/dev/mw19/core/GfxMeasureTest.java): debug-log 2026-09-26: GUI clicks measure text between render passes; that must work (it threw before).
 - [HudLayoutTest.java](../core/src/test/java/dev/mw19/core/HudLayoutTest.java)
@@ -92,6 +101,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [JsonTest.java](../core/src/test/java/dev/mw19/core/JsonTest.java)
 - [ModuleManagerTest.java](../core/src/test/java/dev/mw19/core/ModuleManagerTest.java)
 - [OcclusionTest.java](../core/src/test/java/dev/mw19/core/OcclusionTest.java): Entity culling must hide only what is fully behind solid blocks, and always fail open.
+- [PacksAndSkinsTest.java](../core/src/test/java/dev/mw19/core/PacksAndSkinsTest.java)
 - [PluginDescriptorTest.java](../core/src/test/java/dev/mw19/core/PluginDescriptorTest.java)
 - [PluginManagerTest.java](../core/src/test/java/dev/mw19/core/PluginManagerTest.java): Loads real plugin jars (compiled on the fly) through a MW19 instance backed by the test platform.
 - [ProfileCodecTest.java](../core/src/test/java/dev/mw19/core/ProfileCodecTest.java)
@@ -126,14 +136,17 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 - [AboutPage.java](../core/src/main/java/dev/mw19/core/gui/page/AboutPage.java): Version, target, compatibility flags, hook health and the privacy statement.
 - [ChatSearchPage.java](../core/src/main/java/dev/mw19/core/gui/page/ChatSearchPage.java): Searches the in-memory chat history kept by Chat Tools (newest first).
+- [HostPage.java](../core/src/main/java/dev/mw19/core/gui/page/HostPage.java): Host World: open the singleplayer world to friends on the local network and, through the router, the internet.
 - [HudEditor.java](../core/src/main/java/dev/mw19/core/gui/page/HudEditor.java): Full-screen HUD layout editor.
 - [KeybindsPage.java](../core/src/main/java/dev/mw19/core/gui/page/KeybindsPage.java): Every MW19 key binding in one list; conflicts (with ours or vanilla) are outlined.
 - [ModsPage.java](../core/src/main/java/dev/mw19/core/gui/page/ModsPage.java): Module browser: search, category chips, card grid; settings view per module.
+- [PacksPage.java](../core/src/main/java/dev/mw19/core/gui/page/PacksPage.java): Resource pack browser: searches Modrinth, downloads the chosen pack into the resource pack folder (size-capped and checked against Modrinth's SHA-512) and en...
 - [Page.java](../core/src/main/java/dev/mw19/core/gui/page/Page.java)
 - [PerfPage.java](../core/src/main/java/dev/mw19/core/gui/page/PerfPage.java): Frame-time graph plus our own cost (total and per module).
 - [PluginsPage.java](../core/src/main/java/dev/mw19/core/gui/page/PluginsPage.java): Installed plugins: first-run consent, enable/disable, failures, and panels registered by plugins.
 - [ProfilesPage.java](../core/src/main/java/dev/mw19/core/gui/page/ProfilesPage.java): Unlimited profiles: switch, create, duplicate, rename, delete, export/import strings, per-server auto-switch.
 - [RulesPage.java](../core/src/main/java/dev/mw19/core/gui/page/RulesPage.java): Current server, competitive-safe, and the data-driven serverrules.json.
+- [SkinsPage.java](../core/src/main/java/dev/mw19/core/gui/page/SkinsPage.java): Skins: a 3D preview (drag to turn it), the skin folder as a list, copying a player's skin by name, and applying the selected skin to the account through Moja...
 - [ThemesPage.java](../core/src/main/java/dev/mw19/core/gui/page/ThemesPage.java): Theme presets, accent colour and menu behaviour.
 
 ## core · `dev.mw19.core.gui.widget`
@@ -161,6 +174,10 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [Ui.java](../core/src/main/java/dev/mw19/core/gui/Ui.java): Per-frame GUI context handed to every widget.
 - [Widget.java](../core/src/main/java/dev/mw19/core/gui/Widget.java): Base of all GUI widgets.
 
+## core · `dev.mw19.core.host`
+
+- [WorldHost.java](../core/src/main/java/dev/mw19/core/host/WorldHost.java): Hosting the open singleplayer world: opens it to the local network (vanilla "Open to LAN"), and on request also to the internet by asking the router (UPnP) t...
+
 ## core · `dev.mw19.core.hud`
 
 - [HudElement.java](../core/src/main/java/dev/mw19/core/hud/HudElement.java): Persisted placement + look of one HUD element.
@@ -186,12 +203,14 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [DurabilityAlertModule.java](../core/src/main/java/dev/mw19/core/modules/DurabilityAlertModule.java): A notification (and a ping) once when a worn armor piece or the held item drops below the threshold.
 - [EffectsModule.java](../core/src/main/java/dev/mw19/core/modules/EffectsModule.java): Active potion effects outside the inventory (listed as allowed by Hypixel: "Effect Status").
 - [EntityCullingModule.java](../core/src/main/java/dev/mw19/core/modules/EntityCullingModule.java): Skips drawing mobs, items and other entities that are fully hidden behind solid blocks (Occlusion).
+- [ExploitProtectionModule.java](../core/src/main/java/dev/mw19/core/modules/ExploitProtectionModule.java): Closes known ways for servers to probe the client (original implementation of the fixes ExploitPreventer lists, DECISIONS D-021): sign and anvil text is reso...
 - [FpsGraphModule.java](../core/src/main/java/dev/mw19/core/modules/FpsGraphModule.java): Live frame-time graph: one bar per recent frame, green under 16.7 ms, yellow under 33 ms, red above.
 - [FpsModule.java](../core/src/main/java/dev/mw19/core/modules/FpsModule.java)
 - [FreelookModule.java](../core/src/main/java/dev/mw19/core/modules/FreelookModule.java): Look around without turning your player.
 - [InputRates.java](../core/src/main/java/dev/mw19/core/modules/InputRates.java): Presses per second for each vanilla binding, counted from input events (KeyCPS semantics): a mouse press, a key press and every OS key-repeat of a held key c...
 - [ItemCounterModule.java](../core/src/main/java/dev/mw19/core/modules/ItemCounterModule.java): Counts of chosen items in your inventory (arrows, pearls…).
 - [KeyCpsModule.java](../core/src/main/java/dev/mw19/core/modules/KeyCpsModule.java): KeyCPS: the owner's own keystrokes + CPS mod (KeyCPS 1.6.1), ported into MW19 with the author's permission (DECISIONS D-018).
+- [MoreHud.java](../core/src/main/java/dev/mw19/core/modules/MoreHud.java): Small HUD elements added in 0.3.0 (each is its own module; grouped here like SimpleVisuals).
 - [PingModule.java](../core/src/main/java/dev/mw19/core/modules/PingModule.java): Your own latency to the server (the tab list shows the same as bars).
 - [ScreenshotModule.java](../core/src/main/java/dev/mw19/core/modules/ScreenshotModule.java): After you take a screenshot: a toast plus keys to open the folder or copy the file path.
 - [ServerAddressModule.java](../core/src/main/java/dev/mw19/core/modules/ServerAddressModule.java): The server you are on (as typed in the server list), or "Singleplayer".
@@ -205,6 +224,12 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 ## core · `dev.mw19.core.net`
 
 - [HttpClient.java](../core/src/main/java/dev/mw19/core/net/HttpClient.java): Background JSON GETs with an LRU+TTL cache, request coalescing, per-host spacing and Retry-After backoff.
+- [LocalAddress.java](../core/src/main/java/dev/mw19/core/net/LocalAddress.java): Exploit Protection: whether a server-supplied URL points at this computer or the local network.
+- [Upnp.java](../core/src/main/java/dev/mw19/core/net/Upnp.java): Minimal UPnP Internet Gateway client: finds the home router on the local network and asks it to forward one TCP port to this computer (and to stop again).
+
+## core · `dev.mw19.core.packs`
+
+- [Modrinth.java](../core/src/main/java/dev/mw19/core/packs/Modrinth.java): Modrinth's public API (v2) for resource packs: search URLs and the parts of the responses the pack browser needs.
 
 ## core · `dev.mw19.core.perf`
 
@@ -213,9 +238,12 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 ## core · `dev.mw19.core.platform`
 
 - [ChatAccess.java](../core/src/main/java/dev/mw19/core/platform/ChatAccess.java)
+- [Host.java](../core/src/main/java/dev/mw19/core/platform/Host.java): Hosting the open singleplayer world for other players (game thread).
 - [ModList.java](../core/src/main/java/dev/mw19/core/platform/ModList.java)
+- [Packs.java](../core/src/main/java/dev/mw19/core/platform/Packs.java): The game's resource packs (game thread).
 - [Platform.java](../core/src/main/java/dev/mw19/core/platform/Platform.java): Everything core needs from a Minecraft version.
 - [ScreenHost.java](../core/src/main/java/dev/mw19/core/platform/ScreenHost.java)
+- [Skins.java](../core/src/main/java/dev/mw19/core/platform/Skins.java): Textures from PNG bytes and the signed-in account's skin (game thread).
 
 ## core · `dev.mw19.core.plugin`
 
@@ -234,6 +262,11 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 ## core · `dev.mw19.core.rules`
 
 - [ServerRules.java](../core/src/main/java/dev/mw19/core/rules/ServerRules.java): Data-driven server → disallowed-module rules (serverrules.json).
+
+## core · `dev.mw19.core.skin`
+
+- [SkinLibrary.java](../core/src/main/java/dev/mw19/core/skin/SkinLibrary.java): The skin folder (<game>/MW19/skins): PNG skins the player can preview and apply.
+- [SkinService.java](../core/src/main/java/dev/mw19/core/skin/SkinService.java): Mojang's official skin endpoints: changing the signed-in account's skin, and copying another player's current skin into the library.
 
 ## core · `dev.mw19.core`
 
@@ -257,6 +290,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 ## fabric · `dev.mw19.fabric.mixin`
 
+- [AnvilNameMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/AnvilNameMixin.java): Exploit Protection: the anvil's name field (sent back when renaming) gets the item name as an unmodded client resolves it.
 - [CameraMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/CameraMixin.java): Freelook: the camera takes its angles from Hooks while active (every getView*Rot read).
 - [ChatComponentMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ChatComponentMixin.java): Chat Tools + plugin chat events: filter, timestamp, highlight, stack duplicates.
 - [EntityCullingMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/EntityCullingMixin.java): Entity Culling: after vanilla's frustum test passes, entities fully hidden behind blocks are skipped.
@@ -275,20 +309,29 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [MultiPlayerGameModeMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MultiPlayerGameModeMixin.java): Observes (never changes) the player's attacks, for the combo counter.
 - [NameTagMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/NameTagMixin.java): Plugin name decorations (e.g.
 - [OverlayTextureAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/OverlayTextureAccessor.java)
+- [PackCacheMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackCacheMixin.java): Exploit Protection: server resource packs are cached per account (ExploitGuard.packCache).
+- [PackDownloadMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackDownloadMixin.java): Exploit Protection: server pack downloads (HttpUtil.downloadFile's only caller) fail when the host resolves to a local address.
+- [PackUrlMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackUrlMixin.java): Exploit Protection: a server resource pack URL naming a local host is treated as invalid (vanilla then refuses it).
 - [ParticleEngineMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ParticleEngineMixin.java): Particle multiplier: extra client-side crit / enchanted-hit bursts on hits.
 - [PauseScreenMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PauseScreenMixin.java)
+- [PlayerSkinWidgetAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PlayerSkinWidgetAccessor.java): Lets the home screen and Skins page turn vanilla's player model (rotationX is pitch, rotationY yaw).
 - [PlayerTabOverlayMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PlayerTabOverlayMixin.java): Plugin name decorations in the tab list.
 - [ScreenEffectRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ScreenEffectRendererMixin.java): Low fire: the overlay's vertical offset (-0.3) and alpha are plain constants.
+- [SignEditMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SignEditMixin.java): Exploit Protection: the lines a sign editor sends back are resolved as an unmodded client would (ExploitGuard).
+- [SignEditScreenAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SignEditScreenAccessor.java): Smoke self-test: reads the lines a sign editor would send back.
 - [TitleScreenMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/TitleScreenMixin.java)
 - [TitleSwapMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/TitleSwapMixin.java): Home screen: vanilla's TitleScreen is swapped for MW19's as it is set (Minecraft.setScreen until 26.1, Gui.setScreen from 26.2).
 - [WeatherMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/WeatherMixin.java): Clear Weather: the client's level reports no rain or thunder (a singleplayer server keeps its real weather).
 
 ## fabric · `dev.mw19.fabric`
 
+- [ExploitGuard.java](../fabric/src/main/java/dev/mw19/fabric/ExploitGuard.java): Exploit Protection, Fabric side (original implementation; DECISIONS D-021).
 - [FabricBackend.java](../fabric/src/main/java/dev/mw19/fabric/FabricBackend.java): RenderBackend over GuiGraphics.
 - [FabricChat.java](../fabric/src/main/java/dev/mw19/fabric/FabricChat.java): Component <-> ChatLine glue for the chat mixin.
 - [FabricCompat.java](../fabric/src/main/java/dev/mw19/fabric/FabricCompat.java): The version seams of Minecraft's client object in one place (verified with javap per version): 26.2 moved the current screen to gui.screen()/gui.setScreen, t...
+- [FabricHost.java](../fabric/src/main/java/dev/mw19/fabric/FabricHost.java): Opens the singleplayer world to other players and edits its whitelist (changes run on the server thread).
 - [FabricItem.java](../fabric/src/main/java/dev/mw19/fabric/FabricItem.java): Reusable ItemRef view (one per slot, re-pointed each call; no allocation per frame).
+- [FabricMedia.java](../fabric/src/main/java/dev/mw19/fabric/FabricMedia.java): Textures from PNG bytes, the player model (vanilla's PlayerSkinWidget, as on the skin report screen) and resource packs, for core.
 - [FabricPlatform.java](../fabric/src/main/java/dev/mw19/fabric/FabricPlatform.java): Platform for Fabric targets.
 - [Mw19Fabric.java](../fabric/src/main/java/dev/mw19/fabric/Mw19Fabric.java): Entrypoint + the static bridge the mixins call (keeps mixin bodies one line).
 - [Mw19MixinPlugin.java](../fabric/src/main/java/dev/mw19/fabric/Mw19MixinPlugin.java): Gate for mw19.optional.mixins.json: skips a feature mixin when a mod that does the same job is loaded, or when the user lists it in -Dmw19.mixins.disable=Nam...
@@ -309,17 +352,24 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [EntityMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/EntityMixin.java): Freelook: mouse movement turns the camera instead of the player (setAngles subtracts pitch on 1.8.9).
 - [EntityRendererMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/EntityRendererMixin.java): Damage tilt (the 14° hurt-cam constant) and freelook camera angles (orientCamera's rotation reads).
 - [GuiPlayerTabOverlayMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/GuiPlayerTabOverlayMixin.java): Plugin name decorations in the 1.8.9 tab list.
+- [IntegratedServerAccessor.java](../legacy/src/main/java/dev/mw19/forge/mixin/IntegratedServerAccessor.java): Host World: the LAN announcer holds the port the world was opened on.
 - [ItemRendererMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/ItemRendererMixin.java): Low fire: renderFireInFirstPerson's vertical offset (-0.3) and alpha (0.9).
 - [MinecraftMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/MinecraftMixin.java)
+- [NetHandlerPlayClientMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/NetHandlerPlayClientMixin.java): Exploit Protection: server resource pack requests are checked first (ForgeExploitGuard).
 - [RenderManagerMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/RenderManagerMixin.java): Entity Culling on 1.8.9: after the frustum test passes, entities fully hidden behind blocks are skipped.
 - [RenderMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/RenderMixin.java): Plugin name decorations on 1.8.9 nametags.
 - [RendererLivingEntityMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/RendererLivingEntityMixin.java): Hit colour (the four puts of the hurt tint: 1, 0, 0, 0.3) and show-own-nametag.
+- [ThreadLanServerPingAccessor.java](../legacy/src/main/java/dev/mw19/forge/mixin/ThreadLanServerPingAccessor.java)
 - [WorldMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/WorldMixin.java): Clear Weather on 1.8.9: the client world reports no rain or thunder.
 
 ## legacy · `dev.mw19.forge`
 
 - [ForgeBackend.java](../legacy/src/main/java/dev/mw19/forge/ForgeBackend.java): Immediate-mode backend for 1.8.9 (raw GL is fine on this target).
+- [ForgeExploitGuard.java](../legacy/src/main/java/dev/mw19/forge/ForgeExploitGuard.java): Exploit Protection on 1.8.9 (original implementation; DECISIONS D-021).
+- [ForgeHost.java](../legacy/src/main/java/dev/mw19/forge/ForgeHost.java): 1.8.9: opens the singleplayer world to LAN and edits its whitelist (on the server thread).
 - [ForgeItem.java](../legacy/src/main/java/dev/mw19/forge/ForgeItem.java): Reusable ItemRef view over a (possibly null) 1.8.9 ItemStack.
+- [ForgeMedia.java](../legacy/src/main/java/dev/mw19/forge/ForgeMedia.java): 1.8.9: textures from PNG bytes, the player model drawn from ModelPlayer's parts, and resource packs.
+- [ForgePanorama.java](../legacy/src/main/java/dev/mw19/forge/ForgePanorama.java): The title-screen panorama for the 1.8.9 home screen: the game's six panorama textures on a slowly turning cube, seen from its centre (1.8.9's own renderer is...
 - [ForgePlatform.java](../legacy/src/main/java/dev/mw19/forge/ForgePlatform.java): Platform for Forge 1.8.9 (MCP names).
 - [LwjglKeys.java](../legacy/src/main/java/dev/mw19/forge/LwjglKeys.java): LWJGL2 Keyboard codes <-> GLFW codes (core's canonical codes).
 - [Mw19Forge.java](../legacy/src/main/java/dev/mw19/forge/Mw19Forge.java)

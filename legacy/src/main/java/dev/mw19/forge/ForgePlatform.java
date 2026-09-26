@@ -310,6 +310,21 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
     }
 
     @Override
+    public dev.mw19.core.platform.Skins skins() {
+        return ForgeMedia.INSTANCE;
+    }
+
+    @Override
+    public dev.mw19.core.platform.Packs packs() {
+        return ForgeMedia.INSTANCE;
+    }
+
+    @Override
+    public dev.mw19.core.platform.Host host() {
+        return ForgeHost.INSTANCE;
+    }
+
+    @Override
     public ScreenHost screens() {
         return this;
     }
@@ -415,6 +430,37 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
     @Override
     public int hurtTime() {
         return mc.thePlayer == null ? 0 : mc.thePlayer.hurtTime;
+    }
+
+    /** 1.8.9 has no sign/anvil leak; the level:// path check is what Exploit Protection adds here. */
+    @Override
+    public String selfTest(String what) {
+        if (!"exploit".equals(what)) return "n/a";
+        if (!ForgeExploitGuard.safeLevelPath("New World/resources.zip")) return "FAIL world pack refused";
+        for (String bad : new String[]{"../../options.txt", "x/../../y/resources.zip", "..", "a\\..\\b/resources.zip", "C:/resources.zip"}) {
+            if (ForgeExploitGuard.safeLevelPath(bad)) return "FAIL accepted level://" + bad;
+        }
+        return "ok (level:// paths checked)";
+    }
+
+    @Override
+    public float health() {
+        return mc.thePlayer == null ? 0 : mc.thePlayer.getHealth();
+    }
+
+    @Override
+    public float maxHealth() {
+        return mc.thePlayer == null ? 0 : mc.thePlayer.getMaxHealth();
+    }
+
+    @Override
+    public int food() {
+        return mc.thePlayer == null ? 0 : mc.thePlayer.getFoodStats().getFoodLevel();
+    }
+
+    @Override
+    public float saturation() {
+        return mc.thePlayer == null ? 0 : mc.thePlayer.getFoodStats().getSaturationLevel();
     }
 
     @Override

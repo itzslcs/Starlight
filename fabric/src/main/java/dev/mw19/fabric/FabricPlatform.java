@@ -339,6 +339,21 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
     }
 
     @Override
+    public dev.mw19.core.platform.Skins skins() {
+        return FabricMedia.INSTANCE;
+    }
+
+    @Override
+    public dev.mw19.core.platform.Packs packs() {
+        return FabricMedia.INSTANCE;
+    }
+
+    @Override
+    public dev.mw19.core.platform.Host host() {
+        return FabricHost.INSTANCE;
+    }
+
+    @Override
     public ScreenHost screens() {
         return this;
     }
@@ -482,6 +497,31 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
     @Override
     public int hurtTime() {
         return mc.player == null ? 0 : mc.player.hurtTime;
+    }
+
+    @Override
+    public String selfTest(String what) {
+        return "exploit".equals(what) ? ExploitGuard.selfTest() : "n/a";
+    }
+
+    @Override
+    public float health() {
+        return mc.player == null ? 0 : mc.player.getHealth();
+    }
+
+    @Override
+    public float maxHealth() {
+        return mc.player == null ? 0 : mc.player.getMaxHealth();
+    }
+
+    @Override
+    public int food() {
+        return mc.player == null ? 0 : mc.player.getFoodData().getFoodLevel();
+    }
+
+    @Override
+    public float saturation() {
+        return mc.player == null ? 0 : mc.player.getFoodData().getSaturationLevel();
     }
 
     @Override

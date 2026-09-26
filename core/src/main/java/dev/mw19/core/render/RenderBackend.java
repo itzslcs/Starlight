@@ -29,6 +29,15 @@ public interface RenderBackend {
 
     float guiScale();
 
+    /** Draws the UV rect (0..1) of an image loaded with {@code Skins.loadImage} over the rect, with {@code alpha}. */
+    default void image(int handle, float x1, float y1, float x2, float y2, float u0, float v0, float u1, float v1, float alpha) {}
+
+    /**
+     * The player model standing in the rect (fitted to its height), wearing a loaded skin image, or the signed-in
+     * player's own skin when {@code skin} is 0. Yaw and pitch in degrees.
+     */
+    default void player(float x1, float y1, float x2, float y2, int skin, boolean slim, float yaw, float pitch) {}
+
     /** Submit anything batched (called at the end of every pass). */
     default void flush() {}
 }

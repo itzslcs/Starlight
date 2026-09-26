@@ -295,6 +295,24 @@ public final class Gfx implements Renderer {
         b.item(item, ax(x), ay(y), s);
     }
 
+    /** Part of a loaded image (UVs 0..1) stretched over the rect. */
+    public void image(int handle, float x, float y, float w, float h, float u0, float v0, float u1, float v1) {
+        if (handle == 0 || alpha < 0.02f) return;
+        b.flush();
+        b.image(handle, ax(x), ay(y), ax(x + w), ay(y + h), u0, v0, u1, v1, alpha);
+    }
+
+    public void image(int handle, float x, float y, float w, float h) {
+        image(handle, x, y, w, h, 0, 0, 1, 1);
+    }
+
+    /** The player model fitted into the rect; {@code skin} 0 is the signed-in player's own skin. */
+    public void player(float x, float y, float w, float h, int skin, boolean slim, float yaw, float pitch) {
+        if (alpha < 0.5f) return;
+        b.flush();
+        b.player(ax(x), ay(y), ax(x + w), ay(y + h), skin, slim, yaw, pitch);
+    }
+
     // ---------------------------------------------------------------- clipping
 
     @Override

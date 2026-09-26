@@ -120,6 +120,16 @@ public final class FabricBackend implements RenderBackend {
         return gs;
     }
 
+    @Override
+    public void image(int handle, float x1, float y1, float x2, float y2, float u0, float v0, float u1, float v1, float alpha) {
+        FabricMedia.INSTANCE.blit(g, handle, x1, y1, x2, y2, u0, v0, u1, v1, alpha);
+    }
+
+    @Override
+    public void player(float x1, float y1, float x2, float y2, int skin, boolean slim, float yaw, float pitch) {
+        FabricMedia.INSTANCE.player(g, x1, y1, x2, y2, skin, slim, yaw, pitch);
+    }
+
     /** drawString was renamed to text in 26.1 (GuiGraphics became GuiGraphicsExtractor). */
     private void drawText(String text, int x, int y, int argb, boolean shadow) {
         //? if >=26.1 {

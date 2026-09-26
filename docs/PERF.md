@@ -31,4 +31,24 @@ across machines. Vanilla's inactivity limiter (30 FPS after 60 s without input) 
 ([debug-log](debug-log.md)).
 
 ## Results
-Pending: filled from the benchmark runs below.
+Minecraft 1.21.11, `scripts/bench.sh`, this machine (Xvfb + Mesa llvmpipe, CPU rendering), 2026-09-26, MW19 0.2.0 code
+(Entity Culling and FPS Boost are unchanged in 0.3.0). Two clean runs; a third ran while a Gradle build competed for
+the CPU and is left out (its boost phases fell to 54 and 72 FPS).
+
+| Phase | Run 2: avg FPS | 1 % low | p99 | Run 3: avg FPS | 1 % low | p99 |
+|---|---|---|---|---|---|---|
+| baseline | 46.2 | 13.8 | 63.8 ms | 48.7 | 28.3 | 32.4 ms |
+| culling | 73.9 | 31.0 | 29.6 ms | 78.1 | 44.1 | 18.8 ms |
+| boost | 68.2 | 16.7 | 50.1 ms | 74.4 | 21.4 | 37.8 ms |
+| culling + boost | **127.0** | 24.0 | 30.1 ms | **140.1** | 31.9 | 25.5 ms |
+| baseline-end | 45.5 | 13.7 | 61.7 ms | 51.5 | 19.8 | 29.3 ms |
+
+- **Entity Culling** skipped 91 % of entity draws in this scene (about 9 000 of 10 000 per second) and raised both the
+  average (+60 %) and the 1 % lows.
+- **FPS Boost** raised the average (+48 % and +53 %), but its 1 % low was worse than baseline in run 3 (21.4 vs 28.3).
+  Not explained yet; the GC and hitch counters added since will show whether it is chunk rebuilds after the option change.
+- **Both together** gave 2.7× and 2.9× the baseline average.
+- baseline-end matches baseline within about 6 %, so the runs did not drift.
+
+These numbers exaggerate what a real GPU gains from drawing less (see the caveat above); they compare phases within
+one run, not clients or machines.

@@ -30,4 +30,12 @@ public interface Surface {
 
     /** Whether the host should draw vanilla's background (blur/dim) behind this surface. */
     boolean wantsVanillaBackground();
+
+    /** Whether the host should draw the title-screen panorama (no blur) behind this surface. */
+    default boolean wantsPanorama() {
+        return false;
+    }
+
+    /** Files dropped onto the game window while this surface is open (platforms that support it). */
+    default void filesDropped(java.util.List<java.nio.file.Path> files) {}
 }

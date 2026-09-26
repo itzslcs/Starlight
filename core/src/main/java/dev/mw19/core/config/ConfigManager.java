@@ -162,6 +162,10 @@ public final class ConfigManager {
 
     // ------------------------------------------------------------------ save
 
+    private final Object writeLock = new Object();
+    private final java.util.concurrent.atomic.AtomicLong saves = new java.util.concurrent.atomic.AtomicLong();
+    private long written; // guarded by writeLock
+
     public void markDirty() {
         if (suppressDirty) return;
         synchronized (this) {
@@ -184,23 +188,37 @@ public final class ConfigManager {
         final String g = Json.write(snapshotGlobal(), true);
         final String p = Json.write(snapshotProfile(), true);
         final Path gf = root.resolve("config.json"), pf = profileFile(active);
+        final long snapshot = saves.incrementAndGet();
         io.execute(new Runnable() {
             @Override
             public void run() {
-                write(gf, g);
-                write(pf, p);
+                writeBoth(snapshot, gf, g, pf, p);
             }
         });
     }
 
-    /** Synchronous save on the calling (game) thread; used at shutdown and before profile switches. */
+    /** Synchronous save on the calling thread; used at shutdown and before profile switches. */
     public void flush() {
         synchronized (this) {
             if (pending != null) pending.cancel(false);
             pending = null;
         }
-        write(root.resolve("config.json"), Json.write(snapshotGlobal(), true));
-        write(profileFile(active), Json.write(snapshotProfile(), true));
+        String g = Json.write(snapshotGlobal(), true), p = Json.write(snapshotProfile(), true);
+        writeBoth(saves.incrementAndGet(), root.resolve("config.json"), g, profileFile(active), p);
+    }
+
+    /**
+     * One writer at a time, newest snapshot wins. A queued background save must not overwrite a newer flush, and two
+     * writers must not share the .tmp file (debug-log 2026-09-26: at exit, flush and a background save raced on
+     * config.json.tmp and one failed with NoSuchFileException).
+     */
+    private void writeBoth(long snapshot, Path gf, String g, Path pf, String p) {
+        synchronized (writeLock) {
+            if (snapshot < written) return;
+            written = snapshot;
+            write(gf, g);
+            write(pf, p);
+        }
     }
 
     private void write(Path file, String content) {
@@ -342,7 +360,9 @@ public final class ConfigManager {
         if (profileExists(name)) throw new IOException("A profile with that name exists");
         Map<String, Object> p = copyCurrent ? new LinkedHashMap<String, Object>(snapshotProfile()) : newProfile(name);
         p.put("name", name);
-        AtomicFiles.write(profileFile(name), Json.write(p, true));
+        synchronized (writeLock) {
+            AtomicFiles.write(profileFile(name), Json.write(p, true));
+        }
     }
 
     public void rename(String from, String to) throws IOException {
@@ -381,7 +401,9 @@ public final class ConfigManager {
         String name = base;
         for (int i = 2; profileExists(name); i++) name = (base.length() > 28 ? base.substring(0, 28) : base) + " " + i;
         p.put("name", name);
-        AtomicFiles.write(profileFile(name), Json.write(p, true));
+        synchronized (writeLock) {
+            AtomicFiles.write(profileFile(name), Json.write(p, true));
+        }
         return name;
     }
 

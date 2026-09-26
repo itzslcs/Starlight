@@ -18,6 +18,9 @@ public abstract class Page extends Widget {
     /** Page became visible (rebuild lists here). */
     public void onShow() {}
 
+    /** Files dropped onto the window while this page is shown. */
+    public void filesDropped(java.util.List<java.nio.file.Path> files) {}
+
     /** Scroll so the keyboard-focused widget is visible. */
     public void reveal(Widget w) {}
 

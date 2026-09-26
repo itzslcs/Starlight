@@ -27,6 +27,9 @@ public final class Hooks {
     public static boolean entityCulling;
     /** Clear Weather module: the client level reports no rain or thunder. */
     public static boolean clearWeather;
+
+    /** Exploit Protection: resolve sign/anvil text as an unmodded client would; refuse local resource pack URLs. */
+    public static volatile boolean guardText, guardPackUrls;
     /** Render your own nametag in third person. */
     public static boolean ownNametag;
     /** Extra copies of crit / enchanted-hit particles (0 = vanilla). */

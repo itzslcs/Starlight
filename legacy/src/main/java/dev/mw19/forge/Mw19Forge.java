@@ -25,10 +25,8 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.input.Keyboard;
 
-@Mod(modid = "mw19", name = "MW19", version = Mw19Forge.VERSION, useMetadata = true, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
+@Mod(modid = "mw19", name = "MW19", useMetadata = true, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
 public final class Mw19Forge {
-    /** Placeholder only: useMetadata makes Forge take the real version from mcmod.info (filled from gradle.properties). */
-    public static final String VERSION = "dev";
     private static final int BUTTON_ID = 0x4B53; // "KS"
     private static final net.minecraft.util.BlockPos.MutableBlockPos PROBE = new net.minecraft.util.BlockPos.MutableBlockPos();
     private static final dev.mw19.core.perf.Occlusion.Blocks BLOCKS = new dev.mw19.core.perf.Occlusion.Blocks() {
@@ -40,6 +38,17 @@ public final class Mw19Forge {
     };
 
     /** RenderManagerMixin: false when the entity is fully hidden behind blocks (Entity Culling on). Fails open. */
+    /** NetHandlerPlayClientMixin: Exploit Protection looks at a server resource pack request first (true = cancel). */
+    public static boolean guardResourcePack(net.minecraft.client.network.NetHandlerPlayClient handler,
+                                            net.minecraft.network.play.server.S48PacketResourcePackSend packet) {
+        try {
+            return ForgeExploitGuard.intercept(handler, packet);
+        } catch (RuntimeException e) {
+            dev.mw19.core.Log.error("exploit protection: resource pack check failed, letting vanilla handle it", e);
+            return false;
+        }
+    }
+
     public static boolean drawEntity(net.minecraft.entity.Entity e, double cx, double cy, double cz) {
         if (!Hooks.entityCulling) return true;
         try {

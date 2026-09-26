@@ -3,99 +3,109 @@ package dev.mw19.core.gui;
 import dev.mw19.api.util.Colors;
 import dev.mw19.core.Guard;
 import dev.mw19.core.Mw19;
-import dev.mw19.core.gui.widget.Button;
+import dev.mw19.core.gui.page.PacksPage;
+import dev.mw19.core.gui.page.SkinsPage;
 import dev.mw19.core.render.Gfx;
 import dev.mw19.core.render.RenderBackend;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * The MW19 home screen that replaces Minecraft's title screen (Themes → Custom home screen). It uses an original design,
- * drawn with the same Gfx as the menu, so it looks the same on 1.8.9 and 26.x. The background is a few fills plus 40 ember
- * quads per frame, with no per-pixel effects. "Vanilla menu" shows Minecraft's own title screen once, which has the
- * buttons other mods add there.
+ * The MW19 home screen that replaces Minecraft's title screen (Themes → Custom home screen). Vanilla's panorama
+ * behind a pixel-block logo, the usual buttons in the middle, the player's skin on the left (drag to turn it) and
+ * MW19's own screens on the right. "Vanilla menu" shows Minecraft's own title screen once, where buttons from other
+ * mods live.
  */
 public final class TitleUi implements Surface {
-    private static final int EMBERS = 40;
-    private static final String[] TIPS = {
-        "Right Shift opens MW19 in game",
-        "Edit HUD: drag, snap and scale",
-        "Profiles switch per server",
+    /** Pixel logo, 7 rows per glyph ('#' = block). Drawn from rects: no bundled image (DECISIONS D-009). */
+    private static final String[][] GLYPHS = {
+        {"#.....#", "##...##", "#.#.#.#", "#..#..#", "#.....#", "#.....#", "#.....#"},
+        {"#.....#", "#.....#", "#.....#", "#..#..#", "#.#.#.#", "##...##", "#.....#"},
+        {".##", "###", ".##", ".##", ".##", ".##", "####"},
+        {".###.", "#...#", "#...#", ".####", "....#", "#...#", ".###."},
     };
 
     private final Mw19 k;
     private final Gfx g = new Gfx();
     private final Ui ui = new Ui();
-    private Item[] items;
-    private final Button vanilla;
+    private final List<HomeButton> main = new ArrayList<HomeButton>(), side = new ArrayList<HomeButton>();
+    private final HomeButton options, quit, skins, vanilla;
     private final Anim intro = new Anim(0);
-    private final float[] ex = new float[EMBERS], speed = new float[EMBERS], phase = new float[EMBERS], size = new float[EMBERS];
     private final String footer;
-    private final long start = System.currentTimeMillis();
     private float w, h;
+    private float modelX, modelY, modelW, modelH, yaw = 25, lastX;
+    private boolean turning;
 
     public TitleUi(final Mw19 k) {
         this.k = k;
-        items = new Item[]{
-            new Item("Singleplayer", new Runnable() {
-                @Override
-                public void run() {
-                    k.platform.screens().openSingleplayer();
-                }
-            }),
-            new Item("Multiplayer", new Runnable() {
-                @Override
-                public void run() {
-                    k.platform.screens().openMultiplayer();
-                }
-            }),
-            new Item("Options", new Runnable() {
-                @Override
-                public void run() {
-                    k.platform.screens().openOptions();
-                }
-            }),
-            new Item(Mw19.NAME + " Menu", new Runnable() {
-                @Override
-                public void run() {
-                    k.openGui();
-                }
-            }),
-            new Item("Quit Game", new Runnable() {
-                @Override
-                public void run() {
-                    k.platform.quit();
-                }
-            }),
-        };
+        main.add(new HomeButton("Singleplayer", new Runnable() {
+            @Override
+            public void run() {
+                k.platform.screens().openSingleplayer();
+            }
+        }));
+        main.add(new HomeButton("Multiplayer", new Runnable() {
+            @Override
+            public void run() {
+                k.platform.screens().openMultiplayer();
+            }
+        }));
         if (k.platform.screens().hasModList()) {
-            Item[] withMods = java.util.Arrays.copyOf(items, items.length + 1);
-            System.arraycopy(withMods, 3, withMods, 4, items.length - 3);
-            withMods[3] = new Item("Mods", new Runnable() {
+            main.add(new HomeButton("Mods", new Runnable() {
                 @Override
                 public void run() {
                     k.platform.screens().openModList();
                 }
-            });
-            items = withMods;
+            }));
         }
-        vanilla = new Button("Vanilla menu", Button.Style.GHOST, new Runnable() {
+        options = new HomeButton("Options…", new Runnable() {
+            @Override
+            public void run() {
+                k.platform.screens().openOptions();
+            }
+        });
+        quit = new HomeButton("Quit Game", new Runnable() {
+            @Override
+            public void run() {
+                k.platform.quit();
+            }
+        });
+        side.add(new HomeButton("Host World", new Runnable() {
+            @Override
+            public void run() {
+                k.hostWhenWorldOpens = true;
+                k.platform.screens().openSingleplayer();
+            }
+        }).tip("Pick a world; it opens to friends once it has loaded"));
+        side.add(new HomeButton("Packs", new Runnable() {
+            @Override
+            public void run() {
+                k.gui().openPage(PacksPage.class);
+            }
+        }).tip("Find and install resource packs from Modrinth"));
+        side.add(new HomeButton(Mw19.NAME + " Menu", new Runnable() {
+            @Override
+            public void run() {
+                k.openGui();
+            }
+        }).tip("Mods, HUD, profiles and settings (Right Shift in game)"));
+        skins = new HomeButton("Skins", new Runnable() {
+            @Override
+            public void run() {
+                SkinsPage.open(k);
+            }
+        });
+        vanilla = new HomeButton("Vanilla menu", new Runnable() {
             @Override
             public void run() {
                 k.platform.screens().openVanillaTitle();
             }
-        });
-        vanilla.tooltip = "Minecraft's own title screen (buttons other mods add live there)";
-        Random r = new Random(19);
-        for (int i = 0; i < EMBERS; i++) {
-            ex[i] = r.nextFloat();
-            speed[i] = 0.012f + r.nextFloat() * 0.03f;
-            phase[i] = r.nextFloat();
-            size[i] = 1f + r.nextFloat() * 1.5f;
-        }
+        }).tip("Minecraft's own title screen (buttons other mods add live there)");
+        vanilla.flat = true;
         String loader = k.platform.loader();
-        footer = Mw19.NAME + " " + k.modVersion + "  ·  Minecraft " + k.platform.minecraftVersion() + "  ·  "
-                + (loader.isEmpty() ? loader : Character.toUpperCase(loader.charAt(0)) + loader.substring(1));
+        footer = Mw19.NAME + " " + k.modVersion + " · Minecraft " + k.platform.minecraftVersion()
+                + (loader.isEmpty() ? "" : " · " + Character.toUpperCase(loader.charAt(0)) + loader.substring(1));
     }
 
     @Override
@@ -113,8 +123,9 @@ public final class TitleUi implements Surface {
             ui.my = mouseY;
             ui.now = now;
             ui.tooltip = null;
-            background(now);
-            intro.to(1, 450, now);
+            // Keep the panorama; only shade where text sits.
+            g.gradient(0, h * 0.62f, w, h, 0x00000000, 0x7A000000);
+            intro.to(1, 350, now);
             g.pushAlpha(intro.get(now));
             content();
             g.popAlpha();
@@ -129,92 +140,128 @@ public final class TitleUi implements Surface {
         }
     }
 
-    private void background(long now) {
-        Theme t = ui.t;
-        g.gradient(0, 0, w, h, Colors.lerp(t.sidebar, 0xFF000000, 0.1f) | 0xFF000000, Colors.lerp(t.panel, 0xFF000000, 0.45f) | 0xFF000000);
-        // Two soft accent washes (horizontal + vertical gradients); cheap stand-ins for radial glows.
-        g.gradientH(w * 0.45f, 0, w, h, 0x00000000, Colors.fade(t.accent, 0.10f));
-        g.gradient(0, h * 0.55f, w, h, 0x00000000, Colors.fade(t.accent, 0.07f));
-        // Giant faint wordmark on the right.
-        float ws = Math.max(4f, h / 34f);
-        float ww = g.textWidth(Mw19.NAME) * ws;
-        g.text(Mw19.NAME, w - ww - w * 0.04f, h * 0.10f, ws, Colors.fade(t.text, 0.08f), false);
-        // Embers drifting up.
-        float s = (now - start) / 1000f; // relative: epoch millis in a float have no sub-second precision
-        for (int i = 0; i < EMBERS; i++) {
-            float p = (phase[i] + s * speed[i]) % 1f;
-            float y = h * (1.05f - p * 1.1f);
-            float x = w * ex[i] + (float) Math.sin(p * 12.566f + i) * 6f;
-            float a = (float) Math.sin(p * Math.PI) * 0.75f;
-            g.rect(x, y, x + size[i], y + size[i], Colors.fade(t.accent, a));
-        }
-        g.gradient(0, h * 0.78f, w, h, 0x00000000, 0x55000000);
-    }
-
     private void content() {
-        Theme t = ui.t;
-        float m = Math.max(20f, w * 0.07f);
-        float scale = h < 250 ? 3f : 4f;
-        float ly = Math.max(14f, h * 0.2f);
-        // Wordmark: "MW" + accent "19", then a small letter-spaced "CLIENT" under an accent rule.
-        String a = Mw19.NAME.substring(0, 2), b = Mw19.NAME.substring(2);
-        g.text(a, m, ly, scale, t.text, true);
-        g.text(b, m + g.textWidth(a) * scale, ly, scale, t.accent, true);
-        float under = ly + 9 * scale + 2;
-        g.roundRect(m, under, 16, 2, 1, t.accent);
-        g.text("C L I E N T", m + 22, under - 3, t.textDim, false);
-
-        float iy = under + 16, iw = 130, ih = h < 250 ? 16 : 18, gap = 4;
-        for (Item it : items) {
-            it.bounds(m, iy, iw, ih).render(ui);
-            iy += ih + gap;
+        float px = Math.max(2, Math.min(5, (float) Math.floor(h / 55f)));
+        float logoY = Math.max(8, h * 0.09f);
+        logo(w / 2f, logoY, px);
+        float bh = h < 230 ? 18 : 20, gap = 4, bw = Math.min(200, w * 0.42f);
+        float cx = w / 2f - bw / 2f, top = Math.max(logoY + 7 * px + px + 18, h * 0.36f);
+        float yy = top;
+        for (HomeButton b : main) {
+            b.bounds(cx, yy, bw, bh).render(ui);
+            yy += bh + gap;
         }
-
-        if (w >= 360) tips(t, m);
-
-        g.text(footer, 6, h - 11, t.textDim, false);
-        float vw = g.textWidth(vanilla.label) + 12;
-        vanilla.bounds(w - vw - 4, h - 16, vw, 13).render(ui);
-        g.text("Not affiliated with Mojang or Microsoft", 6, h - 20, 0.75f, Colors.fade(t.textDim, 0.7f), false);
+        float half = (bw - gap) / 2f;
+        yy += 8;
+        options.bounds(cx, yy, half, bh).render(ui);
+        quit.bounds(cx + half + gap, yy, half, bh).render(ui);
+        boolean wide = w >= 400;
+        if (wide) {
+            float sw = Math.min(104, (w - bw) / 2f - 24), sx = w - sw - Math.max(12, w * 0.05f);
+            float sy = top;
+            for (HomeButton b : side) {
+                b.bounds(sx, sy, sw, bh).render(ui);
+                sy += bh + gap;
+            }
+            float modelTop = logoY; // the logo is centred, so the left column can start level with it
+            player(Math.max(12, w * 0.05f), modelTop, Math.min(104, (w - bw) / 2f - 24), yy + bh - modelTop);
+        } else {
+            // Narrow window: MW19's screens become a second row of small buttons.
+            float sy = yy + bh + gap, sw = (bw - gap * (side.size() - 1)) / side.size();
+            for (int i = 0; i < side.size(); i++) side.get(i).bounds(cx + i * (sw + gap), sy, sw, bh).render(ui);
+        }
+        g.text(footer, 4, h - 11, 0xFFE0E0E0, true);
+        float vw = g.textWidth(vanilla.label) + 10;
+        vanilla.bounds(w - vw - 3, h - 14, vw, 12).render(ui);
     }
 
-    private void tips(Theme t, float m) {
-        float tw = 0;
-        for (String tip : TIPS) tw = Math.max(tw, g.textWidth(tip));
-        float cw = Math.min(tw + 26, w * 0.45f), ch = 18 + TIPS.length * 12, cx = w - cw - m, cy = h * 0.52f - ch / 2f;
-        g.roundRect(cx, cy, cw, ch, 5, Colors.fade(t.surface, 0.72f));
-        g.roundOutline(cx, cy, cw, ch, 5, 1, t.border);
-        g.text("Tips", cx + 8, cy + 6, t.accent, false);
-        float y = cy + 18;
-        for (String tip : TIPS) {
-            g.rect(cx + 9, y + 3, cx + 11, y + 5, t.textDim);
-            g.text(g.ellipsize(tip, cw - 22), cx + 15, y, t.text, false);
-            y += 12;
+    /** The player's model with their name above it and the Skins button below. */
+    private void player(float x, float y, float colW, float colH) {
+        String name = k.platform.playerName();
+        float nameH = 12, btnH = 18;
+        modelX = x;
+        modelY = y + nameH;
+        modelW = colW;
+        modelH = colH - nameH - btnH - 6;
+        if (modelH < 40) return;
+        if (name != null && !name.isEmpty()) g.textCentered(name, x + colW / 2f, y, 0xFFFFFFFF, true);
+        g.player(modelX, modelY, modelW, modelH, 0, k.platform.skins().ownSkinSlim(), yaw, -5);
+        if (ui.mx >= modelX && ui.my >= modelY && ui.mx < modelX + modelW && ui.my < modelY + modelH) ui.tooltip = "Drag to turn";
+        float sw = Math.min(colW, 80);
+        skins.bounds(x + (colW - sw) / 2f, modelY + modelH + 6, sw, btnH).render(ui);
+    }
+
+    private void logo(float cx, float y, float px) {
+        float total = 0;
+        for (String[] gl : GLYPHS) total += gl[0].length() * px + px;
+        total -= px;
+        float x = cx - total / 2f, depth = Math.max(1, px / 2f);
+        for (int gi = 0; gi < GLYPHS.length; gi++) {
+            String[] gl = GLYPHS[gi];
+            boolean accent = gi >= 2;
+            for (int pass = 0; pass < 3; pass++) {
+                for (int r = 0; r < gl.length; r++) {
+                    for (int c = 0; c < gl[r].length(); c++) {
+                        if (gl[r].charAt(c) != '#') continue;
+                        float bx = x + c * px, by = y + r * px;
+                        if (pass == 0) {
+                            g.rect(bx - 1, by - 1, bx + px + depth + 1, by + px + depth + 1, 0xFF101010); // outline
+                        } else if (pass == 1) {
+                            g.rect(bx + depth, by + depth, bx + px + depth, by + px + depth, accent ? Colors.lerp(ui.t.accent, 0xFF000000, 0.55f) : 0xFF4A4A4A);
+                        } else {
+                            float shade = r / 6f;
+                            int face = accent ? Colors.lerp(Colors.lerp(ui.t.accent, 0xFFFFFFFF, 0.25f), ui.t.accent, shade)
+                                    : Colors.lerp(0xFFF4F4F4, 0xFFB8B8B8, shade);
+                            g.rect(bx, by, bx + px, by + px, face);
+                        }
+                    }
+                }
+            }
+            x += gl[0].length() * px + px;
         }
     }
 
     private void tooltip(String text) {
         float tw = g.textWidth(text) + 8, tx = Math.min(ui.mx + 8, w - tw - 2), ty = Math.max(2, ui.my - 14);
-        g.roundRect(tx, ty, tw, 12, 3, 0xF0101216);
-        g.text(text, tx + 4, ty + 2, ui.t.text, false);
+        g.rect(tx, ty, tx + tw, ty + 12, 0xF0101010);
+        g.text(text, tx + 4, ty + 2, 0xFFFFFFFF, false);
+    }
+
+    private List<HomeButton> all() {
+        List<HomeButton> l = new ArrayList<HomeButton>(main);
+        l.add(options);
+        l.add(quit);
+        l.addAll(side);
+        l.add(skins);
+        l.add(vanilla);
+        return l;
     }
 
     @Override
     public boolean mouseClicked(float mx, float my, int button) {
         ui.mx = mx;
         ui.my = my;
-        for (Item it : items) if (it.mouseClicked(ui, button)) return true;
-        return vanilla.mouseClicked(ui, button);
+        for (HomeButton b : all()) if (b.visible && b.mouseClicked(ui, button)) return true;
+        if (button == 0 && mx >= modelX && my >= modelY && mx < modelX + modelW && my < modelY + modelH) {
+            turning = true;
+            lastX = mx;
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean mouseReleased(float mx, float my, int button) {
+        turning = false;
         return false;
     }
 
     @Override
     public boolean mouseDragged(float mx, float my, int button) {
-        return false;
+        if (!turning) return false;
+        yaw += (mx - lastX) * 2.5f;
+        lastX = mx;
+        return true;
     }
 
     @Override
@@ -238,7 +285,9 @@ public final class TitleUi implements Surface {
     }
 
     @Override
-    public void onClose() {}
+    public void onClose() {
+        turning = false;
+    }
 
     @Override
     public boolean closesOnEscape() {
@@ -250,24 +299,46 @@ public final class TitleUi implements Surface {
         return false;
     }
 
-    /** A left-aligned menu entry: an accent bar grows and the label slides on hover. */
-    private final class Item extends Widget {
-        private final String label;
+    @Override
+    public boolean wantsPanorama() {
+        return true;
+    }
+
+    /** Flat translucent button in the vanilla layout's spirit; {@code flat} draws text only (the Vanilla menu link). */
+    private static final class HomeButton extends Widget {
+        final String label;
         private final Runnable action;
         private final Anim hover = new Anim(0);
+        boolean flat;
 
-        Item(String label, Runnable action) {
+        HomeButton(String label, Runnable action) {
             this.label = label;
             this.action = action;
         }
 
+        HomeButton tip(String t) {
+            tooltip = t;
+            return this;
+        }
+
         @Override
         public void render(Ui ui) {
-            hover.to(hovered(ui) ? 1 : 0, 140, ui.now);
+            boolean hv = ui.mx >= x && ui.my >= y && ui.mx < x + w && ui.my < y + h;
+            hover.to(hv ? 1 : 0, 110, ui.now);
             float t = hover.get(ui.now);
-            ui.g.roundRect(x, y, w, h, 3, Colors.fade(ui.t.surface2, 0.35f + 0.55f * t));
-            ui.g.roundRect(x, y + 3, 2 + 2 * t, h - 6, 1, Colors.lerp(Colors.fade(ui.t.accent, 0.55f), ui.t.accent, t));
-            ui.g.text(label, x + 10 + 3 * t, y + (h - 8) / 2f, Colors.lerp(Colors.lerp(ui.t.textDim, ui.t.text, 0.6f), ui.t.text, t), false);
+            if (flat) {
+                ui.g.textCentered(label, x + w / 2f, y + (h - 8) / 2f, Colors.lerp(0xFFC8C8C8, 0xFFFFFFFF, t), true);
+                if (t > 0.01f) ui.g.rect(x + 5, y + h - 2, x + w - 5, y + h - 1, Colors.fade(0xFFFFFFFF, t));
+            } else {
+                ui.g.rect(x, y, x + w, y + h, Colors.lerp(0xA0000000, 0xC8282828, t));
+                int edge = Colors.lerp(0x50FFFFFF, 0xFFFFFFFF, t);
+                ui.g.rect(x, y, x + w, y + 1, edge);
+                ui.g.rect(x, y + h - 1, x + w, y + h, edge);
+                ui.g.rect(x, y + 1, x + 1, y + h - 1, edge);
+                ui.g.rect(x + w - 1, y + 1, x + w, y + h - 1, edge);
+                ui.g.textCentered(label, x + w / 2f, y + (h - 8) / 2f, Colors.lerp(0xFFE8E8E8, 0xFFFFFFA0, t), true);
+            }
+            if (hv && tooltip != null) ui.tooltip = tooltip;
         }
 
         @Override

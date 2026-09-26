@@ -57,6 +57,9 @@ public final class GuiRoot implements Surface {
         pages.add(new ModsPage(this));
         pages.add(new ProfilesPage(this));
         pages.add(new KeybindsPage(this));
+        pages.add(new dev.mw19.core.gui.page.SkinsPage(this));
+        pages.add(new dev.mw19.core.gui.page.PacksPage(this));
+        pages.add(new dev.mw19.core.gui.page.HostPage(this));
         pages.add(new PluginsPage(this));
         pages.add(new RulesPage(this));
         pages.add(new PerfPage(this));
@@ -126,6 +129,23 @@ public final class GuiRoot implements Surface {
         if (k.platform.screens().current() != dev.mw19.core.platform.ScreenHost.Kind.OURS) k.openGui();
         editing = false;
         show(chatSearch);
+    }
+
+    /** Opens the menu on {@code type}'s page (home screen buttons). */
+    public void openPage(Class<? extends Page> type) {
+        if (k.platform.screens().current() != dev.mw19.core.platform.ScreenHost.Kind.OURS) k.openGui();
+        editing = false;
+        Page p = page(type);
+        if (p != null) show(p);
+    }
+
+    public void openHost() {
+        openPage(dev.mw19.core.gui.page.HostPage.class);
+    }
+
+    @Override
+    public void filesDropped(List<java.nio.file.Path> files) {
+        if (!editing) page.filesDropped(files);
     }
 
     public void closeHudEditor() {
@@ -247,19 +267,19 @@ public final class GuiRoot implements Surface {
         g.text(Mw19.NAME, px + 23, py + 11, 1.25f, t.text, false);
         g.text("v" + k.modVersion, px + 23, py + 23, t.textDim, false);
         // nav
-        float ny = py + 40;
+        float ny = py + 40, step = navStep(), ih = step - 2, pad = (ih - 9) / 2f;
         for (int i = 0; i < pages.size(); i++) {
             Page p = pages.get(i);
             boolean sel = p == page;
-            boolean hv = ui.hover(px + 6, ny, SIDEBAR - 12, 17);
+            boolean hv = ui.hover(px + 6, ny, SIDEBAR - 12, ih);
             sideHover[i].to(sel ? 1 : hv ? 0.5f : 0, 150, now);
             float a = sideHover[i].get(now);
-            if (a > 0.01f) g.roundRect(px + 6, ny, SIDEBAR - 12, 17, 4, Colors.fade(t.surface2, a));
-            if (sel) g.roundRect(px + 6, ny + 4, 2, 9, 1, t.accent);
+            if (a > 0.01f) g.roundRect(px + 6, ny, SIDEBAR - 12, ih, 4, Colors.fade(t.surface2, a));
+            if (sel) g.roundRect(px + 6, ny + pad, 2, 9, 1, t.accent);
             int col = sel ? t.text : Colors.lerp(t.textDim, t.text, a);
-            Icons.draw(g, p.icon(), px + 13, ny + 3.5f, sel ? t.accent : col);
-            g.text(p.title(), px + 28, ny + 4.5f, col, false);
-            ny += 19;
+            Icons.draw(g, p.icon(), px + 13, ny + pad, sel ? t.accent : col);
+            g.text(p.title(), px + 28, ny + pad + 1, col, false);
+            ny += step;
         }
         // footer: HUD editor
         float by = py + ph - 26;
@@ -276,6 +296,11 @@ public final class GuiRoot implements Surface {
         page.render(ui);
         g.popAlpha();
         g.pop();
+    }
+
+    /** Sidebar row pitch: 19 when there is room, tighter on short windows so the list clears the HUD button. */
+    private float navStep() {
+        return Math.max(12, Math.min(19, (panelH() - 40 - 30) / (float) pages.size()));
     }
 
     private void renderTooltip(long now) {
@@ -404,13 +429,13 @@ public final class GuiRoot implements Surface {
             close();
             return true;
         }
-        float ny = py + 40;
+        float ny = py + 40, step = navStep();
         for (Page p : pages) {
-            if (ui.hover(px + 6, ny, SIDEBAR - 12, 17)) {
+            if (ui.hover(px + 6, ny, SIDEBAR - 12, step - 2)) {
                 show(p);
                 return true;
             }
-            ny += 19;
+            ny += step;
         }
         if (ui.hover(px + 8, py + ph - 26, SIDEBAR - 16, 18)) {
             openHudEditor();

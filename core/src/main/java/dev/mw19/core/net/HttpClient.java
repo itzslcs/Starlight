@@ -8,9 +8,14 @@ import dev.mw19.core.Log;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -198,6 +203,173 @@ public final class HttpClient implements Http {
                 throw new IOException("interrupted");
             }
         }
+    }
+
+    /** Result of {@link #request} and {@link #download}: delivered on the game thread. */
+    public interface BytesCallback {
+        void done(int status, byte[] body, String error);
+    }
+
+    /** Download progress, called on the network thread. */
+    public interface Progress {
+        void update(long done, long total);
+    }
+
+    /**
+     * One uncached request (GET when {@code body} is null, else {@code method} with that body). HTTPS only, except
+     * loopback for tests. The response body is capped at {@code maxBytes}.
+     */
+    public void request(final String method, final String url, final Map<String, String> headers, final byte[] body,
+                        final int maxBytes, final BytesCallback callback) {
+        if (!allowed(url)) {
+            callback.done(0, null, "unsupported URL");
+            return;
+        }
+        pool.execute(new Runnable() {
+            @Override
+            public void run() {
+                int status = 0;
+                byte[] out = null;
+                String error = null;
+                HttpURLConnection con = null;
+                try {
+                    URL u = new URL(url);
+                    waitForHost(u.getHost());
+                    con = open(u);
+                    con.setRequestMethod(method);
+                    if (headers != null) for (Map.Entry<String, String> h : headers.entrySet()) con.setRequestProperty(h.getKey(), h.getValue());
+                    if (body != null) {
+                        con.setDoOutput(true);
+                        con.setFixedLengthStreamingMode(body.length);
+                        OutputStream os = con.getOutputStream();
+                        try {
+                            os.write(body);
+                        } finally {
+                            os.close();
+                        }
+                    }
+                    status = con.getResponseCode();
+                    if (status == 429) backoff(u.getHost(), parseRetryAfter(con.getHeaderField("Retry-After")));
+                    InputStream in = status >= 400 ? con.getErrorStream() : con.getInputStream();
+                    out = in == null ? new byte[0] : readBytes(in, maxBytes);
+                    if (status >= 400) error = "HTTP " + status;
+                } catch (IOException ex) {
+                    error = "offline: " + ex.getClass().getSimpleName();
+                } catch (RuntimeException ex) {
+                    error = ex.toString();
+                } finally {
+                    if (con != null) con.disconnect();
+                }
+                deliver(callback, status, out, error);
+            }
+        });
+    }
+
+    /**
+     * Streams {@code url} into {@code target} (via a .part file, moved into place only when complete) and checks the
+     * SHA-512 when one is given. Fails without leaving a file when the size passes {@code maxBytes} or the hash differs.
+     */
+    public void download(final String url, final Path target, final String sha512, final long maxBytes, final Progress progress,
+                         final BytesCallback callback) {
+        if (!allowed(url)) {
+            callback.done(0, null, "unsupported URL");
+            return;
+        }
+        pool.execute(new Runnable() {
+            @Override
+            public void run() {
+                Path part = target.resolveSibling(target.getFileName() + ".part");
+                HttpURLConnection con = null;
+                int status = 0;
+                String error = null;
+                try {
+                    URL u = new URL(url);
+                    waitForHost(u.getHost());
+                    con = open(u);
+                    con.setReadTimeout(30000);
+                    status = con.getResponseCode();
+                    if (status != 200) throw new IOException("HTTP " + status);
+                    long total = con.getContentLengthLong();
+                    if (total > maxBytes) throw new IOException("file too large");
+                    MessageDigest md = MessageDigest.getInstance("SHA-512");
+                    Files.createDirectories(target.getParent());
+                    InputStream in = con.getInputStream();
+                    OutputStream os = Files.newOutputStream(part);
+                    try {
+                        byte[] buf = new byte[16384];
+                        long done = 0;
+                        int n;
+                        while ((n = in.read(buf)) > 0) {
+                            done += n;
+                            if (done > maxBytes) throw new IOException("file too large");
+                            md.update(buf, 0, n);
+                            os.write(buf, 0, n);
+                            if (progress != null) progress.update(done, total);
+                        }
+                    } finally {
+                        os.close();
+                        in.close();
+                    }
+                    if (sha512 != null && !sha512.equalsIgnoreCase(hex(md.digest()))) throw new IOException("checksum mismatch");
+                    Files.move(part, target, StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException ex) {
+                    error = ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
+                } catch (java.security.NoSuchAlgorithmException | RuntimeException ex) {
+                    error = ex.toString();
+                } finally {
+                    if (con != null) con.disconnect();
+                    try {
+                        Files.deleteIfExists(part);
+                    } catch (IOException ignored) {
+                        // best effort
+                    }
+                }
+                deliver(callback, status, null, error);
+            }
+        });
+    }
+
+    private static boolean allowed(String url) {
+        return url.startsWith("https://") || url.startsWith("http://127.0.0.1:") || url.startsWith("http://localhost:");
+    }
+
+    private HttpURLConnection open(URL u) throws IOException {
+        HttpURLConnection con = (HttpURLConnection) u.openConnection();
+        con.setConnectTimeout(5000);
+        con.setReadTimeout(15000);
+        con.setInstanceFollowRedirects(true);
+        con.setRequestProperty("User-Agent", userAgent);
+        return con;
+    }
+
+    private void deliver(final BytesCallback c, final int status, final byte[] body, final String error) {
+        main.runOnMain(new Runnable() {
+            @Override
+            public void run() {
+                c.done(status, body, error);
+            }
+        });
+    }
+
+    private static byte[] readBytes(InputStream in, int max) throws IOException {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = in.read(buf)) > 0) {
+                out.write(buf, 0, n);
+                if (out.size() > max) throw new IOException("response too large");
+            }
+            return out.toByteArray();
+        } finally {
+            in.close();
+        }
+    }
+
+    static String hex(byte[] b) {
+        StringBuilder sb = new StringBuilder(b.length * 2);
+        for (byte x : b) sb.append(Character.forDigit((x >> 4) & 15, 16)).append(Character.forDigit(x & 15, 16));
+        return sb.toString();
     }
 
     public void shutdown() {

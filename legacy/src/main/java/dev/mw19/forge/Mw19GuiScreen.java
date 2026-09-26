@@ -54,6 +54,7 @@ public final class Mw19GuiScreen extends GuiScreen {
         float mx = Mouse.getX() * width / (float) mc.displayWidth;
         float my = height - Mouse.getY() * height / (float) mc.displayHeight - 1;
         Mw19Forge.hooks().platform().refreshResolution();
+        if (surface.wantsPanorama()) ForgePanorama.render();
         root().render(backend.bind((int) Mw19.get().platform.screens().guiScale()), width, height, mx, my);
     }
 

@@ -23,6 +23,7 @@ final class Smoke {
     private boolean clickBefore;
     private long clickTicks;
     private String guiClick = CLICKS ? "pending" : "skipped (no xdotool)";
+    private String packs = "not run", packEnable = "not run", host = "not run", exploit = "not run";
 
     /**
      * debug-log 2026-09-26: every click on the Mods page threw and the smoke never noticed, because it only rendered
@@ -160,18 +161,114 @@ final class Smoke {
                     next();
                 }
                 break;
-            case 6:
-                if (inWorldTotal >= 20L * WORLD_SECONDS) {
-                    k.platform.screenshot("mw19-smoke-6-final");
+            case 6: // 0.3.0 screens: Skins, Packs (a live Modrinth search), Host World (Open to LAN), exploit self-check
+                if (stageTicks == 1) {
+                    k.gui().openPage(dev.mw19.core.gui.page.SkinsPage.class);
+                    try {
+                        java.nio.file.Files.createDirectories(k.skins.folder());
+                        java.nio.file.Files.write(k.skins.folder().resolve("mw19-smoke.png"), testSkin());
+                    } catch (java.io.IOException e) {
+                        fail("could not write the test skin: " + e);
+                    }
+                    if (!k.gui().page(dev.mw19.core.gui.page.SkinsPage.class).select("mw19-smoke.png")) fail("test skin not listed on the Skins page");
+                } else if (stageTicks == 30) {
+                    if (screen != ScreenHost.Kind.OURS) fail("Skins page did not open (screen=" + screen + ")");
+                    else k.platform.screenshot("mw19-smoke-7-skins");
+                } else if (stageTicks == 40) {
+                    k.gui().openPage(dev.mw19.core.gui.page.PacksPage.class);
+                } else if (stageTicks == 150) {
+                    // Enabling a pack (the Packs page's last step) with a tiny local pack: no download needed.
+                    try {
+                        java.nio.file.Path zip = k.platform.packs().folder().resolve("mw19-smoke-pack.zip");
+                        java.nio.file.Files.createDirectories(zip.getParent());
+                        java.util.zip.ZipOutputStream z = new java.util.zip.ZipOutputStream(java.nio.file.Files.newOutputStream(zip));
+                        z.putNextEntry(new java.util.zip.ZipEntry("pack.mcmeta"));
+                        z.write("{\"pack\":{\"pack_format\":34,\"description\":\"MW19 smoke\"}}".getBytes("UTF-8"));
+                        z.closeEntry();
+                        z.close();
+                        if (!k.platform.packs().enable("mw19-smoke-pack.zip")) fail("the game did not find the smoke resource pack");
+                    } catch (java.io.IOException e) {
+                        fail("could not write the smoke resource pack: " + e);
+                    }
+                } else if (stageTicks == 230) {
+                    java.util.List<String> on = k.platform.packs().enabled();
+                    packEnable = on.isEmpty() ? "none enabled" : "top=" + on.get(0);
+                    if (on.isEmpty() || !"mw19-smoke-pack.zip".equals(on.get(0))) fail("enabling a resource pack did not stick (" + packEnable + ")");
+                } else if (stageTicks == 240) {
+                    packs = k.gui().page(dev.mw19.core.gui.page.PacksPage.class).status(); // network: reported, not required
+                    Log.info("SMOKE: packs " + packs);
+                    k.platform.screenshot("mw19-smoke-8-packs");
+                } else if (stageTicks == 250) {
+                    int port = k.host.open(0, false);
+                    host = "port=" + port + " lan=" + k.host.lanAddress();
+                    Log.info("SMOKE: host " + host);
+                    if (port <= 0 || k.host.port() != port) fail("Host World did not open the world (" + host + ")");
+                    else k.gui().openHost();
+                } else if (stageTicks == 280) {
+                    k.platform.screenshot("mw19-smoke-9-host");
+                } else if (stageTicks == 290) {
+                    exploit = k.platform.selfTest("exploit");
+                    Log.info("SMOKE: exploit protection " + exploit);
+                    if (exploit.startsWith("FAIL")) fail("exploit protection self-test: " + exploit);
+                } else if (stageTicks == 300) {
+                    k.gui().close();
                     next();
                 }
                 break;
             case 7:
+                if (inWorldTotal >= 20L * WORLD_SECONDS) {
+                    k.platform.screenshot("mw19-smoke-10-final");
+                    next();
+                }
+                break;
+            case 8:
                 if (stageTicks == 20) finish();
                 break;
             default:
                 break;
         }
+    }
+
+    /** A valid 64x64 RGBA PNG in the skin layout: coloured head, body, arms and legs (uncompressed rows, zlib stream). */
+    static byte[] testSkin() throws java.io.IOException {
+        int w = 64, h = 64;
+        byte[] raw = new byte[h * (1 + w * 4)];
+        for (int y = 0; y < h; y++) {
+            raw[y * (1 + w * 4)] = 0; // filter: none
+            for (int x = 0; x < w; x++) {
+                int rgb = y < 16 ? (x < 32 ? 0x3A6FD8 : 0x000000) // head (+ transparent hat layer)
+                        : y < 32 ? (x < 16 ? 0xE0B030 : x < 40 ? 0xC03030 : x < 56 ? 0x30A050 : 0) // right leg, body, right arm
+                        : y >= 48 && x >= 16 && x < 48 ? (x < 32 ? 0xE0B030 : 0x30A050) : 0; // left leg, left arm
+                boolean opaque = rgb != 0 || (y < 16 && x < 32);
+                int o = y * (1 + w * 4) + 1 + x * 4;
+                raw[o] = (byte) (rgb >> 16);
+                raw[o + 1] = (byte) (rgb >> 8);
+                raw[o + 2] = (byte) rgb;
+                raw[o + 3] = (byte) (opaque ? 255 : 0);
+            }
+        }
+        java.io.ByteArrayOutputStream z = new java.io.ByteArrayOutputStream();
+        java.util.zip.DeflaterOutputStream d = new java.util.zip.DeflaterOutputStream(z);
+        d.write(raw);
+        d.close();
+        java.io.ByteArrayOutputStream png = new java.io.ByteArrayOutputStream();
+        png.write(new byte[]{(byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A});
+        java.nio.ByteBuffer ihdr = java.nio.ByteBuffer.allocate(13).putInt(w).putInt(h).put((byte) 8).put((byte) 6).put((byte) 0).put((byte) 0).put((byte) 0);
+        chunk(png, "IHDR", ihdr.array());
+        chunk(png, "IDAT", z.toByteArray());
+        chunk(png, "IEND", new byte[0]);
+        return png.toByteArray();
+    }
+
+    private static void chunk(java.io.ByteArrayOutputStream out, String type, byte[] data) throws java.io.IOException {
+        byte[] t = type.getBytes("US-ASCII");
+        out.write(java.nio.ByteBuffer.allocate(4).putInt(data.length).array());
+        out.write(t);
+        out.write(data);
+        java.util.zip.CRC32 crc = new java.util.zip.CRC32();
+        crc.update(t);
+        crc.update(data);
+        out.write(java.nio.ByteBuffer.allocate(4).putInt((int) crc.getValue()).array());
     }
 
     private void finish() {
@@ -200,7 +297,8 @@ final class Smoke {
                 return;
             }
         }
-        Log.info("MW19 SMOKE PASS hooks[" + k.hooks.describe() + "] guiClick[" + guiClick + "] keycps[" + keyCps + "] plugins[" + plugins.toString().trim() + "] modules["
+        Log.info("MW19 SMOKE PASS hooks[" + k.hooks.describe() + "] guiClick[" + guiClick + "] keycps[" + keyCps + "] packs[" + packs + "] packEnable[" + packEnable + "] host[" + host
+                + "] exploit[" + exploit + "] plugins[" + plugins.toString().trim() + "] modules["
                 + k.modules.describeEnabled() + "] avgFrameMs=" + k.perf.avgFrameMs() + " ownUsPerFrame=" + k.perf.avgOwnUs());
         k.config.flush();
         shutdownWatchdog();

@@ -51,6 +51,19 @@
   Vulkan switch on 26.2+. Numbers are in [PERF](PERF.md).
 - New modules: Speed, FPS Graph, Server Address, Clear Weather, Durability Alert.
 
+## 2026-09-26: 0.3.0 (owner requests: skin changer, pack browser, world hosting, ExploitPreventer, home screen, modules)
+- **Home screen** redone: vanilla panorama, pixel-block logo, the player's skin in 3D with a Skins button, Host World /
+  Packs / MW19 Menu on the right ([DECISIONS](DECISIONS.md) D-022).
+- **Skins** page (3D preview, skin folder, copy by player name, change skin via Mojang's API), **Packs** page (Modrinth
+  search, verified download, enable), **Host World** page (Open to LAN, UPnP forwarding, invite whitelist).
+- **Exploit Protection** (GRAY, D-021) and six small modules. Core tests: 63 pass, including a fake UPnP router, the
+  skin upload request format, Modrinth parsing and file-name safety.
+- Every smoke run now opens the three new pages (screenshots), runs a live Modrinth search, opens the world to LAN and
+  runs an exploit self-test (a sign editor must send back a mod-only key untranslated); the mixin audit covers the
+  five new injections.
+- **Fixed:** a config save race at exit (debug-log, [`ConfigRaceTest`](../core/src/test/java/dev/mw19/core/ConfigRaceTest.java)); the 1.8.9 dev version label.
+- **Not built:** in-game account switching (reads other programs' stored logins; D-022).
+
 ## Release status (2026-09-25)
 - **Modrinth:** draft project `mw19` with all 18 jars as `0.1.0+mc<mc>` alpha versions (uploaded hashes match `dist/`).
   It is not submitted for review yet: the owner checks the page (the name is still the D-001 placeholder) and submits.

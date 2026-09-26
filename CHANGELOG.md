@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.0
+- **New home screen look:** the game's own panorama, a pixel-block MW19 logo, your skin in 3D on the left (drag to
+  turn it) and *Host World*, *Packs* and *MW19 Menu* on the right. No more particles or tip cards.
+- **Skins:** preview skins in 3D, copy any player's skin by name, and change your own skin in game (Microsoft
+  accounts; uses Mojang's official skin service).
+- **Packs:** search and install resource packs from Modrinth in game, then enable them with one click.
+- **Host World:** open your world to friends on your network, or over the internet through your router (UPnP) with
+  an invite-only whitelist.
+- **Exploit Protection** (off by default, GRAY): servers cannot detect your mods through sign/anvil text probes, cannot
+  probe your home network (or, on 1.8.9, your files) through resource pack addresses, and server packs are cached per
+  account. Our own implementation of the protections ExploitPreventer lists.
+- **New modules:** Saturation, Session Time, Pack Display, Stopwatch, Day Counter, Low Health Warning.
+- **Fixed:** at exit, two config saves could race and one failed. The 1.8.9 build reported its version as "dev" in dev runs.
+
 ## 0.2.0: MW19
 - **New name:** Kestrel is now **MW19 Client**. Existing settings (`Kestrel/`) move to `MW19/` automatically, and old
   profile codes still import.

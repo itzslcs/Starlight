@@ -62,7 +62,8 @@ public final class Mw19Screen extends Screen {
     //? if >=26.1 {
     /*@Override
     public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
-        if (surface.wantsVanillaBackground()) super.extractBackground(g, mouseX, mouseY, delta);
+        if (surface.wantsPanorama()) extractPanorama(g, delta);
+        else if (surface.wantsVanillaBackground()) super.extractBackground(g, mouseX, mouseY, delta);
     }
 
     @Override
@@ -72,7 +73,8 @@ public final class Mw19Screen extends Screen {
     *///?} else {
     @Override
     public void renderBackground(GuiGraphics g, int mouseX, int mouseY, float delta) {
-        if (surface.wantsVanillaBackground()) super.renderBackground(g, mouseX, mouseY, delta);
+        if (surface.wantsPanorama()) renderPanorama(g, delta);
+        else if (surface.wantsVanillaBackground()) super.renderBackground(g, mouseX, mouseY, delta);
     }
 
     @Override
@@ -155,6 +157,12 @@ public final class Mw19Screen extends Screen {
     @Override
     public void onClose() {
         FabricCompat.setScreen(minecraft, parent);
+    }
+
+    /** Skin PNGs dropped on the window (Skins page). */
+    @Override
+    public void onFilesDrop(java.util.List<java.nio.file.Path> files) {
+        root().filesDropped(files);
     }
 
     @Override

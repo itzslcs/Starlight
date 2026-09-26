@@ -17,6 +17,12 @@ public interface Platform extends Game {
 
     ScreenHost screens();
 
+    Skins skins();
+
+    Packs packs();
+
+    Host host();
+
     ChatAccess chat();
 
     ModList mods();
@@ -90,6 +96,15 @@ public interface Platform extends Game {
 
     boolean sprinting();
 
+    /** The local player's health and food (0 without a world). */
+    float health();
+
+    float maxHealth();
+
+    int food();
+
+    float saturation();
+
     boolean sneaking();
 
     /**
@@ -113,6 +128,11 @@ public interface Platform extends Game {
 
     /** Local UI "ding" (never sent anywhere). */
     void playPing();
+
+    /** Smoke only: a platform self-check by name ("exploit"); "n/a" where it does not apply. */
+    default String selfTest(String what) {
+        return "n/a";
+    }
 
     /** Smoke/test only: feeds a line through the same path as a chat line received from the server. */
     void debugIncomingChat(String text);

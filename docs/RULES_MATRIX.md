@@ -52,6 +52,13 @@ truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/mw19/core/
 | chat | Chat Tools | all | AESTHETIC | ALLOWED | off | Timestamps, compacting, search, filters, highlights. Display only; never sends chat |
 | entity_culling | Entity Culling | all | PERF | ALLOWED | on | Draws less, never more: hides only entities fully behind solid blocks. Players, glowing and named entities always drawn |
 | clear_weather | Clear Weather | all | AESTHETIC | ALLOWED | off | Client-side only: the server weather is unchanged |
+| exploit_protection | Exploit Protection | all (sign/anvil part 1.21+) | none (security) | GRAY | off | Answers server probes (sign/anvil translation and keybind text, local-network resource pack URLs, 1.8.9 `level://` paths) the way an unmodded client would. No gameplay effect, but it changes what the client sends back to a probing server, which the policy lists as disallowed, so it is GRAY. The per-account server pack cache (1.21+) is always on: it only moves the cache folder |
+| saturation | Saturation | all | HUD? | GRAY | off | Your own food and saturation. Vanilla never shows saturation, so it is extra information |
+| session_time | Session Time | all | none (not game info) | ALLOWED | off | A timer since you joined |
+| pack_display | Pack Display | all | none (not game info) | ALLOWED | off | Your own top resource pack's name |
+| stopwatch | Stopwatch | all | none (not game info) | ALLOWED | off | Started and stopped only by your key presses |
+| day_counter | Day Counter | all | HUD | ALLOWED | off | Same day number as F3 |
+| low_health | Low Health Warning | all | AESTHETIC | ALLOWED | off | Red screen edges from your own health, which the hearts already show |
 | durability_alert | Durability Alert | all | HUD | ALLOWED | off | Durability already shows on the items; this only notifies (like Armor Status) |
 | screenshot | Screenshot Tools | all | none (not gameplay) | ALLOWED | off | Copy to clipboard, open folder. No uploads |
 | freelook | Freelook | all | fails AESTHETIC ("perspective") | DISALLOWED@hypixel | off | Server-gated by serverrules.json |

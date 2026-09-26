@@ -8,11 +8,14 @@
     "EntityMixin",
     "EntityRendererMixin",
     "GuiPlayerTabOverlayMixin",
+    "IntegratedServerAccessor",
     "ItemRendererMixin",
     "MinecraftMixin",
+    "NetHandlerPlayClientMixin",
     "RenderManagerMixin",
     "RenderMixin",
     "RendererLivingEntityMixin",
+    "ThreadLanServerPingAccessor",
     "WorldMixin"
   ],
   "injectors": {

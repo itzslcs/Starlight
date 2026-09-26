@@ -150,3 +150,48 @@ were not unpacked, run or copied. Its config folder holds account logins and was
   ([COMPAT_MATRIX](COMPAT_MATRIX.md)) go in.
 - **VulkanMod** (LGPL-3.0) exists for 1.21–1.21.5, 1.21.9–1.21.11 and 26.1.x. It replaces the renderer and conflicts with
   Sodium, so it is not in the default pack. On 26.2+ Minecraft's own Vulkan backend makes it unnecessary.
+
+## D-021 Exploit Protection: ExploitPreventer's list, MW19's own code, GRAY (owner request, 2026-09-26)
+The owner asked to build [ExploitPreventer](https://modrinth.com/mod/exploitpreventer) (NikOverflow, MIT, Fabric
+1.21.9+) into MW19. Only its public Modrinth description was read, for the list of exploits; its source was not read
+or copied (hard rule: original work only). MW19's version is written from the behaviour of vanilla's own code (javap):
+- **Sign and anvil text.** The sign editor's constructor turns each line into a string with `Component.getString()`,
+  which resolves translation keys and keybinds with the client's language and bindings, and sends those strings back.
+  A server can therefore open an editor with a mod's key and read whether it translated. MW19 re-resolves the lines
+  after the constructor ([`SignEditMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/SignEditMixin.java)) and the anvil's name field ([`AnvilNameMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/AnvilNameMixin.java)) as an unmodded client
+  with default bindings would: keys from vanilla's own `en_us.json` translate, other keys stay as written, vanilla
+  keybinds show their default key. 1.8.9 needs nothing here: it sends unedited sign lines back as components, and anvil
+  names are plain strings.
+- **Resource pack addresses.** A pack URL may not name a local host or a loopback, private, link-local or unique-local
+  address ([`LocalAddress`](../core/src/main/java/dev/mw19/core/net/LocalAddress.java)): checked without DNS when the request arrives and again with DNS
+  on the download thread (Fabric), or before the download on a helper thread (1.8.9). 1.8.9 also refuses `level://`
+  paths that leave the world folder, and `level://` outside singleplayer: vanilla 1.8.9 answers whether any file exists.
+- **Pack cache per account (1.21+).** Server packs are cached under `downloads/account-<hash>`, so the cache cannot
+  link one computer's accounts. This must be decided when the game starts, so it is always on.
+- **Verdict GRAY, default off.** It has no gameplay effect, but it changes what the client sends to a server that
+  probes, and Hypixel's policy lists changes to how the client communicates as disallowed. The owner can switch it on
+  under Mods; a smoke self-test proves each part on every target.
+
+## D-022 Skins, Packs and Host World (owner request, 2026-09-26)
+Asked for together with a home screen like Essential's (skin shown on the title screen), a less "generated" look and
+more modules.
+- **Skins** use Mojang's official endpoints only: `POST api.minecraftservices.com/minecraft/profile/skins` with the
+  session token when the player presses *Use this skin*, and the public profile API to copy a player's skin. The token
+  is read at that moment, only if it is a Microsoft-account token (a JWT), and sent only to that endpoint over HTTPS. It
+  is not logged, stored or reachable from plugins. The 3D preview is vanilla's `PlayerSkinWidget` on 1.21+ (the one
+  the skin-report screen uses) and ModelPlayer's parts on 1.8.9. Only 64×64 skins are accepted.
+- **Packs** search Modrinth's public API (no key) and download from its CDN with a size cap and SHA-512 check, to a
+  sanitised file name inside `resourcepacks/`. Icons load only when they are PNG (the game cannot decode WebP), else a
+  letter is shown.
+- **Host World** is vanilla's Open to LAN plus two things: UPnP port forwarding on the player's router
+  ([`Upnp`](../core/src/main/java/dev/mw19/core/net/Upnp.java), SSDP + SOAP; XML with DTDs off; answers only from the device that responded; a 1-hour lease
+  renewed while hosting, removed on stop, world close or exit) and an invite-only whitelist whenever the world is open
+  to the internet. There is no relay server: behind carrier-grade NAT or with UPnP off, the page says so and names the
+  port to forward by hand. Opening a port is a real exposure, so the internet switch is separate and the whitelist
+  cannot be skipped.
+- **Home screen:** vanilla's panorama (1.21+: `Screen.renderPanorama`; 1.8.9: MW19's own cube renderer, because
+  vanilla's is private), a logo drawn from pixel blocks, the player model with a Skins button, and flat buttons.
+  The particles and tip card were removed.
+- **Not built: account switching.** An in-game switcher that reads the launcher's saved accounts would handle other
+  programs' stored login tokens, which MW19's rules forbid (never read launcher account files). Launchers switch
+  accounts themselves.

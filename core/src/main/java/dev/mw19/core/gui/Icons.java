@@ -47,6 +47,20 @@ public final class Icons {
             g.roundOutline(x, y, 10, 10, 5, 1, c);
             g.rect(x + 4.5f, y + 2, x + 5.5f, y + 3, c);
             g.rect(x + 4.5f, y + 4, x + 5.5f, y + 8, c);
+        } else if ("skins".equals(name)) {
+            g.rect(x + 3, y, x + 7, y + 4, c);
+            g.rect(x + 2.5f, y + 4.5f, x + 7.5f, y + 8, c);
+            g.rect(x + 0.5f, y + 4.5f, x + 2, y + 7.5f, c);
+            g.rect(x + 8, y + 4.5f, x + 9.5f, y + 7.5f, c);
+            g.rect(x + 3, y + 8, x + 4.5f, y + 10, c);
+            g.rect(x + 5.5f, y + 8, x + 7, y + 10, c);
+        } else if ("packs".equals(name)) {
+            g.roundOutline(x + 3, y, 7, 7, 1, 1, c);
+            g.roundRect(x, y + 3, 7, 7, 1, c);
+        } else if ("host".equals(name)) {
+            g.roundOutline(x, y, 10, 10, 5, 1, c);
+            g.rect(x + 4.5f, y + 0.5f, x + 5.5f, y + 9.5f, c);
+            g.rect(x + 0.5f, y + 4.5f, x + 9.5f, y + 5.5f, c);
         } else if ("gear".equals(name)) {
             g.roundOutline(x + 2, y + 2, 6, 6, 3, 1.5f, c);
             g.rect(x + 4, y, x + 6, y + 2, c);

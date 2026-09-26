@@ -19,7 +19,8 @@ if mc == "1.8.9":
               ("net.minecraft.client.gui.GuiPlayerTabOverlay", "getPlayerName", "mw19$decorate"),
               ("net.minecraft.client.Minecraft", "shutdownMinecraftApplet", "mw19$shutdown"),
               ("net.minecraft.client.renderer.entity.RenderManager", "shouldRender", "mw19$cull"),
-              ("net.minecraft.world.World", "getRainStrength", "mw19$rain")]
+              ("net.minecraft.world.World", "getRainStrength", "mw19$rain"),
+              ("net.minecraft.client.network.NetHandlerPlayClient", "handleResourcePack", "mw19$guard")]
     jars = [j for j in glob.glob(os.path.expanduser("~/.gradle/caches/essential-loom/minecraftMaven/**/*.jar"), recursive=True)
             if "sources" not in j and "-srg-" not in j and "-intermediary-" not in j]
 else:
@@ -54,7 +55,13 @@ else:
               ("net.minecraft.client.multiplayer.MultiPlayerGameMode", "attack", "mw19$attack"),
               ("net.minecraft.client.gui.Gui" if V >= (26, 2) else "net.minecraft.client.Minecraft", "setScreen", "mw19$home"),
               ("net.minecraft.client.renderer.entity.EntityRenderDispatcher", "shouldRender", "mw19$cull"),
-              ("net.minecraft.world.level.Level", "getRainLevel", "mw19$rain")]
+              ("net.minecraft.world.level.Level", "getRainLevel", "mw19$rain"),
+              # Exploit Protection (the smoke self-test loads the sign and anvil screens)
+              ("net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen", "AbstractSignEditScreen", "mw19$guard"),
+              ("net.minecraft.client.gui.screens.inventory.AnvilScreen", "slotChanged", "mw19$guard"),
+              ("net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl", "parseResourcePackUrl", "mw19$local"),
+              ("net.minecraft.util.HttpUtil", "downloadFile", "mw19$local"),
+              ("net.minecraft.client.Minecraft", "Minecraft", "mw19$perAccount")]
     M = os.path.expanduser("~/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft")
     jars = [j for p in (f"{M}/minecraft-clientonly/{mc}-loom.mappings.*/*.jar", f"{M}/minecraft-common/{mc}-loom.mappings.*/*.jar",
                         f"{M}/minecraft-merged/{mc}/*.jar", f"{M}/minecraft-clientonly/{mc}/*.jar", f"{M}/minecraft-common/{mc}/*.jar")
