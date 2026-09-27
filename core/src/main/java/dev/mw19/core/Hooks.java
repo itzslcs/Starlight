@@ -25,6 +25,11 @@ public final class Hooks {
     public static boolean hideCrosshair;
     /** Entity Culling module: the platform's entity pass asks {@code Mw19.get().occlusion} before drawing. */
     public static boolean entityCulling;
+
+    /** Entity Culling's block entity part: chests, signs, banners, heads... fully hidden behind blocks are not drawn. */
+    public static boolean blockEntityCulling;
+    /** Fast Chests: the chest models are in (the platform sets it); their block entity renderer is skipped. */
+    public static boolean fastChests;
     /** Clear Weather module: the client level reports no rain or thunder. */
     public static boolean clearWeather;
 

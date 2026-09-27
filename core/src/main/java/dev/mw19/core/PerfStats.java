@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 /** Frame-time and own-cost ring buffers for the Performance page and the benchmark harness. */
 public final class PerfStats {
+    /** Time the open menu takes to draw one frame, microseconds (moving average; the menu is not part of the HUD budget). */
+    public volatile double menuUs;
     public static final int N = 480;
     public final float[] frameMs = new float[N];
     public final float[] ownUs = new float[N];

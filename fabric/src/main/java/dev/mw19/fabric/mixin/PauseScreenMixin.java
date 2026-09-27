@@ -1,8 +1,6 @@
 package dev.mw19.fabric.mixin;
 
 import dev.mw19.core.Mw19;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -19,8 +17,6 @@ public abstract class PauseScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void mw19$button(CallbackInfo ci) {
-        if (!Mw19.wantMenuButton()) return;
-        addRenderableWidget(Button.builder(Component.literal("MW"), b -> Mw19.get().openGui())
-                .bounds(6, 6, 20, 20).tooltip(Tooltip.create(Component.literal(Mw19.NAME + " menu"))).build());
+        if (Mw19.wantMenuButton()) dev.mw19.fabric.Mw19Fabric.pauseRow(this, b -> addRenderableWidget(b));
     }
 }

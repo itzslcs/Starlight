@@ -1,19 +1,20 @@
 # Architecture
 
-See also: [DECISIONS](DECISIONS.md) (why), [CODE_MAP](CODE_MAP.md) (every file), [PLUGIN_API](PLUGIN_API.md) (the public surface), [RULES_MATRIX](RULES_MATRIX.md) (what the server-rules engine enforces).
+See also: [DECISIONS](DECISIONS.md) (why), [CODE_MAP](CODE_MAP.md) (every file), [RULES_MATRIX](RULES_MATRIX.md) (what the server-rules engine enforces).
 
 ```
-api/     Java 8, zero MC imports: the stable plugin API (versioned, semver). Module/HudModule base classes,
-         settings, events, Renderer, PluginContext, NameDecorator, Http. Plugins compile against this only.
-core/    Java 8, zero MC imports: module manager, event bus, config/profiles/migrations, plugin loader,
+api/     Java 8, zero MC imports: Module/HudModule base classes, settings, events, Renderer, Http (the types core's
+         modules are written against; the plugin system that also used them was removed in 0.5.0, D-026).
+core/    Java 8, zero MC imports: module manager, event bus, config/profiles/migrations,
          GUI widget tree + pages + HUD editor, animation, themes, toasts, server-rule engine, JSON codec,
          HTTP client (LRU+TTL cache, rate limiter), the built-in modules' logic.
-fabric/  Stonecutter tree → versions/<mc>/ for 1.21 … 26.3. Platform adapters + mixins only.
+fabric/  Stonecutter tree → versions/<mc>/ for 1.21 … 26.3. Platform adapters + mixins, the renderer switch, and the
+         Fast Chests pack (resources/mw19packs). 1.21.9–1.21.11 nest VulkanMod (D-024).
 legacy/  Separate Gradle build: Forge 1.8.9 platform adapters + mixins. Consumes api/ and core/ sources.
-addons/  Plugin jars built against api/ only: sample plugin, tiertags (TierTagger-style tier display).
 ```
 
-`buildAll` → `dist/MW19-<modver>+mc<mc>.jar` ×18, `dist/plugins/*.jar`, `dist/prism/*.zip`, `dist/SHA256SUMS`.
+`buildAll` → `dist/MW19-<modver>+mc<mc>.jar` ×18, `dist/sources/` (the bundled VulkanMod's source), `dist/prism/*.zip`,
+`dist/SHA256SUMS`.
 
 ## Layering rule
 `platform → core → api`. Core never imports a Minecraft class, and the build fails if it does: `core` and `api` have no
@@ -44,7 +45,7 @@ interested. Each wraps its work in the guard described below.
 - events: `tick(start/end)`, `renderHud(Renderer, partial)`, `key(code, action, mods)`, `mouse(button, action)`,
   `scroll(delta) → consumed?`, `chat(ChatLine) → keep/modify`, `joinServer(addr)`, `leaveServer()`, `screenOpened(kind)`,
   `attack(entityId)`, `screenshot(path)`, `frame(nanos)`
-- queries: `fovMultiplier()`, `gammaOverride()`, `hitColor()`, `renderOwnName()`, `nameSuffix(uuid, name)`,
+- queries: `fovMultiplier()`, `gammaOverride()`, `hitColor()`, `renderOwnName()`, `vanillaButton(...)` (menu style),
   `crosshairOverride()`, `fireOverlayOffset()`, `damageTiltScale()`, `particleMultiplier()`, `freelook*()`
 
 ## Error isolation
@@ -54,7 +55,7 @@ Every module callback (`onEnable/onTick/onRender/...`) runs inside `Guard.run(mo
 - At **5 failures** the module is disabled for the session with a toast "‹name› was disabled after repeated errors" and
   a log line. It is not persisted, so a restart retries.
 - Each platform hook wraps its whole body too, so an error inside core can never propagate into Minecraft's frame.
-- The crash-report section lists enabled modules and plugins (Fabric: mixin into `Minecraft.fillReport`; Forge: `ICrashCallable`).
+- The crash-report section lists enabled modules (Fabric: mixin into `Minecraft.fillReport`; Forge: `ICrashCallable`).
 
 ## Event bus
 Listeners are indexed by exact event class into pre-sized arrays, and dispatch is a plain indexed loop. Hot events
@@ -71,15 +72,25 @@ Listeners are indexed by exact event class into pre-sized arrays, and dispatch i
 - **Profiles**: unlimited; switching is instant (in memory). Export = `MW19-P1:` + base64(deflate(json)) + `:` + crc32.
   Import validates the CRC and schema, then migrates. Auto-switch maps a server pattern to a profile name.
 
-## Plugins
-`<gameDir>/MW19/plugins/*.jar` + `plugin.json` `{id, name, version, api, main, depends{}, authors, description}`.
-Load order: parse → API check (same major, minor ≤ host) → dependency resolution (topological, cycle = error) →
-first-run consent (D-014) → `URLClassLoader(parent = MW19's loader)` → `main.onEnable(PluginContext)`.
-A plugin that throws during enable is disabled and reported on the Plugins page. The loader never crashes the game.
+## Renderer switch (1.21.9 – 1.21.11)
+[`RendererSwitch`](../fabric/src/main/java/dev/mw19/fabric/RendererSwitch.java) is declared as a Fabric language adapter, because Fabric creates adapters after picking the mods
+and before registering their entrypoints and mixin configs. It decides from files in `<gameDir>/MW19/`
+(`renderer.txt`, `vulkan-probe.txt`, `vulkan-starting`/`vulkan-failed`) whether the nested VulkanMod runs; if not, it
+empties VulkanMod's entrypoints and mixin configs in Fabric's metadata. Nothing Minecraft-related may load there. The
+platform clears `vulkan-starting` once a menu or world has been up for 2 s and starts the one-time
+[`VulkanProbe`](../fabric/src/main/java/dev/mw19/fabric/VulkanProbe.java) in OpenGL sessions (D-024). In dev runs Loom's `mods` block groups the mod's classes and resources so
+Fabric exposes them that early.
+
+## Fast Chests
+A built-in resource pack in the Fabric jar (`mw19packs/fast_chests`, generated by [`scripts/fast-chests.py`](../scripts/fast-chests.py)) holds
+blockstates, block models and a block-atlas source for the chest textures. [`FastChests`](../fabric/src/main/java/dev/mw19/fabric/FastChests.java) offers it from the client
+pack scan while the module is on; the block entity renderer then skips the chests it covers (D-025).
 
 ## GUI
 A retained widget tree in core ([`Widget`](../core/src/main/java/dev/mw19/core/gui/Widget.java): bounds, children, `render(Renderer, mouse, dt)`, input handlers, focus).
-Pages: Mods, HUD Editor, Profiles, Keybinds, Plugins, Server Rules, Performance, Themes, About/Compat.
+Pages: Mods (tiles or list), HUD Editor, Profiles, Keybinds, Skins, Packs, Host World, Server Rules, Performance,
+Themes, About. A closed menu is released (textures, pages) and rebuilt on the next open. Minecraft's own buttons are
+redrawn in the menu style by [`ButtonStyleMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/ButtonStyleMixin.java) / [`GuiButtonMixin`](../legacy/src/main/java/dev/mw19/forge/mixin/GuiButtonMixin.java) (D-027).
 Animations use [`Anim`](../core/src/main/java/dev/mw19/core/gui/Anim.java) (value, target, 150–250 ms, ease-out-cubic) and are ticked with frame dt, which allocates nothing.
 Themes are token sets (bg, surface, surface2, border, text, textDim, accent, good, warn, bad) with presets and a
 user accent colour. Blur comes from vanilla `Screen` background rendering (1.20.5+). The 1.8.9 fallback is a dim overlay.

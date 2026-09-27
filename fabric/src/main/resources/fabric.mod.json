@@ -11,6 +11,9 @@
   "entrypoints": {
     "client": ["dev.mw19.fabric.Mw19Fabric"]
   },
+  "languageAdapters": {
+    "mw19_renderer_switch": "dev.mw19.fabric.RendererSwitch"
+  },
   "mixins": ["mw19.mixins.json", "mw19.optional.mixins.json"],
   "depends": {
     "fabricloader": "${loader}",

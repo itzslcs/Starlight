@@ -165,6 +165,8 @@ final class TestPlatform implements Platform, ScreenHost, ChatAccess, ModList {
     public void openMultiplayer() {}
     public void openOptions() {}
     public void openVanillaTitle() {}
+    public void openPause() {}
+    public void closeScreen() {}
     public boolean hasModList() { return false; }
     public void openModList() {}
     public int width() { return 400; }

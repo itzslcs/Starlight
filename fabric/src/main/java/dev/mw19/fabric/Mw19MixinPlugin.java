@@ -25,6 +25,7 @@ public final class Mw19MixinPlugin implements IMixinConfigPlugin {
         CONFLICTS.put("CameraMixin", Arrays.asList("freelook", "perspectivemod"));
         CONFLICTS.put("EntityTurnMixin", Arrays.asList("freelook", "perspectivemod"));
         CONFLICTS.put("EntityCullingMixin", Arrays.asList("entityculling")); // one culler at a time
+        CONFLICTS.put("BlockEntityCullingMixin", Arrays.asList("entityculling")); // it culls block entities too
     }
 
     private Set<String> userDisabled = new HashSet<String>();
@@ -62,9 +63,11 @@ public final class Mw19MixinPlugin implements IMixinConfigPlugin {
     @Override
     public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {}
 
+    /** Mixins whose target belongs to another mod: listed only when that mod is present (a missing target class is
+     *  logged as an error even for @Pseudo mixins). */
     @Override
     public List<String> getMixins() {
-        return null;
+        return FabricLoader.getInstance().isModLoaded("vulkanmod") ? Arrays.asList("VulkanUpdateMixin") : null;
     }
 
     @Override

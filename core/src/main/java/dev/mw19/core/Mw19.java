@@ -1,6 +1,5 @@
 package dev.mw19.core;
 
-import dev.mw19.api.Mw19Api;
 import dev.mw19.api.event.ClientTickEvent;
 import dev.mw19.api.event.KeyPressEvent;
 import dev.mw19.api.event.ServerEvent;
@@ -56,18 +55,18 @@ public final class Mw19 {
     public final dev.mw19.core.modules.InputRates rates = new dev.mw19.core.modules.InputRates();
     public final VideoPresets video = new VideoPresets(this);
     public final dev.mw19.core.perf.Occlusion occlusion = new dev.mw19.core.perf.Occlusion();
-    public final dev.mw19.core.plugin.NameTagRegistry nameTags = new dev.mw19.core.plugin.NameTagRegistry();
-    public final dev.mw19.core.plugin.PanelRegistry panels = new dev.mw19.core.plugin.PanelRegistry();
+    /** Block entities get their own cache so they never evict entity results. */
+    public final dev.mw19.core.perf.Occlusion blockOcclusion = new dev.mw19.core.perf.Occlusion();
     public final dev.mw19.core.net.HttpClient http;
     public final dev.mw19.core.host.WorldHost host = new dev.mw19.core.host.WorldHost(this);
     public final dev.mw19.core.skin.SkinLibrary skins;
     /** Set by the home screen's Host World: open the Host page once a singleplayer world has loaded. */
     public boolean hostWhenWorldOpens;
-    public final dev.mw19.core.plugin.PluginManager plugins;
     public Theme theme = Theme.preset("MW19");
     public String currentServer;
     private GuiRoot gui;
     private final Gfx hudGfx = new Gfx();
+    private final Gfx menuGfx = new Gfx();
     private final ClientTickEvent tickEvent = new ClientTickEvent();
     private final dev.mw19.core.event.ScrollEvent scrollEvent = new dev.mw19.core.event.ScrollEvent();
     private final dev.mw19.core.event.AttackEvent attackEvent = new dev.mw19.core.event.AttackEvent();
@@ -103,7 +102,6 @@ public final class Mw19 {
         this.config = new ConfigManager(configDir(platform.gameDir()), modules, hud, client, scheduler);
         this.http = new dev.mw19.core.net.HttpClient(scheduler, modVersion);
         this.skins = new dev.mw19.core.skin.SkinLibrary(configDir(platform.gameDir()).resolve("skins"));
-        this.plugins = new dev.mw19.core.plugin.PluginManager(this, config.pluginsDir);
     }
 
     /** {@code <gameDir>/MW19}; a folder from before the rename ({@code Kestrel}, 2026-09-26) is moved over once. */
@@ -134,7 +132,7 @@ public final class Mw19 {
             public void run() {
                 Mw19 k = boot(platform, modVersion);
                 Log.info(NAME + " " + modVersion + " on Minecraft " + platform.minecraftVersion() + " (" + platform.loader()
-                        + "), API " + Mw19Api.VERSION + "; compat: " + k.compat.describePresent());
+                        + "); compat: " + k.compat.describePresent());
             }
         });
     }
@@ -144,7 +142,6 @@ public final class Mw19 {
         Mw19 k = new Mw19(platform, modVersion);
         instance = k; // before start(): modules enabled by the profile may call Mw19.get() in onEnable
         k.start();
-        k.plugins.loadAll();
         return k;
     }
 
@@ -152,6 +149,7 @@ public final class Mw19 {
         modules.holdUntilGameReady();
         BuiltinModules.registerAll(this);
         config.load();
+        if (config.freshInstall) video.markFresh();
         modules.setListener(new ModuleManager.Listener() {
             @Override
             public void changed(ModuleManager.State s) {
@@ -192,7 +190,7 @@ public final class Mw19 {
         }
     };
 
-    /** Registers a module (built-in or plugin) and applies the active profile's stored state to it. */
+    /** Registers a module and applies the active profile's stored state to it. */
     public ModuleManager.State register(Module m, String owner) {
         ModuleManager.State s = modules.register(m, owner);
         for (dev.mw19.api.setting.Setting<?> set : m.settings()) set.addListener(dirtyListener);
@@ -281,6 +279,31 @@ public final class Mw19 {
         return gui;
     }
 
+    /** The menu instance on screen is the live one (see {@link #unloadGui}). */
+    public void adoptGui(GuiRoot shown) {
+        gui = shown;
+    }
+
+    /**
+     * The menu closed: release its textures and drop it, so it costs nothing (memory or GPU) until it is opened again.
+     * Deferred to the next tick, because closing can happen while its own screen is still unwinding.
+     */
+    public void unloadGui(final GuiRoot closed) {
+        scheduler.runOnMain(new Runnable() {
+            @Override
+            public void run() {
+                if (gui != closed || platform.screens().current() == dev.mw19.core.platform.ScreenHost.Kind.OURS) return;
+                gui = null;
+                Guard.run("unload menu", new Runnable() {
+                    @Override
+                    public void run() {
+                        closed.dispose();
+                    }
+                });
+            }
+        });
+    }
+
     public void openGui() {
         platform.screens().openGui();
     }
@@ -334,7 +357,9 @@ public final class Mw19 {
         long t0 = System.nanoTime();
         k.hooks.hud = true;
         if (k.bench != null) k.bench.frame();
-        k.occlusion.newFrame(System.currentTimeMillis());
+        long frameNow = System.currentTimeMillis();
+        k.occlusion.newFrame(frameNow);
+        k.blockOcclusion.newFrame(frameNow);
         Gfx g = k.hudGfx;
         try {
             g.begin(backend, System.currentTimeMillis());
@@ -449,7 +474,7 @@ public final class Mw19 {
         }
     }
 
-    /** Incoming chat line: plugins may cancel it, then Chat Tools may decorate it. Never throws. */
+    /** Incoming chat line: event listeners may cancel it, then Chat Tools may decorate it. Never throws. */
     public static void onChat(dev.mw19.core.chat.ChatLine line) {
         Mw19 k = instance;
         if (k == null) return;
@@ -519,24 +544,6 @@ public final class Mw19 {
         });
     }
 
-    /**
-     * Text to append to a player's name (plugins such as Tier Tags), or null. Called while rendering nametags and the
-     * tab list, so the fast path (no decorators) is a single field read.
-     */
-    public static String nameSuffix(java.util.UUID uuid, String name, boolean tabList) {
-        Mw19 k = instance;
-        if (k == null || k.nameTags.isEmpty()) return null;
-        try {
-            return k.nameTags.suffix(uuid, name, tabList ? dev.mw19.api.name.NameDecorator.Placement.TAB_LIST
-                    : dev.mw19.api.name.NameDecorator.Placement.NAMETAG);
-        } catch (VirtualMachineError e) {
-            throw e;
-        } catch (Throwable t) {
-            Log.error("hook nameSuffix failed", t);
-            return null;
-        }
-    }
-
     private volatile long lastProbeToast;
 
     /** Exploit Protection stopped a probe (any thread). Tells the player at most once a minute. */
@@ -556,6 +563,48 @@ public final class Mw19 {
     }
 
     /** A vanilla title/pause screen finished init: returns whether to add our menu button. */
+    /**
+     * A vanilla button's background (pause menu, server list, options...) drawn like the home screen's buttons: dark
+     * glass with a thin edge that lights up on hover. False when "MW19 game menus" is off, so vanilla draws its own.
+     * Render thread, no allocation.
+     */
+    public static boolean vanillaButton(RenderBackend backend, float x, float y, float w, float h, boolean hovered, boolean active, float alpha) {
+        Mw19 k = instance;
+        if (k == null || !k.client.styleMenus.on()) return false;
+        Gfx g = k.menuGfx;
+        try {
+            g.begin(backend, 0);
+            int fill = !active ? 0x60000000 : hovered ? 0xC8282828 : 0xA0000000;
+            int edge = !active ? 0x28FFFFFF : hovered ? 0xFFFFFFFF : 0x50FFFFFF;
+            g.pushAlpha(alpha);
+            g.rect(x, y, x + w, y + h, fill);
+            g.rect(x, y, x + w, y + 1, edge);
+            g.rect(x, y + h - 1, x + w, y + h, edge);
+            g.rect(x, y + 1, x + 1, y + h - 1, edge);
+            g.rect(x + w - 1, y + 1, x + w, y + h - 1, edge);
+            g.popAlpha();
+            return true;
+        } catch (VirtualMachineError e) {
+            throw e;
+        } catch (Throwable t) {
+            Log.error("hook vanillaButton failed", t);
+            return false;
+        } finally {
+            try {
+                g.end();
+            } catch (Throwable ignored) {
+            }
+        }
+    }
+
+    /** Pause screen: MW19 Menu opens the menu, Packs opens it on the resource pack browser. */
+    public static void openFromPause(boolean packs) {
+        Mw19 k = instance;
+        if (k == null) return;
+        k.openGui();
+        if (packs) k.gui().openPage(dev.mw19.core.gui.page.PacksPage.class);
+    }
+
     public static boolean wantMenuButton() {
         Mw19 k = instance;
         if (k == null) return false;
@@ -570,7 +619,6 @@ public final class Mw19 {
         Guard.run("shutdown", new Runnable() {
             @Override
             public void run() {
-                k.plugins.shutdown();
                 k.host.shutdown();
                 k.config.shutdown();
                 k.scheduler.shutdown();

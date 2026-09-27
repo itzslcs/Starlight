@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.5.0
+- **Vulkan inside MW19 (1.21.9 – 1.21.11):** the jar now carries VulkanMod (LGPL-3.0, unmodified), so one file in the
+  mods folder gives you the Vulkan renderer. It never stops your game: the first start runs on OpenGL while MW19 checks in
+  the background whether your graphics card can run Vulkan, and switches to it from the next start. If a Vulkan start
+  ever fails, the next one is back on OpenGL by itself. Performance page → *Vulkan renderer* shows what is running and
+  switches it. With Sodium or Iris installed, VulkanMod stays off. On 26.2+ the switch uses Minecraft's own Vulkan
+  renderer, as before.
+- **Fast Chests** (on by default, 1.21+): chests, trapped chests, ender chests and copper chests are drawn as ordinary
+  blocks instead of every frame, which is much faster in storage rooms. Lids no longer open visibly; turn the module off
+  to get the animation back. Works with resource packs that change chest textures.
+- **Block entity culling:** Entity Culling now also skips chests, signs, banners and heads hidden behind walls.
+- **Minecraft's menus in the MW19 style:** the pause menu, server list and options use the home screen's buttons, and
+  the pause menu has **MW19 Menu** and **Packs** (the pack browser in game). Themes → *MW19 game menus* turns it off.
+- **New Mods page:** tiles with each module's icon and an ENABLED / DISABLED bar, a list view with descriptions, a
+  highlight that glides between categories, and the Performance category is back (it no longer drops off the row).
+- **Lighter menu:** it is unloaded when closed (no memory or GPU cost), cheaper corners, blur off by default.
+- **Plugins removed**, with the Tier Tags and Session Stats addons.
+- **Fixed:** if the very first start of a new install crashed, the next start skipped the automatic graphics preset.
+  On 1.21.9+ the Hitboxes module no longer leaves hitboxes switched on in the game's own saved F3 settings.
+  Hovering your skin on the home screen and the Skins page no longer shows a "drag to turn" tooltip.
+
 ## 0.4.0
 - **Graphics presets:** Potato, Low, Medium and High on the Performance page, all tuned for frame rate, with Undo.
   **Auto-detection:** on first start MW19 reads your graphics card (and CPU threads and memory) and picks a preset by

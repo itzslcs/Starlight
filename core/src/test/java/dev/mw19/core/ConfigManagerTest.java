@@ -92,19 +92,19 @@ class ConfigManagerTest {
     void keepsEntriesOfModulesNotRegisteredNowAndAppliesThemLater() throws Exception {
         Path profile = dir.resolve("profiles").resolve("Default.json");
         Files.createDirectories(profile.getParent());
-        AtomicFiles.write(profile, "{\"schema\":1,\"name\":\"Default\",\"modules\":{\"plugin_mod\":{\"enabled\":true,"
+        AtomicFiles.write(profile, "{\"schema\":1,\"name\":\"Default\",\"modules\":{\"late_mod\":{\"enabled\":true,"
                 + "\"settings\":{\"num\":2}}}}");
         Rig a = new Rig(dir);
-        TestModules.Plain late = new TestModules.Plain("plugin_mod", Rule.ALLOWED, false);
-        ModuleManager.State ls = a.mm.register(late, "plugin:x");
+        TestModules.Plain late = new TestModules.Plain("late_mod", Rule.ALLOWED, false);
+        ModuleManager.State ls = a.mm.register(late, "extra");
         a.cfg.applyTo(ls);
         assertTrue(ls.enabled());
         assertEquals(2.0, late.num.get(), 0);
 
-        a.mm.unregisterOwner("plugin:x");
+        a.mm.unregisterOwner("extra");
         a.cfg.flush();
         Map<String, Object> saved = Json.obj(Json.parse(AtomicFiles.read(profile)));
-        assertTrue(Json.obj(saved.get("modules")).containsKey("plugin_mod"), "unknown module data preserved");
+        assertTrue(Json.obj(saved.get("modules")).containsKey("late_mod"), "unknown module data preserved");
     }
 
     @Test

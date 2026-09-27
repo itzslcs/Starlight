@@ -16,7 +16,7 @@ plugins {
 }
 
 rootProject.name = "MW19"
-include("api", "core", "addons:sample", "addons:tiertags")
+include("api", "core")
 
 // versions.json is the single source of truth for targets. -Pmw19.fabricTargets=1.21.11,26.3 narrows it for dev.
 @Suppress("UNCHECKED_CAST")

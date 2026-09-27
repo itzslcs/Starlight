@@ -14,19 +14,27 @@ Multi-version Minecraft client mod: 18 jars (1.8.9 Forge; 1.21–1.21.11 and 26.
 
 ## Layout
 `api/` + `core/`: Java 8, no MC imports. `fabric/`: Stonecutter tree (versions/<mc>). `legacy/`: separate Gradle
-build for Forge 1.8.9. `addons/`: plugin jars. `scripts/`: smoke/prod tests. `docs/`: all documentation.
+build for Forge 1.8.9. `scripts/`: smoke/prod tests. `docs/`: all documentation. (Plugins were removed in 0.5.0, D-026.)
 
 ## Commands
 - `./gradlew buildAll`: every jar → `dist/` + `SHA256SUMS` (runs core tests; builds `legacy/` through its own wrapper).
 - `./gradlew :core:test`: unit tests.
 - `./gradlew :fabric:<mc>:build -Pmw19.fabricTargets=<mc>`: one Fabric target (the property limits configuration to it).
 - `cd legacy && ./gradlew build`: 1.8.9 (needs `./gradlew :api:jar :core:jar` in the root first).
-- `scripts/smoke.sh <mc> [seconds]`: headless smoke (Xvfb + llvmpipe). Evidence goes to `smoke-out/<mc>/`.
+- `scripts/smoke.sh <mc> [seconds]`: headless smoke (Xvfb + llvmpipe). Evidence goes to `smoke-out/<mc>/`
+  (game screenshots plus `x11-*.png` screen grabs, which are the only evidence under VulkanMod).
+- `PROD=1 scripts/smoke.sh <mc>`: the built dist jar in a real Fabric production launch ([`scripts/prodlaunch.py`](scripts/prodlaunch.py),
+  offline name, libraries cached in `~/.cache/mw19-prod`); needed for anything jar-in-jar (the bundled VulkanMod).
+  Vulkan headless: `VK_DRIVER_FILES=<lavapipe icd json>` (Mesa's `vulkan-swrast`, extracted from the Arch package
+  matching the installed Mesa; the RADV path hangs under Xvfb), plus `RENDERER=vulkan|opengl|auto`, `KEEP_STATE=1`
+  (keep `MW19/` between runs) and `VK_SOFT=1` (let the Vulkan check accept a CPU device).
 - `scripts/bench.sh <mc>`: fixed-scene benchmark (baseline / culling / boost / both). The machine must be otherwise idle,
   because llvmpipe uses every core. Results go in [PERF.md](docs/PERF.md).
 - `WITH_MODS="sodium immediatelyfast ferrite-core lithium" scripts/smoke.sh <mc>`: compatibility run with other mods
   (fetched from Modrinth by [`scripts/testmods.py`](scripts/testmods.py), never bundled).
 - `scripts/mrpack.py dist [mc ...]`: MW19 Performance `.mrpack` packs, which reference the performance mods by Modrinth URL.
+- [`scripts/vulkanmod-pin.py`](scripts/vulkanmod-pin.py): re-pins the bundled VulkanMod per version ([`fabric/bundled.json`](fabric/bundled.json)); only builds whose source
+  commit is public (LGPL), see DECISIONS D-024. [`scripts/fast-chests.py`](scripts/fast-chests.py): regenerates the Fast Chests pack.
 - Signatures, never from memory: javap against Loom's mapped jars in `~/.gradle/caches/fabric-loom/minecraftMaven/...`
   (Mojang names) and `~/.gradle/caches/essential-loom/minecraftMaven/...` (MCP names for 1.8.9).
 

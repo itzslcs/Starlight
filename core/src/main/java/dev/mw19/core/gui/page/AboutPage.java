@@ -1,6 +1,5 @@
 package dev.mw19.core.gui.page;
 
-import dev.mw19.api.Mw19Api;
 import dev.mw19.core.gui.GuiRoot;
 import dev.mw19.core.gui.Ui;
 import dev.mw19.core.gui.widget.Button;
@@ -33,8 +32,7 @@ public final class AboutPage extends Page {
 
     @Override
     public void render(Ui ui) {
-        heading(ui, "MW19 " + root.k.modVersion, "Minecraft " + root.k.platform.minecraftVersion() + " · " + root.k.platform.loader()
-                + " · plugin API " + Mw19Api.VERSION);
+        heading(ui, "MW19 " + root.k.modVersion, "Minecraft " + root.k.platform.minecraftVersion() + " · " + root.k.platform.loader());
         float ty = y + 30;
         String missing = root.k.hooks.missing(root.k.platform.inWorld());
         ui.g.text("Hooks: " + (missing.isEmpty() ? "all firing" : "not firing yet: " + missing), x, ty, missing.isEmpty() ? ui.t.good : ui.t.warn, false);
@@ -50,14 +48,21 @@ public final class AboutPage extends Page {
         ty += 6;
         ui.g.text("Privacy", x, ty, ui.t.text, false);
         ty += 11;
-        String privacy = "No telemetry, accounts or analytics. MW19 only uses the network for modules you turn on that say so"
-                + " (e.g. tier tags). Your session token is never exposed to plugins.";
+        String privacy = "No telemetry, accounts or analytics. MW19 only uses the network for what you ask it to (pack search,"
+                + " skins, hosting); your session token only ever goes to Mojang's skin service.";
         for (String line : dev.mw19.core.gui.Toasts.wrap(ui.g, privacy, w)) {
             ui.g.text(line, x + 4, ty, ui.t.textDim, false);
             ty += 10;
         }
         ty += 6;
         ui.g.text("Original work · MIT licence · not affiliated with Mojang, Hypixel, Feather/Dawn or Lunar.", x, ty, ui.t.textDim, false);
+        String bundled = root.k.platform.bundledNotice(); // LGPL-3.0 section 4(c): the library's notice among ours
+        if (!bundled.isEmpty()) {
+            for (String line : dev.mw19.core.gui.Toasts.wrap(ui.g, bundled, w)) {
+                ty += 10;
+                ui.g.text(line, x, ty, ui.t.textDim, false);
+            }
+        }
         folder.bounds(x, y + h - 18, 110, 16).render(ui);
     }
 

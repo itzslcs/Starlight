@@ -119,7 +119,7 @@ public final class TitleUi implements Surface {
             ui.g = g;
             ui.t = k.theme;
             ui.k = k;
-            ui.root = k.gui();
+            ui.root = null; // the home screen has no popups; never build the menu just to draw it
             ui.mx = mouseX;
             ui.my = mouseY;
             ui.now = now;
@@ -193,7 +193,6 @@ public final class TitleUi implements Surface {
         if (modelH < 40) return;
         if (name != null && !name.isEmpty()) g.textCentered(name, x + colW / 2f, y, 0xFFFFFFFF, true);
         g.player(modelX, modelY, modelW, modelH, 0, k.platform.skins().ownSkinSlim(), yaw, -5);
-        if (ui.mx >= modelX && ui.my >= modelY && ui.mx < modelX + modelW && ui.my < modelY + modelH) ui.tooltip = "Drag to turn";
         float sw = Math.min(colW, 80);
         skins.bounds(x + (colW - sw) / 2f, modelY + modelH + 6, sw, btnH).render(ui);
     }

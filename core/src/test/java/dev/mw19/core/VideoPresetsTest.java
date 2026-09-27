@@ -56,9 +56,23 @@ class VideoPresetsTest {
         assertNull(k.video.current());
 
         Mw19 up = TestPlatform.boot(dir.resolve("upgrade"));
+        up.config.section("video").remove("fresh"); // as a profile saved by an MW19 from before presets
         up.video.firstRun(false);
         assertNull(up.video.current());
         assertNull(((TestPlatform) up.platform).options.get("particles"));
+    }
+
+    /** debug-log 2026-09-27: a first start that crashed before its first tick (Vulkan failing) saved a profile on the
+     *  way out, so the next start was no longer "fresh" and skipped the preset. */
+    @Test
+    void aFirstStartThatCrashedStillGetsThePresetNextTime(@TempDir Path dir) {
+        Mw19 crashed = TestPlatform.boot(dir); // fresh install, then down before the first tick: firstRun never ran
+        assertTrue(crashed.config.freshInstall);
+        crashed.config.flush(); // the shutdown hook saves on the way out
+        Mw19 next = TestPlatform.boot(dir);
+        assertFalse(next.config.freshInstall);
+        next.video.firstRun(next.config.freshInstall);
+        assertEquals(VideoPreset.POTATO, next.video.current());
     }
 
     @Test

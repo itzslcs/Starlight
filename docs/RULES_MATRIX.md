@@ -1,6 +1,6 @@
 # Rules matrix: every module vs. the Hypixel Allowed Modifications policy
 
-See also: [ARCHITECTURE](ARCHITECTURE.md) (how server rules suspend modules), [PLUGIN_API](PLUGIN_API.md) (plugin modules follow the same rules), [DECISIONS](DECISIONS.md).
+See also: [ARCHITECTURE](ARCHITECTURE.md) (how server rules suspend modules), [DECISIONS](DECISIONS.md) (why each call was made).
 
 Policy source: https://support.hypixel.net/hc/en-us/articles/6472550754962 (fetched 2026-09-25 through the
 Zendesk API, article `updated_at 2025-02-24`). Its permitted categories:
@@ -51,6 +51,7 @@ truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/mw19/core/
 | particles | Particle Multiplier | all | AESTHETIC | ALLOWED | off | Client-side extra crit/sharpness particles |
 | chat | Chat Tools | all | AESTHETIC | ALLOWED | off | Timestamps, compacting, search, filters, highlights. Display only; never sends chat |
 | entity_culling | Entity Culling | all | PERF | ALLOWED | on | Draws less, never more: hides only entities fully behind solid blocks. Players, glowing and named entities always drawn |
+| fast_chests | Fast Chests | 1.21+ | PERF | ALLOWED | on | Chests drawn as ordinary blocks from a built-in resource pack (visual only, own screen); lids do not animate. Changes nothing the server sees |
 | clear_weather | Clear Weather | all | AESTHETIC | ALLOWED | off | Client-side only: the server weather is unchanged |
 | exploit_protection | Exploit Protection | all (sign/anvil part 1.21+) | none (security) | GRAY | off | Answers server probes (sign/anvil translation and keybind text, local-network resource pack URLs, 1.8.9 `level://` paths) the way an unmodded client would. No gameplay effect, but it changes what the client sends back to a probing server, which the policy lists as disallowed, so it is GRAY. The per-account server pack cache (1.21+) is always on: it only moves the cache folder |
 | saturation | Saturation | all | HUD? | GRAY | off | Your own food and saturation. Vanilla never shows saturation, so it is extra information |
@@ -76,14 +77,13 @@ truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/mw19/core/
 | scoreboard | Scoreboard Tweaks | 1.8.9 | HUD | ALLOWED | off | Hide numbers, move, retitle |
 | lobby_clutter | Lobby Clutter | 1.8.9 | AESTHETIC | ALLOWED | off | Hides lobby spam and holograms client-side |
 | quick_commands | Quick Commands | all | none | GRAY | off | **One command per keypress** (at most one a second, only with no screen open). No sequences, no timers |
-| tiertags | Tier Tags (addon plugin) | all | none | GRAY | off | Third-party PvP tier-list data next to names. Force-disabled on Hypixel |
 | opt_* | Optimizations (Phase 5) | 1.21+ | PERF | ALLOWED | per benchmark | Only kept if measured; see docs/PERF.md |
 
 ## serverrules.json (shipped default)
 
 ```json
 { "schema": 1, "servers": [ { "name": "Hypixel", "match": ["hypixel.net", "*.hypixel.net"],
-  "disallow": ["freelook", "tiertags", "reach"], "note": "Allowed Modifications policy, perspective + extra player info" } ] }
+  "disallow": ["freelook", "reach"], "note": "Allowed Modifications policy, perspective + extra player info" } ] }
 ```
 
 The user can update `<gameDir>/MW19/serverrules.json` without a new jar (it is merged over the bundled default).

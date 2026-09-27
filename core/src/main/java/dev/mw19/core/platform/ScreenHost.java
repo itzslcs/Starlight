@@ -26,6 +26,12 @@ public interface ScreenHost {
     /** Shows Minecraft's own title screen once, bypassing the home screen (buttons other mods add live there). */
     void openVanillaTitle();
 
+    /** The game's pause menu (in a world; smoke checks the MW19 row on it). */
+    void openPause();
+
+    /** Closes whatever screen is open (back to the game or the bare title). */
+    void closeScreen();
+
     /** Scaled (GUI-unit) screen size and physical pixels per unit. */
     int width();
 

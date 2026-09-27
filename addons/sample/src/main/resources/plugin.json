@@ -1,9 +1,0 @@
-{
-  "id": "session_stats",
-  "name": "Session Stats (sample)",
-  "version": "${version}",
-  "api": "2.0",
-  "main": "dev.mw19.addons.sample.SessionStatsPlugin",
-  "authors": ["MW19 contributors"],
-  "description": "Sample plugin: a HUD timer for this session plus lifetime totals, using events, the scheduler, config and a panel."
-}

@@ -70,6 +70,16 @@ public interface Platform extends Game {
     /** Sets that preference; the game applies it on the next start and falls back to OpenGL if Vulkan fails. */
     void setGraphicsApi(String api);
 
+    /** Notice for third-party code bundled into this build (VulkanMod, LGPL-3.0), or "" (About page). */
+    default String bundledNotice() {
+        return "";
+    }
+
+    /** One line on what renders now and at the next start (bundled VulkanMod), or "" (Performance page). */
+    default String rendererStatus() {
+        return "";
+    }
+
     /** Opens a folder in the OS file manager (best effort). */
     void openFolder(Path dir);
 
@@ -147,6 +157,12 @@ public interface Platform extends Game {
 
     /** Local UI "ding" (never sent anywhere). */
     void playPing();
+
+    /**
+     * Fast Chests: adds or removes the built-in pack that draws chests as blocks and reloads resources when that changes
+     * ({@code supports("fast_chests")}). Game thread.
+     */
+    default void setFastChests(boolean on) {}
 
     /** Smoke only: a platform self-check by name ("exploit"); "n/a" where it does not apply. */
     default String selfTest(String what) {

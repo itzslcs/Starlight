@@ -6,13 +6,19 @@ set -uo pipefail
 MC="${1:?usage: smoke.sh <mc-version> [seconds]}"
 SECS="${2:-60}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-RUN="$ROOT/run/$MC"
-OUT="$ROOT/smoke-out/$MC"
+# PROD=1: the built jar (dist/) in a real Fabric production launch (scripts/prodlaunch.py) instead of a Loom dev run.
+PROD="${PROD:-}"
+RUN="$ROOT/run/${PROD:+prod-}$MC"
+OUT="$ROOT/smoke-out/${PROD:+prod-}$MC"
 rm -rf "$OUT" && mkdir -p "$OUT" "$RUN"
-rm -rf "$RUN/saves/mw19-smoke" "$RUN"/screenshots/mw19-smoke-* "$RUN/logs/latest.log" "$RUN/MW19"
+rm -rf "$RUN/saves/mw19-smoke" "$RUN"/screenshots/mw19-smoke-* "$RUN/logs/latest.log"
+rm -f "$RUN/debug-profile.json"  # vanilla's saved F3 entries (hitboxes) must not carry over between runs
+# KEEP_STATE=1 keeps MW19/ from the last run (renderer markers: vulkan-starting, vulkan-probe.txt...);
+# RENDERER=auto|vulkan|opengl writes MW19/renderer.txt; VK_SOFT=1 lets the Vulkan check accept a CPU driver (lavapipe).
+[ -z "${KEEP_STATE:-}" ] && rm -rf "$RUN/MW19"
 # WITH_MODS="sodium ..." adds those mods from Modrinth to the dev run (compatibility/perf checks); cleared otherwise.
 rm -rf "$RUN/mods" && mkdir -p "$RUN/mods"
-rm -rf "$RUN/compat-mods"
+rm -rf "$RUN/compat-mods" "$RUN/compat-libs"
 if [ -n "${WITH_MODS:-}" ] && [ "$MC" != "1.8.9" ]; then
   MODS_LIST=""
   for m in $WITH_MODS; do
@@ -24,24 +30,12 @@ if [ -n "${WITH_MODS:-}" ] && [ "$MC" != "1.8.9" ]; then
     fi
   done
   mkdir -p "$RUN/compat-mods"
-  if [ -n "$MODS_LIST" ]; then python3 "$ROOT/scripts/testmods.py" "$MC" "$RUN/compat-mods" $MODS_LIST || exit 1; fi
+  if [ -n "$MODS_LIST" ]; then python3 "$ROOT/scripts/testmods.py" ${PROD:+--no-unnest} "$MC" "$RUN/compat-mods" $MODS_LIST || exit 1; fi
   WITH_MODS_ARG="${WITH_MODS_ARG:-} -Pmw19.withMods=$RUN/compat-mods"  # Loom remaps them at build time
 fi
 
-# Fresh MW19 config with the addon plugins installed and pre-approved (consent is keyed by the jar's SHA-256).
-mkdir -p "$RUN/MW19/plugins"
-rm -f "$ROOT"/addons/*/build/libs/*.jar  # stale jars (e.g. from before a rename) would be installed too
-(cd "$ROOT" && ./gradlew -q :addons:sample:jar :addons:tiertags:jar) || { echo "FAIL build addons" | tee "$OUT/result.txt"; exit 1; }
-cp "$ROOT"/addons/*/build/libs/*.jar "$RUN/MW19/plugins/"
-python3 - "$RUN/MW19" <<'PY'
-import hashlib, json, os, sys, zipfile
-root = sys.argv[1]; consent = {}
-for f in os.listdir(os.path.join(root, "plugins")):
-    p = os.path.join(root, "plugins", f)
-    pid = json.loads(zipfile.ZipFile(p).read("plugin.json"))["id"]
-    consent[pid] = hashlib.sha256(open(p, "rb").read()).hexdigest()
-json.dump({"schema": 1, "activeProfile": "Default", "pluginConsent": consent}, open(os.path.join(root, "config.json"), "w"))
-PY
+mkdir -p "$RUN/MW19"
+[ -n "${RENDERER:-}" ] && printf '%s' "$RENDERER" > "$RUN/MW19/renderer.txt"
 
 # Skip first-run screens and keep software rendering responsive. Written fresh every run.
 cat > "$RUN/options.txt" <<OPT
@@ -64,7 +58,14 @@ cp "$RUN/options.txt" "$RUN/optionsof.txt" 2>/dev/null || true
 # With xdotool, the run also clicks the menu through real X11 input (Smoke.requestClick logs where).
 CLICKS=""
 command -v xdotool >/dev/null && CLICKS="-Pmw19.smokeClicks=1"
-if [ "$MC" = "1.8.9" ]; then
+if [ -n "$PROD" ]; then
+  (cd "$ROOT" && ./gradlew -q ":fabric:$MC:collectJar" "-Pmw19.fabricTargets=$MC") || { echo "FAIL build jar" | tee "$OUT/result.txt"; exit 1; }
+  JAR=$(ls -t "$ROOT"/dist/MW19-*+mc"$MC".jar | head -1)
+  PROD_MODS=("$JAR")
+  [ -d "$RUN/compat-mods" ] && PROD_MODS+=("$RUN"/compat-mods/*.jar)
+  CMD=(python3 "$ROOT/scripts/prodlaunch.py" "$MC" "$RUN" "${PROD_MODS[@]}" -- -Dmw19.smoke=1 "-Dmw19.smoke.seconds=$SECS"
+       ${CLICKS:+-Dmw19.smoke.clicks=true} ${VK_SOFT:+-Dmw19.vulkan.allowSoftware=true})
+elif [ "$MC" = "1.8.9" ]; then
   (cd "$ROOT" && ./gradlew :api:jar :core:jar -q) || { echo "FAIL build core" | tee "$OUT/result.txt"; exit 1; }
   CMD=(bash -c "cd '$ROOT/legacy' && ./gradlew runClient --console=plain -Pmw19.smoke=$SECS $CLICKS")
 else
@@ -94,11 +95,26 @@ if [ -n "$CLICKS" ]; then
   CLICKER=$!
 fi
 
+# X11 grab next to each game screenshot ("SMOKE SHOT <display> <name>"): renderers that bypass the game's own
+# capture (VulkanMod) leave its screenshots blank, so x11-<name>.png is the evidence of what was on screen.
+if command -v import >/dev/null; then
+  (
+    while :; do
+      grep -o 'SMOKE SHOT .*' "$OUT/gradle.log" 2>/dev/null | while read -r _ _ d name; do
+        [ -e "$OUT/x11-$name.png" ] || DISPLAY="$d" import -window root "$OUT/x11-$name.png" 2>/dev/null
+      done
+      sleep 0.3
+    done
+  ) &
+  SHOOTER=$!
+fi
+
 echo "smoke $MC: launching (log: $OUT/gradle.log)"
 START=$(date +%s)
 xvfb-run -a -s "-screen 0 1280x720x24" env LIBGL_ALWAYS_SOFTWARE=1 timeout 1500 "${CMD[@]}" > "$OUT/gradle.log" 2>&1
 CODE=$?
 [ -n "${CLICKER:-}" ] && { kill "$CLICKER" 2>/dev/null; pkill -P "$CLICKER" 2>/dev/null; }
+[ -n "${SHOOTER:-}" ] && { kill "$SHOOTER" 2>/dev/null; pkill -P "$SHOOTER" 2>/dev/null; }
 echo "exit=$CODE after $(( $(date +%s) - START ))s" > "$OUT/result.txt"
 
 cp "$RUN/logs/latest.log" "$OUT/latest.log" 2>/dev/null || true
@@ -106,8 +122,12 @@ cp "$RUN"/screenshots/mw19-smoke-*.png "$OUT/" 2>/dev/null || true
 LOG="$OUT/latest.log"
 [ -s "$LOG" ] || LOG="$OUT/gradle.log"
 
-python3 "$ROOT/scripts/mixin-audit.py" "$RUN" "$MC" > "$OUT/mixin-audit.txt" 2>&1
-AUDIT=$?
+if [ -n "$PROD" ]; then  # production classes carry intermediary names; the dev runs audit the wiring
+  echo "mixin audit skipped (production run)" > "$OUT/mixin-audit.txt"; AUDIT=0
+else
+  python3 "$ROOT/scripts/mixin-audit.py" "$RUN" "$MC" > "$OUT/mixin-audit.txt" 2>&1
+  AUDIT=$?
+fi
 
 python3 - "$LOG" "$OUT/result.txt" "$AUDIT" "$OUT/mixin-audit.txt" <<'PY'
 import re, sys
@@ -132,7 +152,10 @@ allow = [r"Failed to fetch user properties", r"Realms", r"realms", r"Narrator", 
          # the dev account has no token, so authlib's key-pair fetch gets a 401 (26.2+)
          r"Failed to retrieve profile key pair",
          # vanilla fetching Mojang's service keys at start; a network timeout there is not ours (debug-log 2026-09-26)
-         r"Failed to request yggdrasil public key"]
+         r"Failed to request yggdrasil public key",
+         # VulkanMod ships shader files with an upper-case letter in their path (terrain_earlyZ), which Fabric's
+         # resource loader rejects and logs on every reload; harmless, not ours (debug-log 2026-09-26 "VulkanMod")
+         r"Invalid path in mod resource-pack vulkanmod: vulkanmod:shaders/basic/terrain_earlyZ/"]
 # Minecraft logs a GLFW error as three records ("#### GL ERROR ####", "@ <where>", "<code>: <message>"). Xvfb has no
 # cursor theme, so only that one message (with its frame) is environment noise; any other GL error still fails.
 env = set()

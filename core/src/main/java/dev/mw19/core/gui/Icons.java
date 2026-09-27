@@ -25,10 +25,6 @@ public final class Icons {
             g.rect(x + 4.5f, y + 4, x + 5.5f, y + 5, c);
             g.rect(x + 7, y + 4, x + 8, y + 5, c);
             g.rect(x + 3, y + 6.5f, x + 7, y + 7.5f, c);
-        } else if ("plugins".equals(name)) {
-            g.roundRect(x, y + 2, 8, 8, 1.5f, c);
-            g.roundRect(x + 3, y, 3, 3, 1.5f, c);
-            g.roundRect(x + 7, y + 4, 3, 3, 1.5f, c);
         } else if ("rules".equals(name)) {
             g.roundRect(x + 1, y, 8, 6, 1, c);
             g.roundRect(x + 2, y + 5, 6, 3, 1.5f, c);

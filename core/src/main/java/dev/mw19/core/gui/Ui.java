@@ -21,6 +21,6 @@ public final class Ui {
     }
 
     public boolean hover(float x, float y, float w, float h) {
-        return mx >= x && my >= y && mx < x + w && my < y + h && !root.blockedAt(mx, my);
+        return mx >= x && my >= y && mx < x + w && my < y + h && (root == null || !root.blockedAt(mx, my));
     }
 }

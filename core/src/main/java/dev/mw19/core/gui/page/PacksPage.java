@@ -105,6 +105,13 @@ public final class PacksPage extends Page {
         if (!searched) search(false);
     }
 
+    @Override
+    public void dispose() {
+        generation++; // callbacks still in flight are dropped
+        for (Integer h : icons.values()) if (h != null && h > 0) root.k.platform.skins().releaseImage(h);
+        icons.clear();
+    }
+
     private String mc() {
         return root.k.platform.minecraftVersion();
     }

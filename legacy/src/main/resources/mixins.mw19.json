@@ -7,15 +7,15 @@
     "EffectRendererMixin",
     "EntityMixin",
     "EntityRendererMixin",
-    "GuiPlayerTabOverlayMixin",
+    "GuiButtonMixin",
     "IntegratedServerAccessor",
     "ItemRendererMixin",
     "MinecraftMixin",
     "NetHandlerPlayClientMixin",
     "RenderManagerMixin",
-    "RenderMixin",
     "RendererLivingEntityMixin",
     "ThreadLanServerPingAccessor",
+    "TileEntityRendererDispatcherMixin",
     "WorldMixin"
   ],
   "injectors": {

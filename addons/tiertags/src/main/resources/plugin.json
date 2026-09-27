@@ -1,9 +1,0 @@
-{
-  "id": "tiertags",
-  "name": "Tier Tags",
-  "version": "${version}",
-  "api": "2.0",
-  "main": "dev.mw19.addons.tiertags.TierTagsPlugin",
-  "authors": ["MW19 contributors"],
-  "description": "Shows PvP tier-list ranks (MCTiers, SubTiers or any v2-compatible list) next to player names."
-}

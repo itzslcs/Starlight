@@ -12,12 +12,16 @@ import java.util.Locale;
  * Benchmark ({@code scripts/bench.sh}, {@code -Dmw19.bench=1}): one fixed scene measured in phases, so every optimisation
  * gets before/after numbers (docs/PERF.md). The scene is a stone floor and wall at y=200 in a fixed-seed world, 120
  * villagers (no AI) behind the wall and 14 in front, with the camera facing the wall. Phases: baseline (culling off,
- * the player's options), culling on, then culling plus FPS Boost (undone at the end). Software rendering exaggerates
- * GPU-side savings, so compare phases within one run, not against other machines.
+ * the player's options), culling on, Fast Chests on (the storage room above the villagers), the Low preset, then all
+ * three (undone at the end). Software rendering exaggerates GPU-side savings, so compare phases within one run, not
+ * against other machines.
  */
 final class Bench {
     /** "warmup" (JIT, chunk loading) is not reported; "baseline-end" repeats the baseline to expose drift. */
-    private static final String[] PHASES = {"warmup", "baseline", "culling", "boost", "culling+boost", "baseline-end"};
+    /** -Dmw19.bench.scene=chests (bench.sh BENCH_SCENE=chests): a storage room in plain view, Fast Chests off / on / off. */
+    private static final boolean CHESTS = "chests".equals(System.getProperty("mw19.bench.scene"));
+    private static final String[] PHASES = CHESTS ? new String[]{"warmup", "baseline", "fastchests", "baseline-end"}
+            : new String[]{"warmup", "baseline", "culling", "fastchests", "boost", "culling+fastchests+boost", "baseline-end"};
     private static final int WARMUP_TICKS = 200, BOOST_WARMUP_TICKS = 500, PHASE_TICKS = 300;
     private final Mw19 k;
     private final boolean legacy;
@@ -73,6 +77,16 @@ final class Bench {
     }
 
     private void buildScene() {
+        if (CHESTS) { // 41 x 25 single chests on a floor, filling the view (fill places them unconnected)
+            setup.add("weather clear");
+            setup.add("time set 6000");
+            setup.add("fill -24 199 -4 24 199 34 minecraft:stone");
+            setup.add("fill -24 200 -4 24 210 34 minecraft:air");
+            setup.add("fill -20 200 6 20 200 30 minecraft:chest");
+            setup.add("tp @p 0.5 205 0.5 0 30");
+            Log.info("BENCH: scene has 1025 chests in view");
+            return;
+        }
         String stone = legacy ? "stone" : "minecraft:stone";
         String mob = legacy ? "Villager" : "minecraft:villager";
         String tag = legacy ? "{NoAI:1,Silent:1,PersistenceRequired:1}" : "{NoAI:1b,Silent:1b,PersistenceRequired:1b}";
@@ -88,7 +102,13 @@ final class Bench {
         for (int x = -12; x <= 12; x += 4) {
             for (int z = 5; z <= 9; z += 4) setup.add("summon " + mob + " " + x + ".5 200 " + z + ".5 " + tag);
         }
-        Log.info("BENCH: scene has " + (setup.size() - 6) + " villagers");
+        int villagers = setup.size() - 6;
+        // A storage room behind the wall (block entity culling): chests above the villagers' heads.
+        String chest = legacy ? "chest" : "minecraft:chest";
+        for (int x = -22; x <= 22; x += 2) {
+            for (int z = 14; z <= 38; z += 2) setup.add("setblock " + x + " 203 " + z + " " + chest);
+        }
+        Log.info("BENCH: scene has " + villagers + " villagers and " + (setup.size() - 6 - villagers) + " chests");
     }
 
     private void runPhases() {
@@ -109,15 +129,16 @@ final class Bench {
         }
     }
 
-    /** Option changes rebuild every chunk section; boost phases wait until that is done. */
+    /** Option changes and Fast Chests' resource reload rebuild every chunk section; those phases wait until that is done. */
     private int warmup() {
         String p = PHASES[phase];
-        return p.contains("boost") || p.equals("baseline-end") ? BOOST_WARMUP_TICKS : WARMUP_TICKS;
+        return "warmup".equals(p) || "baseline".equals(p) ? WARMUP_TICKS : BOOST_WARMUP_TICKS;
     }
 
     private void configure(String p) {
-        ModuleManager.State culling = k.modules.get("entity_culling");
+        ModuleManager.State culling = k.modules.get("entity_culling"), fast = k.modules.get("fast_chests");
         if (culling != null) k.modules.setEnabled(culling, p.contains("culling"));
+        if (fast != null && (fast.suspend() & ModuleManager.SUSPEND_UNAVAILABLE) == 0) k.modules.setEnabled(fast, p.contains("fastchests"));
         if (p.contains("boost") && !k.video.active()) k.video.apply(dev.mw19.core.perf.VideoPreset.LOW, true);
         if (!p.contains("boost") && k.video.active()) k.video.undo();
         Log.info("BENCH: phase " + p);
@@ -142,7 +163,8 @@ final class Bench {
         int worst = Math.max(1, n / 100);
         double worstSum = 0;
         for (int i = n - worst; i < n; i++) worstSum += s[i];
-        String culled = Hooks.entityCulling ? k.occlusion.culled + "/" + k.occlusion.calls : "off";
+        String culled = Hooks.entityCulling ? k.occlusion.culled + "/" + k.occlusion.calls + " blocks=" + k.blockOcclusion.culled
+                + "/" + k.blockOcclusion.calls : "off";
         int hitches = 0;
         for (float f : s) if (f > 50) hitches++;
         Log.info(String.format(Locale.ROOT, "MW19 BENCH mc=%s phase=%s frames=%d avgFps=%.1f low1=%.1f p99ms=%.2f hitches50=%d gc=%dx/%dms culled=%s ownUs=%.0f",

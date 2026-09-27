@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Benchmark one target headless (core Bench): fixed scene, phases baseline / culling / culling+boost.
-# usage: scripts/bench.sh <mc-version>   -> bench-out/<mc>/{bench.txt,latest.log,gradle.log}
+# Benchmark one target headless (core Bench): fixed scene, phases baseline / culling / fastchests / boost / all.
+# usage: [BENCH_SCENE=chests] scripts/bench.sh <mc-version>   -> bench-out/<mc>/{bench.txt,latest.log,gradle.log}
 # Software GL (llvmpipe): compare phases within a run; the numbers are not GPU performance.
 set -uo pipefail
 MC="${1:?usage: bench.sh <mc-version>}"
@@ -33,7 +33,8 @@ if [ "$MC" = "1.8.9" ]; then
   (cd "$ROOT" && ./gradlew :api:jar :core:jar -q) || { echo "FAIL build core"; exit 1; }
   CMD=(bash -c "cd '$ROOT/legacy' && ./gradlew runClient --console=plain -Pmw19.bench=1")
 else
-  CMD=("$ROOT/gradlew" -p "$ROOT" ":fabric:$MC:runClient" --console=plain "-Pmw19.bench=1" "-Pmw19.fabricTargets=$MC")
+  CMD=("$ROOT/gradlew" -p "$ROOT" ":fabric:$MC:runClient" --console=plain "-Pmw19.bench=1" "-Pmw19.fabricTargets=$MC"
+       ${BENCH_SCENE:+"-Pmw19.benchScene=$BENCH_SCENE"})
 fi
 echo "bench $MC: running (log: $OUT/gradle.log)"
 xvfb-run -a -s "-screen 0 1280x720x24" env LIBGL_ALWAYS_SOFTWARE=1 timeout 900 "${CMD[@]}" > "$OUT/gradle.log" 2>&1

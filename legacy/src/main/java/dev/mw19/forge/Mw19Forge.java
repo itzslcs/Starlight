@@ -28,6 +28,21 @@ import org.lwjgl.input.Keyboard;
 @Mod(modid = "mw19", name = "MW19", useMetadata = true, clientSideOnly = true, acceptedMinecraftVersions = "[1.8.9]")
 public final class Mw19Forge {
     private static final int BUTTON_ID = 0x4B53; // "KS"
+    private static final ForgeBackend MENU = new ForgeBackend();
+
+    /** GuiButtonMixin: a vanilla button's background in the MW19 style; false = vanilla draws its own. */
+    public static boolean button(int x, int y, int w, int h, boolean hovered, boolean enabled) {
+        return Mw19.vanillaButton(MENU.bind(guiScale()), x, y, w, h, hovered, enabled, 1f);
+    }
+
+    /** The GUI scale factor as ScaledResolution computes it, without allocating one per button. */
+    private static int guiScale() {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getMinecraft();
+        int want = mc.gameSettings.guiScale == 0 ? 1000 : mc.gameSettings.guiScale, f = 1;
+        while (f < want && mc.displayWidth / (f + 1) >= 320 && mc.displayHeight / (f + 1) >= 240) f++;
+        if (mc.isUnicode() && f % 2 != 0 && f != 1) f--;
+        return f;
+    }
     private static final net.minecraft.util.BlockPos.MutableBlockPos PROBE = new net.minecraft.util.BlockPos.MutableBlockPos();
     private static final dev.mw19.core.perf.Occlusion.Blocks BLOCKS = new dev.mw19.core.perf.Occlusion.Blocks() {
         @Override
@@ -57,11 +72,41 @@ public final class Mw19Forge {
             Mw19 k = Mw19.get();
             if (k == null) return true;
             net.minecraft.util.AxisAlignedBB b = e.getEntityBoundingBox();
-            return k.occlusion.visible(BLOCKS, e.getEntityId(), b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ, cx, cy, cz,
-                    System.currentTimeMillis());
+            // 1.8.9 hands culling the viewer's interpolated FEET position; rays must start at the camera (eyes, or behind
+            // the player in third person), or a mob seen over a one-block wall counts as hidden (debug-log 2026-09-26).
+            net.minecraft.util.Vec3 eye = net.minecraft.client.renderer.ActiveRenderInfo.getPosition();
+            return k.occlusion.visible(BLOCKS, e.getEntityId(), b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ,
+                    cx + eye.xCoord, cy + eye.yCoord, cz + eye.zCoord, System.currentTimeMillis());
         } catch (RuntimeException ex) {
             Hooks.entityCulling = false; // stop culling rather than risk the render loop
             dev.mw19.core.Log.error("entity culling disabled after an error", ex);
+            return true;
+        }
+    }
+
+    /**
+     * TileEntityRendererDispatcherMixin: false when the tile entity (chest, sign, banner, skull...) is fully hidden behind
+     * blocks. Renderers that force rendering (beacon beams) are never skipped. Fails open.
+     */
+    public static boolean drawTileEntity(net.minecraft.tileentity.TileEntity te) {
+        if (!Hooks.blockEntityCulling) return true;
+        try {
+            Mw19 k = Mw19.get();
+            if (k == null) return true;
+            net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer<net.minecraft.tileentity.TileEntity> r =
+                    net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher.instance.getSpecialRenderer(te);
+            if (r == null || r.forceTileEntityRender()) return true;
+            net.minecraft.util.BlockPos p = te.getPos();
+            net.minecraft.util.Vec3 eye = net.minecraft.client.renderer.ActiveRenderInfo.getPosition();
+            double cx = net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher.staticPlayerX + eye.xCoord;
+            double cy = net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher.staticPlayerY + eye.yCoord;
+            double cz = net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher.staticPlayerZ + eye.zCoord;
+            long key = p.toLong();
+            return k.blockOcclusion.visible(BLOCKS, (int) (key ^ (key >>> 32)), p.getX() - 1, p.getY() - 1, p.getZ() - 1,
+                    p.getX() + 2, p.getY() + 2, p.getZ() + 2, cx, cy, cz, System.currentTimeMillis());
+        } catch (RuntimeException ex) {
+            Hooks.blockEntityCulling = false;
+            dev.mw19.core.Log.error("block entity culling disabled after an error", ex);
             return true;
         }
     }
@@ -215,15 +260,29 @@ public final class Mw19Forge {
 
         @SubscribeEvent
         public void onGuiInit(GuiScreenEvent.InitGuiEvent.Post e) {
-            if ((e.gui instanceof GuiMainMenu || e.gui instanceof GuiIngameMenu) && Mw19.wantMenuButton()) {
-                e.buttonList.add(new GuiButton(BUTTON_ID, 6, 6, 20, 20, "MW"));
-            }
+            if (!Mw19.wantMenuButton()) return;
+            if (e.gui instanceof GuiMainMenu) e.buttonList.add(new GuiButton(BUTTON_ID, 6, 6, 20, 20, "MW"));
+            if (e.gui instanceof GuiIngameMenu) pauseRow(e.buttonList);
+        }
+
+        /** [MW19 Menu][Packs] under "Back to Game" (the topmost wide button); the rest of the menu moves down a row. */
+        private void pauseRow(java.util.List<GuiButton> buttons) {
+            GuiButton back = null;
+            for (GuiButton b : buttons) if (b.visible && b.getButtonWidth() >= 150 && (back == null || b.yPosition < back.yPosition)) back = b;
+            if (back == null) return;
+            int row = back.yPosition + 24, half = (back.getButtonWidth() - 4) / 2;
+            for (GuiButton b : buttons) if (b != back && b.yPosition >= row - 2) b.yPosition += 24;
+            buttons.add(new GuiButton(BUTTON_ID, back.xPosition, row, half, 20, "MW19 Menu"));
+            buttons.add(new GuiButton(BUTTON_ID + 1, back.xPosition + back.getButtonWidth() - half, row, half, 20, "Packs"));
         }
 
         @SubscribeEvent
         public void onButton(GuiScreenEvent.ActionPerformedEvent.Pre e) {
-            if (e.button.id == BUTTON_ID && (e.gui instanceof GuiMainMenu || e.gui instanceof GuiIngameMenu)) {
+            if (e.gui instanceof GuiMainMenu && e.button.id == BUTTON_ID) {
                 Mw19.get().openGui();
+                e.setCanceled(true);
+            } else if (e.gui instanceof GuiIngameMenu && (e.button.id == BUTTON_ID || e.button.id == BUTTON_ID + 1)) {
+                Mw19.openFromPause(e.button.id == BUTTON_ID + 1);
                 e.setCanceled(true);
             }
         }

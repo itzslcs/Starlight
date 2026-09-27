@@ -59,8 +59,8 @@ public final class PerfPage extends Page {
 
             @Override
             public void set(boolean v) {
-                root.k.platform.setGraphicsApi(v ? "vulkan" : "default");
-                root.k.toast("Renderer", (v ? "Vulkan" : "OpenGL") + " takes effect after a restart (Vulkan falls back to OpenGL if the GPU cannot run it).", root.k.theme.warn);
+                root.k.platform.setGraphicsApi(v ? "vulkan" : "opengl");
+                root.k.toast("Renderer", (v ? "Vulkan" : "OpenGL") + " from the next start (if Vulkan cannot start, MW19 goes back to OpenGL by itself).", root.k.theme.warn);
             }
         });
     }
@@ -115,16 +115,20 @@ public final class PerfPage extends Page {
         ui.g.text(ui.g.ellipsize(line1, w), x, by + 34, ui.t.text, false);
         ui.g.text(ui.g.ellipsize(line2, w), x, by + 45, p.avgOwnUs() > 300 ? ui.t.bad : ui.t.textDim, false);
         float top = by + 58;
-        if (dev.mw19.core.Hooks.entityCulling && root.k.occlusion.calls > 0) {
-            dev.mw19.core.perf.Occlusion oc = root.k.occlusion;
-            ui.g.text(ui.g.ellipsize("Entity culling: " + (oc.culled * 100 / oc.calls) + "% of entity draws skipped (" + oc.culled + " of " + oc.calls
-                    + " in the last second)", w), x, top, ui.t.textDim, false);
+        if (dev.mw19.core.Hooks.entityCulling && root.k.occlusion.calls + root.k.blockOcclusion.calls > 0) {
+            dev.mw19.core.perf.Occlusion oc = root.k.occlusion, bo = root.k.blockOcclusion;
+            ui.g.text(ui.g.ellipsize("Culling (last second): " + oc.culled + " of " + oc.calls + " entity draws, " + bo.culled + " of "
+                    + bo.calls + " block entity draws skipped", w), x, top, ui.t.textDim, false);
             top += 12;
         }
         if (root.k.platform.graphicsApi() != null) {
             ui.g.roundRect(x, top, w, 18, 4, ui.t.surface);
             ui.g.text("Vulkan renderer", x + 6, top + 5, ui.t.text, false);
-            ui.g.text("after restart · falls back to OpenGL", x + 90, top + 5, ui.t.textDim, false);
+            String status = root.k.platform.rendererStatus();
+            float sx = x + 14 + ui.g.textWidth("Vulkan renderer");
+            String line = ui.g.ellipsize(status.isEmpty() ? "after restart · falls back to OpenGL" : status, x + w - 36 - sx);
+            ui.g.text(line, sx, top + 5, ui.t.textDim, false);
+            if (ui.hover(sx, top, x + w - 36 - sx, 18) && !status.isEmpty()) ui.tooltip = status;
             vulkan.bounds(x + w - 30, top + 3, 24, 12).render(ui);
             top += 22;
         }

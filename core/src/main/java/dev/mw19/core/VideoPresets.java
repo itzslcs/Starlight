@@ -75,6 +75,9 @@ public final class VideoPresets {
      */
     void firstRun(boolean freshInstall) {
         if (state().containsKey("autoDone")) return;
+        // A first start that ended before its first tick (a crash, e.g. Vulkan failing) still saved a profile on the
+        // way out, so the next start is not "fresh" by that test any more: markFresh() kept the fact for it.
+        freshInstall |= Boolean.TRUE.equals(state().remove("fresh"));
         state().put("autoDone", Boolean.TRUE);
         k.config.markDirty();
         HardwareTier.Suggestion s = suggestion();
@@ -85,6 +88,18 @@ public final class VideoPresets {
         }
         int n = apply(s.preset, true);
         k.toast("Graphics: " + s.preset.label, "Picked for " + s.reason + " (" + n + " settings). Change it or undo it on the Performance page.", k.theme.good);
+    }
+
+    /** Smoke: this start was not the first one (the first run's preset may have been undone since). */
+    boolean firstRunDone(boolean freshInstall) {
+        return !freshInstall && !Boolean.TRUE.equals(state().get("fresh")) && state().containsKey("autoDone");
+    }
+
+    /** Called at load on a fresh install: remembered until {@link #firstRun} has actually run. */
+    void markFresh() {
+        if (state().containsKey("autoDone")) return;
+        state().put("fresh", Boolean.TRUE);
+        k.config.markDirty();
     }
 
     private Map<String, Object> backup() {

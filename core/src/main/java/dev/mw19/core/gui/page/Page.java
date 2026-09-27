@@ -18,6 +18,9 @@ public abstract class Page extends Widget {
     /** Page became visible (rebuild lists here). */
     public void onShow() {}
 
+    /** The menu closed and is being unloaded: free textures and anything else heavy. */
+    public void dispose() {}
+
     /** Files dropped onto the window while this page is shown. */
     public void filesDropped(java.util.List<java.nio.file.Path> files) {}
 

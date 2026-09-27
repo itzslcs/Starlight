@@ -51,13 +51,13 @@ public final class CrosshairModule extends Module implements Overlay {
         float t = thickness.floatValue() * k, s = size.floatValue() * k, gp = gap.floatValue() * k, h = t / 2f;
         String st = style.get();
         if (st.equals("Dot") || st.equals("Plus + dot")) {
-            if (outline.on()) g.roundRect(cx - h - 0.5f, cy - h - 0.5f, t + 1, t + 1, (t + 1) / 2f, o);
-            g.roundRect(cx - h, cy - h, t, t, t / 2f, c);
+            if (outline.on()) g.roundRectSmooth(cx - h - 0.5f, cy - h - 0.5f, t + 1, t + 1, (t + 1) / 2f, o);
+            g.roundRectSmooth(cx - h, cy - h, t, t, t / 2f, c);
         }
         if (st.equals("Circle")) {
             float r = gp + s;
-            if (outline.on()) g.roundOutline(cx - r - 0.5f, cy - r - 0.5f, r * 2 + 1, r * 2 + 1, r + 0.5f, t + 1, o);
-            g.roundOutline(cx - r, cy - r, r * 2, r * 2, r, t, c);
+            if (outline.on()) g.roundOutlineSmooth(cx - r - 0.5f, cy - r - 0.5f, r * 2 + 1, r * 2 + 1, r + 0.5f, t + 1, o);
+            g.roundOutlineSmooth(cx - r, cy - r, r * 2, r * 2, r, t, c);
         }
         if (st.equals("Cross") || st.equals("T") || st.equals("Plus + dot")) {
             arm(g, cx - h, cy - gp - s, cx + h, cy - gp, c, o, !st.equals("T")); // up (skipped for T)

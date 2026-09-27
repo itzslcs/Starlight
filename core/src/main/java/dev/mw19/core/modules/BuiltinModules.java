@@ -41,6 +41,7 @@ public final class BuiltinModules {
         m.add(new SimpleVisuals.Particles());
         m.add(new ChatModule());
         m.add(new EntityCullingModule());
+        m.add(new FastChestsModule());
         m.add(new ClearWeatherModule());
         m.add(new ExploitProtectionModule());
         m.add(new MoreHud.Saturation());

@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * config.json (global) + profiles/<name>.json. Game-thread API; disk writes happen on "MW19-IO".
- * Unknown keys and entries of modules that are not registered right now (e.g. a disabled plugin) are preserved.
+ * Unknown keys and entries of modules that are not registered right now (e.g. from a newer MW19) are preserved.
  */
 public final class ConfigManager {
     public static final String DEFAULT_PROFILE = "Default";
@@ -36,7 +36,7 @@ public final class ConfigManager {
     private static final long BACKUP_INTERVAL_MS = 10 * 60 * 1000L;
     private static final int KEEP_BACKUPS = 10;
 
-    public final Path root, profilesDir, backupsDir, pluginsDir, pluginDataDir;
+    public final Path root, profilesDir, backupsDir;
     private final ModuleManager modules;
     private final HudManager hud;
     private final ClientSettings client;
@@ -56,8 +56,6 @@ public final class ConfigManager {
         this.root = root;
         this.profilesDir = root.resolve("profiles");
         this.backupsDir = root.resolve("backups");
-        this.pluginsDir = root.resolve("plugins");
-        this.pluginDataDir = root.resolve("plugin-data");
         this.modules = modules;
         this.hud = hud;
         this.client = client;
@@ -83,7 +81,6 @@ public final class ConfigManager {
         try {
             freshInstall = !Files.exists(profileFile(DEFAULT_PROFILE));
             Files.createDirectories(profilesDir);
-            Files.createDirectories(pluginsDir);
             Map<String, Object> g = readWithRecovery(root.resolve("config.json"), false);
             global = g != null ? g : newGlobal();
             client.fromJson(Json.obj(global.get("client")));
@@ -277,7 +274,7 @@ public final class ConfigManager {
         return m;
     }
 
-    // ------------------------------------------------------------------ global extras (plugins, auto-profiles)
+    // ------------------------------------------------------------------ global extras (sections, auto-profiles)
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> section(String key) {

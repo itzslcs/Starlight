@@ -3,7 +3,6 @@ package dev.mw19.core;
 import dev.mw19.api.game.Game;
 import dev.mw19.core.module.ModuleManager;
 import dev.mw19.core.platform.ScreenHost;
-import dev.mw19.core.plugin.PluginManager;
 
 /**
  * Self-driving smoke run (-Dmw19.smoke=1): title → GUI → HUD editor → world → GUI → every module on + chat lines →
@@ -24,6 +23,9 @@ final class Smoke {
     private long clickTicks;
     private String guiClick = CLICKS ? "pending" : "skipped (no xdotool)";
     private String packs = "not run", packEnable = "not run", host = "not run", exploit = "not run", presets = "not run";
+    private String chests = "not run", pauseRow = "not run";
+    private int chestStep;
+    private long chestWait;
 
     /**
      * debug-log 2026-09-26: every click on the Mods page threw and the smoke never noticed, because it only rendered
@@ -59,6 +61,13 @@ final class Smoke {
     }
     private long ticks, stageTicks, worldTicks, inWorldTotal;
 
+    /** The game's own screenshot, and a line for smoke.sh to grab the X11 screen too (renderers such as VulkanMod
+     *  bypass the game's capture path, so only the X11 grab shows what was on screen). */
+    private void shot(String name) {
+        k.platform.screenshot(name);
+        Log.info("SMOKE SHOT " + System.getenv("DISPLAY") + " " + name);
+    }
+
     Smoke(Mw19 k) {
         this.k = k;
         Log.info("SMOKE: armed");
@@ -81,7 +90,7 @@ final class Smoke {
                     if (ticks > 20 * 180) fail("title screen never appeared (screen=" + screen + ")");
                     stageTicks = 0;
                 } else if (stageTicks == 60) {
-                    k.platform.screenshot("mw19-smoke-0-home");
+                    shot("mw19-smoke-0-home");
                 } else if (stageTicks == 70) {
                     k.platform.screens().openVanillaTitle();
                 } else if (stageTicks == 90) {
@@ -95,7 +104,7 @@ final class Smoke {
             case 2:
                 if (stageTicks == 30) {
                     if (screen != ScreenHost.Kind.OURS) fail("GUI did not open on title (screen=" + screen + ")");
-                    else k.platform.screenshot("mw19-smoke-1-title-gui");
+                    else shot("mw19-smoke-1-title-gui");
                 } else if (stageTicks == 35 && CLICKS) {
                     requestClick();
                 } else if (clickTarget != null) {
@@ -103,7 +112,7 @@ final class Smoke {
                 } else if (stageTicks == 40) {
                     k.gui().openHudEditor();
                 } else if (stageTicks == 70) {
-                    k.platform.screenshot("mw19-smoke-2-hud-editor");
+                    shot("mw19-smoke-2-hud-editor");
                 } else if (stageTicks == 80) {
                     k.gui().close();
                     next();
@@ -123,13 +132,28 @@ final class Smoke {
                 if (stageTicks == 1) k.openGui();
                 else if (stageTicks == 30) {
                     if (screen != ScreenHost.Kind.OURS) fail("GUI did not open in world (screen=" + screen + ")");
-                    else k.platform.screenshot("mw19-smoke-3-world-gui");
+                    else shot("mw19-smoke-3-world-gui");
                 } else if (stageTicks == 40) {
                     k.gui().close();
+                } else if (stageTicks == 50) { // Minecraft's own menus in the MW19 style, with the MW19 row on the pause menu
+                    k.platform.screens().openPause();
+                } else if (stageTicks == 80) {
+                    shot("mw19-smoke-3b-pause");
+                    pauseRow = k.platform.selfTest("pauserow");
+                    if (pauseRow.startsWith("FAIL")) fail("pause menu: " + pauseRow);
+                } else if (stageTicks == 90) {
+                    k.platform.screens().openMultiplayer();
+                } else if (stageTicks == 120) {
+                    shot("mw19-smoke-3c-multiplayer");
+                } else if (stageTicks == 130) {
+                    k.platform.screens().closeScreen();
                     next();
                 }
                 break;
-            case 5: // every module on (plugins included), then feed chat through the incoming path
+            case 5: // Fast Chests: a chest scene drawn from block models, then by vanilla's block entity renderer, compared
+                chestStage(screen);
+                break;
+            case 6: // every module on, then feed chat through the incoming path
                 if (stageTicks == 1) {
                     int n = 0;
                     for (ModuleManager.State s : k.modules.all()) {
@@ -151,17 +175,17 @@ final class Smoke {
                     keyCps = "lmb=" + k.rates.rate(Game.Binding.ATTACK, now) + " rmb=" + k.rates.rate(Game.Binding.USE, now);
                     if (!"lmb=7 rmb=4".equals(keyCps)) fail("KeyCPS counted " + keyCps + ", expected lmb=7 rmb=4");
                 } else if (stageTicks == 200) {
-                    k.platform.screenshot("mw19-smoke-4-all-modules");
+                    shot("mw19-smoke-4-all-modules");
                 } else if (stageTicks == 210) {
                     k.gui().openHudEditor();
                 } else if (stageTicks == 240) {
-                    k.platform.screenshot("mw19-smoke-5-hud-editor-world");
+                    shot("mw19-smoke-5-hud-editor-world");
                 } else if (stageTicks == 250) {
                     k.gui().close();
                     next();
                 }
                 break;
-            case 6: // 0.3.0 screens: Skins, Packs (a live Modrinth search), Host World (Open to LAN), exploit self-check
+            case 7: // 0.3.0 screens: Skins, Packs (a live Modrinth search), Host World (Open to LAN), exploit self-check
                 if (stageTicks == 1) {
                     k.gui().openPage(dev.mw19.core.gui.page.SkinsPage.class);
                     try {
@@ -173,7 +197,7 @@ final class Smoke {
                     if (!k.gui().page(dev.mw19.core.gui.page.SkinsPage.class).select("mw19-smoke.png")) fail("test skin not listed on the Skins page");
                 } else if (stageTicks == 30) {
                     if (screen != ScreenHost.Kind.OURS) fail("Skins page did not open (screen=" + screen + ")");
-                    else k.platform.screenshot("mw19-smoke-7-skins");
+                    else shot("mw19-smoke-7-skins");
                 } else if (stageTicks == 40) {
                     k.gui().openPage(dev.mw19.core.gui.page.PacksPage.class);
                 } else if (stageTicks == 150) {
@@ -197,7 +221,7 @@ final class Smoke {
                 } else if (stageTicks == 240) {
                     packs = k.gui().page(dev.mw19.core.gui.page.PacksPage.class).status(); // network: reported, not required
                     Log.info("SMOKE: packs " + packs);
-                    k.platform.screenshot("mw19-smoke-8-packs");
+                    shot("mw19-smoke-8-packs");
                 } else if (stageTicks == 250) {
                     int port = k.host.open(0, false);
                     host = "port=" + port + " lan=" + k.host.lanAddress();
@@ -205,7 +229,7 @@ final class Smoke {
                     if (port <= 0 || k.host.port() != port) fail("Host World did not open the world (" + host + ")");
                     else k.gui().openHost();
                 } else if (stageTicks == 280) {
-                    k.platform.screenshot("mw19-smoke-9-host");
+                    shot("mw19-smoke-9-host");
                 } else if (stageTicks == 300) {
                     // Graphics presets: what first-run detection picked, then Medium and Undo (render distance is readable).
                     dev.mw19.core.perf.VideoPreset auto = k.video.current();
@@ -218,10 +242,12 @@ final class Smoke {
                     int after = k.platform.videoOption("renderDistance");
                     presets += " rd " + before + "->" + medium + "->" + after;
                     Log.info("SMOKE: presets " + presets);
-                    if (auto == null) fail("first-run graphics detection did not apply a preset");
+                    // a kept-state run (smoke.sh KEEP_STATE) had its first run earlier, and the last run undid the preset
+                    if (auto == null && !k.video.firstRunDone(k.config.freshInstall)) fail("first-run graphics detection did not apply a preset");
                     else if (medium != 10 || after != before) fail("presets: render distance " + before + " -> " + medium + " -> " + after);
                 } else if (stageTicks == 330) {
-                    k.platform.screenshot("mw19-smoke-9b-performance");
+                    shot("mw19-smoke-9b-performance");
+                    Log.info(String.format(java.util.Locale.ROOT, "SMOKE: menu draws in %.0f us/frame (Performance page)", k.perf.menuUs));
                 } else if (stageTicks == 340) {
                     exploit = k.platform.selfTest("exploit"); // last: its probe toast would cover the screenshots
                     Log.info("SMOKE: exploit protection " + exploit);
@@ -231,19 +257,106 @@ final class Smoke {
                     next();
                 }
                 break;
-            case 7:
+            case 8:
                 if (inWorldTotal >= 20L * WORLD_SECONDS) {
-                    k.platform.screenshot("mw19-smoke-10-final");
+                    shot("mw19-smoke-10-final");
                     next();
                 }
                 break;
-            case 8:
+            case 9:
                 if (stageTicks == 20) finish();
                 break;
             default:
                 break;
         }
     }
+
+    /** Stage 5: chests in front of the camera, captured with Fast Chests on (the default), then off, then on again. */
+    private void chestStage(ScreenHost.Kind screen) {
+        if (stageTicks == 1) {
+            if (!k.platform.supports("fast_chests")) {
+                chests = "n/a";
+                next();
+                return;
+            }
+            String v = k.platform.minecraftVersion();
+            String[] cmds = {
+                    // game rules have snake_case ids from 1.21.11 (the old spelling is rejected there)
+                    v.startsWith("26.") || v.equals("1.21.11") ? "gamerule send_command_feedback false" : "gamerule sendCommandFeedback false",
+                    "gamemode spectator", "time set 6000", "weather clear",
+                    "fill -4 198 -4 14 198 12 minecraft:stone", "fill -4 199 -4 14 204 12 minecraft:air",
+                    // front row faces the camera: single, double (left half connects east), trapped, ender, side, back
+                    "setblock 0 199 4 minecraft:chest[facing=north]",
+                    "setblock 2 199 4 minecraft:chest[facing=north,type=left]", "setblock 3 199 4 minecraft:chest[facing=north,type=right]",
+                    "setblock 5 199 4 minecraft:trapped_chest[facing=north]", "setblock 7 199 4 minecraft:ender_chest[facing=north]",
+                    "setblock 9 199 4 minecraft:chest[facing=east]", "setblock 11 199 4 minecraft:chest[facing=south]",
+                    // back row: a double chest along z, a copper chest (1.21.9+), a chest minecart and a block display
+                    "setblock 0 199 8 minecraft:chest[facing=west,type=left]", "setblock 0 199 7 minecraft:chest[facing=west,type=right]",
+                    "setblock 11 199 8 minecraft:copper_chest[facing=north]",
+                    "summon minecraft:chest_minecart 4.5 199 8.5",
+                    "summon minecraft:block_display 7 199 8 {block_state:{Name:\"minecraft:chest\",Properties:{facing:\"north\"}}}",
+                    CHEST_VIEW};
+            for (String c : cmds) k.platform.chat().sendCommand(c);
+            chestStep = 0;
+            return;
+        }
+        ModuleManager.State fast = k.modules.get("fast_chests");
+        long since = stageTicks - chestWait;
+        // Each view: shot, then 10 ticks before the camera moves (smoke.sh grabs the X11 screen ~0.3 s after a shot).
+        switch (chestStep) {
+            case 0: // chunks meshed with the chests in them (pack on): front view
+            case 5: // vanilla block entity renderer again (pack off)
+                if (chestStep == 0 && stageTicks < 100 || chestStep == 5 && since < 60) return;
+                shot(chestStep == 0 ? "mw19-smoke-6a-chests-fast" : "mw19-smoke-6b-chests-vanilla");
+                break;
+            case 1:
+            case 6:
+                if (since < 10) return;
+                k.platform.chat().sendCommand("tp @s 5.5 207 5 0 90"); // from above
+                break;
+            case 2:
+            case 7:
+                if (since < 10) return;
+                shot(chestStep == 2 ? "mw19-smoke-6c-chests-fast-top" : "mw19-smoke-6d-chests-vanilla-top");
+                if (chestStep == 2) {
+                    chests = k.platform.selfTest("fastchests");
+                    Log.info("SMOKE: fast chests " + chests);
+                    if (!chests.startsWith("ok")) {
+                        fail("Fast Chests: " + chests);
+                        return;
+                    }
+                }
+                break;
+            case 3:
+            case 8:
+                if (since < 10) return;
+                k.platform.chat().sendCommand(CHEST_VIEW);
+                k.modules.setEnabled(fast, chestStep == 8); // resources reload without, then with the pack
+                break;
+            case 4: // vanilla models back (the chest model is empty again) / the pack's models in again
+            case 9:
+                boolean on = chestStep == 9;
+                if (since > 20L * 90) {
+                    fail("Fast Chests: resources did not reload within 90 s after turning it " + (on ? "on" : "off"));
+                    return;
+                }
+                if (stageTicks % 10 != 0 || screen != ScreenHost.Kind.NONE) return;
+                if (("0".equals(k.platform.selfTest("chestfaces"))) == on) return;
+                break;
+            case 10:
+                if (since < 40) return;
+                k.platform.chat().sendCommand("gamemode creative");
+                chests += " off/on reloads ok";
+                next();
+                return;
+            default:
+                return;
+        }
+        chestWait = stageTicks;
+        chestStep++;
+    }
+
+    private static final String CHEST_VIEW = "tp @s 5.5 202 -1.5 0 30";
 
     /** A valid 64x64 RGBA PNG in the skin layout: coloured head, body, arms and legs (uncompressed rows, zlib stream). */
     static byte[] testSkin() throws java.io.IOException {
@@ -305,14 +418,6 @@ final class Smoke {
             fail("modules disabled by errors: " + failed.toString().trim());
             return;
         }
-        StringBuilder plugins = new StringBuilder();
-        for (PluginManager.Entry e : k.plugins.entries()) {
-            plugins.append(e.id()).append('=').append(e.state).append(' ');
-            if (e.state == PluginManager.State.FAILED) {
-                fail("plugin " + e.id() + " failed: " + e.error);
-                return;
-            }
-        }
         java.util.List<ModuleManager.State> costly = new java.util.ArrayList<ModuleManager.State>(k.modules.all());
         java.util.Collections.sort(costly, new java.util.Comparator<ModuleManager.State>() {
             @Override
@@ -326,7 +431,7 @@ final class Smoke {
         }
         Log.info("SMOKE: top HUD costs " + costs.toString().trim());
         Log.info("MW19 SMOKE PASS hooks[" + k.hooks.describe() + "] guiClick[" + guiClick + "] keycps[" + keyCps + "] presets[" + presets + "] packs[" + packs + "] packEnable[" + packEnable + "] host[" + host
-                + "] exploit[" + exploit + "] plugins[" + plugins.toString().trim() + "] modules["
+                + "] exploit[" + exploit + "] pause[" + pauseRow + "] chests[" + chests + "] renderer[" + k.platform.rendererStatus() + "] modules["
                 + k.modules.describeEnabled() + "] avgFrameMs=" + k.perf.avgFrameMs() + " ownUsPerFrame=" + k.perf.avgOwnUs());
         k.config.flush();
         shutdownWatchdog();

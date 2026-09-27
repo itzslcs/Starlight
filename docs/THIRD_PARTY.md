@@ -8,9 +8,24 @@ project's source repository. The *Evidence* column names the source.
 | Component | Version | Where | License | Evidence | How we comply |
 |---|---|---|---|---|---|
 | SpongePowered Mixin | 0.7.11-SNAPSHOT | shaded into the **1.8.9** jar only (`org/spongepowered/asm`) | MIT | POM: "MIT license"; jar: `LICENSE.txt` (The MIT License) | notice shipped as `LICENSE_mixin` in the jar; the build-only `org/spongepowered/tools` part is not shipped |
+| VulkanMod (by Collateral) | 0.6.8+1.21.11 (1.21.11 jar); 0.6.6 (1.21.9 and 1.21.10 jars) | nested unmodified as jar-in-jar (`META-INF/jars/vulkanmod-<modrinth id>.jar`); it nests its own Fabric API modules (Apache-2.0) and LWJGL Vulkan/VMA/shaderc bindings (BSD-3-Clause) | LGPL-3.0-only | Modrinth project licence; `LICENSE` at the source commits below; `LICENSE_VulkanMod` in its jar | see "VulkanMod" below ([DECISIONS](DECISIONS.md) D-024) |
 
-Nothing else is bundled. The Fabric jars contain only MW19 classes (`dev/mw19/{api,core,fabric}`) and resources,
-checked by listing the built jars. The addon jars contain only their own classes.
+The Fabric jars otherwise contain only MW19 classes (`dev/mw19/{api,core,fabric}`) and resources, checked by listing
+the built jars.
+
+### VulkanMod
+- **Which builds:** only those whose release commit is public, pinned in [`fabric/bundled.json`](../fabric/bundled.json) by
+  [`scripts/vulkanmod-pin.py`](../scripts/vulkanmod-pin.py) with their SHA-512 (the build fails on a mismatch):
+  0.6.8+1.21.11 = [d3db079](https://github.com/xCollateral/VulkanMod/tree/d3db07925f60257433233409125a08d7c08bf023)
+  ("Bump version", dev branch, 2026-06-14); 0.6.6 for 1.21.9/1.21.10 = tag
+  [0.6.6](https://github.com/xCollateral/VulkanMod/tree/67e20f1f359a3a0611e2312a8a72e47fc9a09737). Other MW19 jars
+  bundle no VulkanMod (their upstream sources are not published, or Minecraft has its own Vulkan backend).
+- **How we comply with the LGPL:** the jar is not modified; `THIRD_PARTY_NOTICES.txt` in every jar that carries it
+  names it, its licence and the source commit; `META-INF/licenses/` holds the LGPL-3.0 and GPL-3.0 texts
+  ([`docs/licenses`](licenses/)); the About page shows the notice while the game runs (section 4(c)); `dist/sources/`
+  holds the source zip of each bundled commit, published next to the jars; a player can use a different or modified
+  VulkanMod by putting it in the mods folder, where Fabric loads the newer version instead (section 4(d)). MW19 only
+  decides at launch whether VulkanMod runs, through Fabric's own metadata (D-024); it does not link against or change it.
 
 ## Provided by the player's install (not shipped by us)
 | Component | Used by | License | Evidence |
@@ -31,6 +46,8 @@ checked by listing the built jars. The addon jars contain only their own classes
 | architectury-pack200 | 0.1.3 | GPL-2.0 with Classpath exception | its `LICENSE` file ("subject to the 'Classpath' exception") |
 | foojay-resolver-convention | 1.0.0 | Apache-2.0 | GitHub API `repos/gradle/foojay-toolchains/license` |
 | JUnit | 5.13.4 | EPL-2.0 | POM of junit-jupiter-api 5.13.4 |
+| LWJGL Vulkan binding | 3.3.3 (compile only) | BSD-3-Clause | POM of lwjgl-vulkan 3.3.3; at runtime the one VulkanMod nests is used |
+| Mesa lavapipe (software Vulkan) | 26.2.2 | MIT | Arch package `vulkan-swrast`; used only to run the Vulkan smoke tests headless |
 | Mojang official mappings | per version (Fabric ≤1.21.11 builds) | Mojang mappings licence (use permitted, no redistribution) | applied by Loom at build time and not redistributed. 26.x ships unobfuscated. |
 | MCP mappings `stable_22` | 1.8.9 build | MCP terms (mod development use) | applied by Loom at build time and not redistributed |
 
@@ -44,7 +61,7 @@ Modrinth when you import the pack. They are not included in MW19's jars.
 | Mod | License (Modrinth) |
 |---|---|
 | Fabric API | Apache-2.0 |
-| Sodium | PolyForm Shield 1.0.0 |
+| Sodium | PolyForm Shield 1.0.0 (its noncompete clause is why it is referenced, never bundled: D-024) |
 | ImmediatelyFast | LGPL-3.0-or-later |
 | FerriteCore | MIT |
 | Lithium | LGPL-3.0-only |
@@ -52,15 +69,15 @@ Modrinth when you import the pack. They are not included in MW19's jars.
 ## Online services (runtime, only when the user turns them on)
 | Service | Used by | When |
 |---|---|---|
-| MCTiers API v2 `https://mctiers.com/api/v2/profile/{uuid}` | Tier Tags addon | only while the Tier Tags module is enabled (GRAY, default off) and the plugin is approved |
-| SubTiers API v2 `https://subtiers.net/api/v2/profile/{uuid}` | Tier Tags addon | same, if the user picks SubTiers |
-| A user-entered `https://` v2-compatible URL | Tier Tags addon | same, if the user enters one |
 | Modrinth API v2 `https://api.modrinth.com/v2` (search, project versions) and CDN `https://cdn.modrinth.com` | Packs page | while the player uses the Packs page (search, icons, *Install*) |
 | Minecraft Services `https://api.minecraftservices.com/minecraft/profile/skins` | Skins page | the player presses *Use this skin* (sends the session token, D-022) |
 | Mojang profile APIs `https://api.mojang.com/users/profiles/minecraft/{name}`, `https://sessionserver.mojang.com/session/minecraft/profile/{id}`, `https://textures.minecraft.net` | Skins page (*Copy*), Host World (*Invite*) | the player presses those buttons |
 | The player's router (UPnP IGD: SSDP multicast, then SOAP on the local network) | Host World | the player switches on *Over the internet* |
 
-No other network access exists in MW19 (see [README](../README.md) → Privacy).
+No other network access exists in MW19 (see [README](../README.md) → Privacy). The bundled VulkanMod's only network code
+(its jars were searched for URLs and HTTP use) is an update check against `api.modrinth.com` at every start, which
+[`VulkanUpdateMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/VulkanUpdateMixin.java) turns off. Its options screen also has buttons that open its Modrinth and Ko-fi pages in the
+browser when clicked.
 
 ## KeyCPS (owner's own mod)
 [`core/.../modules/KeyCpsModule.java`](../core/src/main/java/dev/mw19/core/modules/KeyCpsModule.java) and [`InputRates.java`](../core/src/main/java/dev/mw19/core/modules/InputRates.java) port KeyCPS 1.6.1 (modrinth.com/mod/keycps). Its
@@ -74,6 +91,6 @@ so no ExploitPreventer code or licence notice ships with MW19.
 
 ## Original work
 Apart from the KeyCPS port above, all MW19 code, UI, icons (drawn from rectangles in code, [`core/.../gui/Icons.java`](../core/src/main/java/dev/mw19/core/gui/Icons.java), D-009), themes and texts are original. No code or
-assets were copied or decompiled from other clients or mods. TierTagger (MPL-2.0) and Tiers (GPL-3.0) were used only
-to identify which public tier lists exist (DECISIONS D-015). Their code was never read or copied. MW19 renders text
-with Minecraft's own font and bundles no fonts.
+assets were copied or decompiled from other clients or mods. The Fast Chests models are generated by
+[`scripts/fast-chests.py`](../scripts/fast-chests.py) from the layout of Minecraft's own chest textures, which they reference by name (D-025).
+MW19 renders text with Minecraft's own font and bundles no fonts.

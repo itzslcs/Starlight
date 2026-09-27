@@ -17,7 +17,6 @@ Each zip contains:
 | `mmc-pack.json` | Minecraft + Fabric Loader 0.19.5 (+ intermediary), or Minecraft 1.8.9 + Forge 11.15.1.2318. The component ids and versions were checked against Prism's own metadata |
 | `instance.cfg` | name `MW19 <mc>`, everything else left to Prism's defaults |
 | `minecraft/mods/` | the MW19 jar for that version |
-| `minecraft/MW19/plugins/` | the **Tier Tags** addon, which stays off until you approve it on the Plugins page ([PLUGIN_API](PLUGIN_API.md) explains the approval) |
 
 MW19 needs the same Java as its Minecraft version: 8 for 1.8.9, 21 for 1.21.x, 25 for 26.x. With Prism's automatic
 Java setting on, Prism downloads it; otherwise pick one under **Edit → Settings → Java**.
@@ -37,7 +36,7 @@ as a MW19 feature (freelook, perspective), MW19's matching mixin steps aside ([A
 standalone KeyCPS mod is not needed: it is built in, and MW19 shows a notice if both are installed.
 
 ## Where things are
-- MW19's settings, profiles and plugins: `<instance>/minecraft/MW19/`.
+- MW19's settings and profiles: `<instance>/minecraft/MW19/`.
 - Log: Prism's **Minecraft Log** tab. MW19's lines are tagged `(MW19)`.
 
 ## Verification status

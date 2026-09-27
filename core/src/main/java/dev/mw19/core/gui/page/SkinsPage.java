@@ -111,6 +111,11 @@ public final class SkinsPage extends Page {
         rebuild();
     }
 
+    @Override
+    public void dispose() {
+        for (SkinLibrary.Entry e : root.k.skins.entries()) release(e);
+    }
+
     private void release(SkinLibrary.Entry e) {
         if (e.handle > 0) root.k.platform.skins().releaseImage(e.handle);
         e.handle = 0;
@@ -252,7 +257,6 @@ public final class SkinsPage extends Page {
                 s = selected.slim;
             }
             ui.g.player(x + 4, y + 6, w - 8, h - 10, handle, s, yaw, pitch);
-            if (hovered(ui)) ui.tooltip = "Drag to turn";
         }
 
         @Override

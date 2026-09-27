@@ -35,11 +35,6 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [Module.java](../api/src/main/java/dev/mw19/api/module/Module.java): A toggleable feature.
 - [Rule.java](../api/src/main/java/dev/mw19/api/module/Rule.java): Verdict against the Hypixel Allowed Modifications policy (docs/RULES_MATRIX.md).
 
-## api · `dev.mw19.api.name`
-
-- [NameDecorator.java](../api/src/main/java/dev/mw19/api/name/NameDecorator.java): Adds text next to player names.
-- [NameTags.java](../api/src/main/java/dev/mw19/api/name/NameTags.java)
-
 ## api · `dev.mw19.api.net`
 
 - [Http.java](../api/src/main/java/dev/mw19/api/net/Http.java): Background HTTP GET for JSON with an in-memory LRU+TTL cache and per-host rate limiting.
@@ -68,12 +63,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 ## api · `dev.mw19.api`
 
-- [ConfigStore.java](../api/src/main/java/dev/mw19/api/ConfigStore.java): Small persistent key/value store private to one plugin.
-- [Gui.java](../api/src/main/java/dev/mw19/api/Gui.java)
 - [Logger.java](../api/src/main/java/dev/mw19/api/Logger.java)
-- [Mw19Api.java](../api/src/main/java/dev/mw19/api/Mw19Api.java): Plugin API version.
-- [Plugin.java](../api/src/main/java/dev/mw19/api/Plugin.java): Entry point of an external plugin jar (declared as "main" in plugin.json).
-- [PluginContext.java](../api/src/main/java/dev/mw19/api/PluginContext.java): Everything a plugin may touch.
 - [Scheduler.java](../api/src/main/java/dev/mw19/api/Scheduler.java)
 - [Subscription.java](../api/src/main/java/dev/mw19/api/Subscription.java)
 
@@ -105,8 +95,6 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [ModuleManagerTest.java](../core/src/test/java/dev/mw19/core/ModuleManagerTest.java)
 - [OcclusionTest.java](../core/src/test/java/dev/mw19/core/OcclusionTest.java): Entity culling must hide only what is fully behind solid blocks, and always fail open.
 - [PacksAndSkinsTest.java](../core/src/test/java/dev/mw19/core/PacksAndSkinsTest.java)
-- [PluginDescriptorTest.java](../core/src/test/java/dev/mw19/core/PluginDescriptorTest.java)
-- [PluginManagerTest.java](../core/src/test/java/dev/mw19/core/PluginManagerTest.java): Loads real plugin jars (compiled on the fly) through a MW19 instance backed by the test platform.
 - [ProfileCodecTest.java](../core/src/test/java/dev/mw19/core/ProfileCodecTest.java)
 - [RenameCompatTest.java](../core/src/test/java/dev/mw19/core/RenameCompatTest.java): The client was renamed Kestrel -> MW19 (2026-09-26); existing settings and shared codes keep working.
 - [RulesMatrixTest.java](../core/src/test/java/dev/mw19/core/RulesMatrixTest.java): docs/RULES_MATRIX.md is the human source of truth; code must agree with it.
@@ -114,7 +102,6 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [ServerRulesTest.java](../core/src/test/java/dev/mw19/core/ServerRulesTest.java)
 - [TestModules.java](../core/src/test/java/dev/mw19/core/TestModules.java)
 - [TestPlatform.java](../core/src/test/java/dev/mw19/core/TestPlatform.java): Headless Platform for tests: no world, no screen, everything inert.
-- [TierFormatTest.java](../core/src/test/java/dev/mw19/core/TierFormatTest.java): Guard for the MCTiers v2 schema the Tier Tags addon relies on (field names checked against the live API).
 - [VideoPresetsTest.java](../core/src/test/java/dev/mw19/core/VideoPresetsTest.java): Presets keep the player's original options (first snapshot wins), Undo puts them back, and auto never raises distances.
 
 ## core · `dev.mw19.core.chat`
@@ -143,11 +130,10 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [HostPage.java](../core/src/main/java/dev/mw19/core/gui/page/HostPage.java): Host World: open the singleplayer world to friends on the local network and, through the router, the internet.
 - [HudEditor.java](../core/src/main/java/dev/mw19/core/gui/page/HudEditor.java): Full-screen HUD layout editor.
 - [KeybindsPage.java](../core/src/main/java/dev/mw19/core/gui/page/KeybindsPage.java): Every MW19 key binding in one list; conflicts (with ours or vanilla) are outlined.
-- [ModsPage.java](../core/src/main/java/dev/mw19/core/gui/page/ModsPage.java): Module browser: search, category chips, card grid; settings view per module.
+- [ModsPage.java](../core/src/main/java/dev/mw19/core/gui/page/ModsPage.java): Module browser: search, category chips (a highlight slides between them), then either tiles (default: item icon, name and an ENABLED/DISABLED bar that toggle...
 - [PacksPage.java](../core/src/main/java/dev/mw19/core/gui/page/PacksPage.java): Resource pack browser: searches Modrinth, downloads the chosen pack into the resource pack folder (size-capped and checked against Modrinth's SHA-512) and en...
 - [Page.java](../core/src/main/java/dev/mw19/core/gui/page/Page.java)
 - [PerfPage.java](../core/src/main/java/dev/mw19/core/gui/page/PerfPage.java): Frame-time graph plus our own cost (total and per module).
-- [PluginsPage.java](../core/src/main/java/dev/mw19/core/gui/page/PluginsPage.java): Installed plugins: first-run consent, enable/disable, failures, and panels registered by plugins.
 - [ProfilesPage.java](../core/src/main/java/dev/mw19/core/gui/page/ProfilesPage.java): Unlimited profiles: switch, create, duplicate, rename, delete, export/import strings, per-server auto-switch.
 - [RulesPage.java](../core/src/main/java/dev/mw19/core/gui/page/RulesPage.java): Current server, competitive-safe, and the data-driven serverrules.json.
 - [SkinsPage.java](../core/src/main/java/dev/mw19/core/gui/page/SkinsPage.java): Skins: a 3D preview (drag to turn it), the skin folder as a list, copying a player's skin by name, and applying the selected skin to the account through Moja...
@@ -171,6 +157,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [Anim.java](../core/src/main/java/dev/mw19/core/gui/Anim.java): Eased value (ease-out cubic) that animates toward a target over a fixed duration.
 - [GuiRoot.java](../core/src/main/java/dev/mw19/core/gui/GuiRoot.java): The whole menu: sidebar + pages + popup layer + tooltips, or the full-screen HUD editor.
 - [Icons.java](../core/src/main/java/dev/mw19/core/gui/Icons.java): Original pixel icons drawn from rects in a 10x10 box (no bundled assets; DECISIONS D-009).
+- [ModIcons.java](../core/src/main/java/dev/mw19/core/gui/ModIcons.java): The item shown on each module's tile in the Mods page.
 - [Surface.java](../core/src/main/java/dev/mw19/core/gui/Surface.java): A full-screen UI the platform's screen class hosts: the MW19 menu (GuiRoot) or the home screen (TitleUi).
 - [Theme.java](../core/src/main/java/dev/mw19/core/gui/Theme.java): Colour tokens.
 - [TitleUi.java](../core/src/main/java/dev/mw19/core/gui/TitleUi.java): The MW19 home screen that replaces Minecraft's title screen (Themes → Custom home screen).
@@ -208,6 +195,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [EffectsModule.java](../core/src/main/java/dev/mw19/core/modules/EffectsModule.java): Active potion effects outside the inventory (listed as allowed by Hypixel: "Effect Status").
 - [EntityCullingModule.java](../core/src/main/java/dev/mw19/core/modules/EntityCullingModule.java): Skips drawing mobs, items and other entities that are fully hidden behind solid blocks (Occlusion).
 - [ExploitProtectionModule.java](../core/src/main/java/dev/mw19/core/modules/ExploitProtectionModule.java): Closes known ways for servers to probe the client (original implementation of the fixes ExploitPreventer lists, DECISIONS D-021): sign and anvil text is reso...
+- [FastChestsModule.java](../core/src/main/java/dev/mw19/core/modules/FastChestsModule.java): Chests, trapped chests, ender chests and copper chests are drawn as ordinary blocks (baked into the world mesh once) instead of by a block entity renderer ev...
 - [FpsGraphModule.java](../core/src/main/java/dev/mw19/core/modules/FpsGraphModule.java): Live frame-time graph: one bar per recent frame, green under 16.7 ms, yellow under 33 ms, red above.
 - [FpsModule.java](../core/src/main/java/dev/mw19/core/modules/FpsModule.java)
 - [FreelookModule.java](../core/src/main/java/dev/mw19/core/modules/FreelookModule.java): Look around without turning your player.
@@ -251,15 +239,6 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [ScreenHost.java](../core/src/main/java/dev/mw19/core/platform/ScreenHost.java)
 - [Skins.java](../core/src/main/java/dev/mw19/core/platform/Skins.java): Textures from PNG bytes and the signed-in account's skin (game thread).
 
-## core · `dev.mw19.core.plugin`
-
-- [NameTagRegistry.java](../core/src/main/java/dev/mw19/core/plugin/NameTagRegistry.java): Collects decorators from plugins.
-- [PanelRegistry.java](../core/src/main/java/dev/mw19/core/plugin/PanelRegistry.java): Panels plugins add under the Plugins page.
-- [PluginConfigStore.java](../core/src/main/java/dev/mw19/core/plugin/PluginConfigStore.java): plugin-data/<id>.json; saved (atomically) a few ticks after the last change and on disable.
-- [PluginContextImpl.java](../core/src/main/java/dev/mw19/core/plugin/PluginContextImpl.java): What one plugin sees.
-- [PluginDescriptor.java](../core/src/main/java/dev/mw19/core/plugin/PluginDescriptor.java): Parsed plugin.json.
-- [PluginManager.java](../core/src/main/java/dev/mw19/core/plugin/PluginManager.java): Loads plugin jars from <gameDir>/MW19/plugins.
-
 ## core · `dev.mw19.core.render`
 
 - [Gfx.java](../core/src/main/java/dev/mw19/core/render/Gfx.java): Renderer used by the GUI, HUD and plugins.
@@ -297,13 +276,18 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 ## fabric · `dev.mw19.fabric.mixin`
 
 - [AnvilNameMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/AnvilNameMixin.java): Exploit Protection: the anvil's name field (sent back when renaming) gets the item name as an unmodded client resolves it.
+- [BlockEntityCullingMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/BlockEntityCullingMixin.java): Entity Culling for block entities: hidden ones are not drawn (1.21.9+: no render state is extracted for them).
+- [ButtonStyleMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ButtonStyleMixin.java): "MW19 game menus": vanilla buttons (pause menu, server list, options...) get the home screen's button look.
 - [CameraMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/CameraMixin.java): Freelook: the camera takes its angles from Hooks while active (every getView*Rot read).
 - [ChatComponentMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ChatComponentMixin.java): Chat Tools + plugin chat events: filter, timestamp, highlight, stack duplicates.
+- [ChestShapeMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ChestShapeMixin.java): Fast Chests before 1.21.4: chests report RenderShape.ENTITYBLOCK_ANIMATED, which the world mesh skips; with the pack on they report MODEL so their (pack) blo...
 - [EntityCullingMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/EntityCullingMixin.java): Entity Culling: after vanilla's frustum test passes, entities fully hidden behind blocks are skipped.
 - [EntityTurnMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/EntityTurnMixin.java): Freelook: mouse movement turns the camera instead of the player.
+- [FastChestsMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/FastChestsMixin.java): Fast Chests: chests the world mesh already draws get no block entity render (1.21.9+: no render state).
 - [FovMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/FovMixin.java): Zoom: scales the final field of view.
 - [GameRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/GameRendererMixin.java): Damage tilt strength (zoom lives in FovMixin).
 - [GuiMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/GuiMixin.java): HUD pass (after vanilla) and crosshair replacement.
+- [HitboxesMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/HitboxesMixin.java): Hitboxes module, 1.21.9+: while it is on, vanilla's debug entry list reports entity hitboxes as enabled.
 - [ItemInHandRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ItemInHandRendererMixin.java): Shield overlay: lower a raised shield in first person.
 - [ItemSwapMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ItemSwapMixin.java): 1.8-style "no cooldown dip": the held item ignores the swap/attack-strength scale.
 - [KeyMappingAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/KeyMappingAccessor.java)
@@ -313,20 +297,21 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [MinecraftMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MinecraftMixin.java)
 - [MouseHandlerMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MouseHandlerMixin.java)
 - [MultiPlayerGameModeMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MultiPlayerGameModeMixin.java): Observes (never changes) the player's attacks, for the combo counter.
-- [NameTagMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/NameTagMixin.java): Plugin name decorations (e.g.
 - [OverlayTextureAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/OverlayTextureAccessor.java)
 - [PackCacheMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackCacheMixin.java): Exploit Protection: server resource packs are cached per account (ExploitGuard.packCache).
 - [PackDownloadMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackDownloadMixin.java): Exploit Protection: server pack downloads (HttpUtil.downloadFile's only caller) fail when the host resolves to a local address.
+- [PackSourceMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackSourceMixin.java): The client's built-in pack scan also offers MW19's own packs (Fast Chests).
 - [PackUrlMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackUrlMixin.java): Exploit Protection: a server resource pack URL naming a local host is treated as invalid (vanilla then refuses it).
 - [ParticleEngineMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ParticleEngineMixin.java): Particle multiplier: extra client-side crit / enchanted-hit bursts on hits.
 - [PauseScreenMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PauseScreenMixin.java)
 - [PlayerSkinWidgetAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PlayerSkinWidgetAccessor.java): Lets the home screen and Skins page turn vanilla's player model (rotationX is pitch, rotationY yaw).
-- [PlayerTabOverlayMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PlayerTabOverlayMixin.java): Plugin name decorations in the tab list.
 - [ScreenEffectRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ScreenEffectRendererMixin.java): Low fire: the overlay's vertical offset (-0.3) and alpha are plain constants.
 - [SignEditMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SignEditMixin.java): Exploit Protection: the lines a sign editor sends back are resolved as an unmodded client would (ExploitGuard).
 - [SignEditScreenAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SignEditScreenAccessor.java): Smoke self-test: reads the lines a sign editor would send back.
+- [SpecialChestMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SpecialChestMixin.java): Fast Chests, 1.21.4 - 1.21.11: a chest shown as a block outside the world mesh (chest minecart, block display) is drawn from its block model plus this specia...
 - [TitleScreenMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/TitleScreenMixin.java)
 - [TitleSwapMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/TitleSwapMixin.java): Home screen: vanilla's TitleScreen is swapped for MW19's as it is set (Minecraft.setScreen until 26.1, Gui.setScreen from 26.2).
+- [VulkanUpdateMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/VulkanUpdateMixin.java): The bundled VulkanMod asks api.modrinth.com for a newer version at every start (its UpdateChecker).
 - [WeatherMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/WeatherMixin.java): Clear Weather: the client's level reports no rain or thunder (a singleplayer server keeps its real weather).
 
 ## fabric · `dev.mw19.fabric`
@@ -339,17 +324,55 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [FabricItem.java](../fabric/src/main/java/dev/mw19/fabric/FabricItem.java): Reusable ItemRef view (one per slot, re-pointed each call; no allocation per frame).
 - [FabricMedia.java](../fabric/src/main/java/dev/mw19/fabric/FabricMedia.java): Textures from PNG bytes, the player model (vanilla's PlayerSkinWidget, as on the skin report screen) and resource packs, for core.
 - [FabricPlatform.java](../fabric/src/main/java/dev/mw19/fabric/FabricPlatform.java): Platform for Fabric targets.
+- [FastChests.java](../fabric/src/main/java/dev/mw19/fabric/FastChests.java): Fast Chests (core FastChestsModule).
 - [Mw19Fabric.java](../fabric/src/main/java/dev/mw19/fabric/Mw19Fabric.java): Entrypoint + the static bridge the mixins call (keeps mixin bodies one line).
 - [Mw19MixinPlugin.java](../fabric/src/main/java/dev/mw19/fabric/Mw19MixinPlugin.java): Gate for mw19.optional.mixins.json: skips a feature mixin when a mod that does the same job is loaded, or when the user lists it in -Dmw19.mixins.disable=Nam...
 - [Mw19Screen.java](../fabric/src/main/java/dev/mw19/fabric/Mw19Screen.java): Vanilla Screen hosting a core Surface: the MW19 menu (GuiRoot) or the home screen (TitleUi).
+- [RendererSwitch.java](../fabric/src/main/java/dev/mw19/fabric/RendererSwitch.java): Decides, before any mod code or mixin runs, whether the bundled VulkanMod renders this session (DECISIONS D-024).
+- [VulkanProbe.java](../fabric/src/main/java/dev/mw19/fabric/VulkanProbe.java): The GPU check behind "auto" (RendererSwitch): in an OpenGL session with the bundled VulkanMod kept off, a background thread asks the Vulkan driver once wheth...
 
 ## fabric · build and resources
 
 - [build.gradle.kts](../fabric/build.gradle.kts): Shared build script for every Fabric target (Stonecutter node fabric/versions/<mc>).
+- [bundled.json](../fabric/bundled.json)
 - [gradle.properties](../fabric/gradle.properties)
 - [fabric.mod.json](../fabric/src/main/resources/fabric.mod.json)
 - [mw19.mixins.json](../fabric/src/main/resources/mw19.mixins.json)
 - [mw19.optional.mixins.json](../fabric/src/main/resources/mw19.optional.mixins.json)
+- [blocks.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/atlases/blocks.json)
+- [chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/chest.json)
+- [copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/copper_chest.json)
+- [ender_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/ender_chest.json)
+- [exposed_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/exposed_copper_chest.json)
+- [oxidized_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/oxidized_copper_chest.json)
+- [trapped_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/trapped_chest.json)
+- [waxed_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/waxed_copper_chest.json)
+- [waxed_exposed_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/waxed_exposed_copper_chest.json)
+- [waxed_oxidized_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/waxed_oxidized_copper_chest.json)
+- [waxed_weathered_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/waxed_weathered_copper_chest.json)
+- [weathered_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/weathered_copper_chest.json)
+- [copper_exposed_left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_exposed_left.json)
+- [copper_exposed_right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_exposed_right.json)
+- [copper_exposed_single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_exposed_single.json)
+- [copper_left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_left.json)
+- [copper_oxidized_left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_oxidized_left.json)
+- [copper_oxidized_right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_oxidized_right.json)
+- [copper_oxidized_single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_oxidized_single.json)
+- [copper_right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_right.json)
+- [copper_single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_single.json)
+- [copper_weathered_left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_weathered_left.json)
+- [copper_weathered_right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_weathered_right.json)
+- [copper_weathered_single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_weathered_single.json)
+- [ender.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/ender.json)
+- [left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/left.json)
+- [normal_left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/normal_left.json)
+- [normal_right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/normal_right.json)
+- [normal_single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/normal_single.json)
+- [right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/right.json)
+- [single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/single.json)
+- [trapped_left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/trapped_left.json)
+- [trapped_right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/trapped_right.json)
+- [trapped_single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/trapped_single.json)
 - [stonecutter.gradle.kts](../fabric/stonecutter.gradle.kts)
 
 ## legacy · `dev.mw19.forge.mixin`
@@ -357,15 +380,15 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [EffectRendererMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/EffectRendererMixin.java): Particle multiplier: extra client-side crit / sharpness bursts on hits.
 - [EntityMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/EntityMixin.java): Freelook: mouse movement turns the camera instead of the player (setAngles subtracts pitch on 1.8.9).
 - [EntityRendererMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/EntityRendererMixin.java): Damage tilt (the 14° hurt-cam constant) and freelook camera angles (orientCamera's rotation reads).
-- [GuiPlayerTabOverlayMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/GuiPlayerTabOverlayMixin.java): Plugin name decorations in the 1.8.9 tab list.
+- [GuiButtonMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/GuiButtonMixin.java): "MW19 game menus" on 1.8.9: vanilla buttons get the home screen's look.
 - [IntegratedServerAccessor.java](../legacy/src/main/java/dev/mw19/forge/mixin/IntegratedServerAccessor.java): Host World: the LAN announcer holds the port the world was opened on.
 - [ItemRendererMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/ItemRendererMixin.java): Low fire: renderFireInFirstPerson's vertical offset (-0.3) and alpha (0.9).
 - [MinecraftMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/MinecraftMixin.java)
 - [NetHandlerPlayClientMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/NetHandlerPlayClientMixin.java): Exploit Protection: server resource pack requests are checked first (ForgeExploitGuard).
 - [RenderManagerMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/RenderManagerMixin.java): Entity Culling on 1.8.9: after the frustum test passes, entities fully hidden behind blocks are skipped.
-- [RenderMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/RenderMixin.java): Plugin name decorations on 1.8.9 nametags.
 - [RendererLivingEntityMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/RendererLivingEntityMixin.java): Hit colour (the four puts of the hurt tint: 1, 0, 0, 0.3) and show-own-nametag.
 - [ThreadLanServerPingAccessor.java](../legacy/src/main/java/dev/mw19/forge/mixin/ThreadLanServerPingAccessor.java)
+- [TileEntityRendererDispatcherMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/TileEntityRendererDispatcherMixin.java): Entity Culling for tile entities on 1.8.9: hidden chests, signs, banners and skulls are not drawn.
 - [WorldMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/WorldMixin.java): Clear Weather on 1.8.9: the client world reports no rain or thunder.
 
 ## legacy · `dev.mw19.forge`
@@ -390,33 +413,19 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [settings.gradle.kts](../legacy/settings.gradle.kts)
 - [mixins.mw19.json](../legacy/src/main/resources/mixins.mw19.json)
 
-## addons · `dev.mw19.addons.sample`
-
-- [SessionStatsPlugin.java](../addons/sample/src/main/java/dev/mw19/addons/sample/SessionStatsPlugin.java): Reference plugin for docs/PLUGIN_API.md.
-
-## addons · `dev.mw19.addons.tiertags`
-
-- [Tier.java](../addons/tiertags/src/main/java/dev/mw19/addons/tiertags/Tier.java): Picks and formats one ranking out of a tier-list profile (MCTiers API v2 schema).
-- [TierTagsModule.java](../addons/tiertags/src/main/java/dev/mw19/addons/tiertags/TierTagsModule.java): Tier-list tags next to names.
-- [TierTagsPlugin.java](../addons/tiertags/src/main/java/dev/mw19/addons/tiertags/TierTagsPlugin.java): Entry point: one module that is also the name decorator.
-
-## addons · build and resources
-
-- [build.gradle.kts](../addons/sample/build.gradle.kts)
-- [plugin.json](../addons/sample/src/main/resources/plugin.json)
-- [build.gradle.kts](../addons/tiertags/build.gradle.kts)
-- [plugin.json](../addons/tiertags/src/main/resources/plugin.json)
-
 ## scripts
 
-- [bench.sh](../scripts/bench.sh): Benchmark one target headless (core Bench): fixed scene, phases baseline / culling / culling+boost.
+- [bench.sh](../scripts/bench.sh): Benchmark one target headless (core Bench): fixed scene, phases baseline / culling / fastchests / boost / all.
 - [docs-graph.py](../scripts/docs-graph.py): Keeps the docs a linked graph (the repo root is also an Obsidian vault; the links work on GitHub too).
+- [fast-chests.py](../scripts/fast-chests.py): Writes MW19's Fast Chests resource pack (fabric/src/main/resources/mw19packs/fast_chests): block models that draw
 - [mixin-audit.py](../scripts/mixin-audit.py): Proves MW19's injections were applied: disassembles the classes Mixin exported during a dev run
 - [modrinth.py](../scripts/modrinth.py): Updates MW19's Modrinth project from dist/: title, summary, description (docs/MODRINTH.md), icon, and one alpha
 - [mrpack.py](../scripts/mrpack.py): Builds "MW19 Performance" Modrinth packs (.mrpack) for Prism Launcher, the Modrinth app and ATLauncher.
+- [prodlaunch.py](../scripts/prodlaunch.py): Test-only production launch: starts real Fabric (Knot, intermediary-mapped game) with the distributed MW19 jar in a
 - [smoke-all.sh](../scripts/smoke-all.sh): Runs scripts/smoke.sh for each given version (default: every target in versions.json) and prints a summary.
 - [smoke.sh](../scripts/smoke.sh): Smoke test one target headless: title -> our GUI -> HUD editor -> world -> GUI -> N seconds -> quit.
 - [testmods.py](../scripts/testmods.py): Test-only: put other mods (e.g.
+- [vulkanmod-pin.py](../scripts/vulkanmod-pin.py): Pins the VulkanMod build bundled into each MW19 Fabric jar (fabric/bundled.json, read by fabric/build.gradle.kts):
 
 ## gradle
 

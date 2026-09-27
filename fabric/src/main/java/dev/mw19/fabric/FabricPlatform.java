@@ -101,8 +101,19 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     /** Called at the start of every client tick: detects world/server changes without extra mixins. */
     /** Start of every client tick. */
+    private int ticks;
+
+    /** Ticks with a menu or world on screen; -1 once the start counts as good. */
+    private int upTicks;
+
     void tick() {
         pollServer();
+        if (++ticks % 20 == 0) FastChests.check();
+        if (upTicks >= 0 && (mc.level != null || current() == Kind.TITLE || current() == Kind.OURS) && ++upTicks >= 40) {
+            upTicks = -1; // loading is over and the game has run for 2 s: Vulkan (if on) got through its start
+            if ("vulkan".equals(RendererSwitch.state)) RendererSwitch.started();
+            VulkanProbe.maybeRun();
+        }
         if (Hooks.hitColor != appliedHitColor) applyHitColor(Hooks.hitColor);
     }
 
@@ -323,7 +334,7 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     @Override
     public boolean supports(String feature) {
-        return "offhand".equals(feature) || "shield".equals(feature) || "blur".equals(feature);
+        return "offhand".equals(feature) || "shield".equals(feature) || "blur".equals(feature) || "fast_chests".equals(feature);
     }
 
     // ------------------------------------------------------------------ Platform
@@ -483,7 +494,13 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
             /*net.minecraft.resources.ResourceLocation id = net.minecraft.resources.ResourceLocation.tryParse(itemId);
             *///?}
             net.minecraft.world.item.Item item = id == null ? null : BuiltInRegistries.ITEM.getOptional(id).orElse(null);
-            f = new FabricItem().set(item == null ? ItemStack.EMPTY : new ItemStack(item));
+            ItemStack stack;
+            try {
+                stack = item == null ? ItemStack.EMPTY : new ItemStack(item);
+            } catch (RuntimeException componentsNotBound) { // 26.x binds item components with the first world: ask again later
+                return new FabricItem().set(ItemStack.EMPTY);
+            }
+            f = new FabricItem().set(stack);
             icons.put(itemId, f);
         }
         return f;
@@ -501,24 +518,36 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     @Override
     public String selfTest(String what) {
-        return "exploit".equals(what) ? ExploitGuard.selfTest() : "n/a";
+        if ("exploit".equals(what)) return ExploitGuard.selfTest();
+        if ("fastchests".equals(what)) return FastChests.selfTest();
+        if ("chestfaces".equals(what)) return Integer.toString(FastChests.chestFaces());
+        if ("pauserow".equals(what)) {
+            Screen s = FabricCompat.screen(mc);
+            if (!(s instanceof net.minecraft.client.gui.screens.PauseScreen)) return "FAIL (not the pause menu)";
+            int n = 0;
+            for (var l : s.children()) {
+                if (l instanceof net.minecraft.client.gui.components.Button b
+                        && ("Packs".equals(b.getMessage().getString()) || "MW19 Menu".equals(b.getMessage().getString()))) n++;
+            }
+            return n == 2 ? "ok (MW19 Menu + Packs)" : "FAIL (" + n + " of 2 MW19 buttons)";
+        }
+        return "n/a";
     }
 
-    //? if >=1.21.9 {
-    private net.minecraft.client.gui.components.debug.DebugScreenEntryStatus hitboxesBefore;
-    //?}
+    @Override
+    public void setFastChests(boolean on) {
+        FastChests.set(on);
+    }
 
     @Override
     public void setHitboxes(boolean on) {
         //? if >=1.21.9 {
-        var id = net.minecraft.client.gui.components.debug.DebugScreenEntries.ENTITY_HITBOXES; // ResourceLocation before 1.21.11
-        if (on) {
-            if (hitboxesBefore == null) hitboxesBefore = mc.debugEntries.getStatus(id);
-            mc.debugEntries.setStatus(id, net.minecraft.client.gui.components.debug.DebugScreenEntryStatus.ALWAYS_ON);
-        } else {
-            mc.debugEntries.setStatus(id, hitboxesBefore != null ? hitboxesBefore : net.minecraft.client.gui.components.debug.DebugScreenEntryStatus.NEVER);
-            hitboxesBefore = null;
-        }
+        Mw19Fabric.hitboxes = on; // HitboxesMixin answers for the debug entry; the player's saved F3+B choice stays as it is
+        //? if >=26.2 {
+        /*mc.levelExtractor.debugRenderer.refreshRendererList();
+        *///?} else {
+        mc.levelRenderer.debugRenderer.refreshRendererList();
+        //?}
         //?} else {
         /*mc.getEntityRenderDispatcher().setRenderHitBoxes(on);
         *///?}
@@ -745,8 +774,21 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
         //? if >=26.2 {
         /*return mc.options.preferredGraphicsBackend().get().getSerializedName();
         *///?} else {
-        return null;
+        // The bundled VulkanMod (RendererSwitch); a separately installed one is the player's to manage.
+        return RendererSwitch.bundled ? (RendererSwitch.vulkanNext() ? "vulkan" : "opengl") : null;
         //?}
+    }
+
+    @Override
+    public String rendererStatus() {
+        return RendererSwitch.status();
+    }
+
+    @Override
+    public String bundledNotice() {
+        if (!RendererSwitch.bundled || "none".equals(RendererSwitch.state)) return "";
+        return "Includes VulkanMod " + RendererSwitch.version + " by Collateral, under the GNU LGPL 3.0 (source: github.com/xCollateral/VulkanMod)."
+                + " The licence texts and the exact source link are in the MW19 jar: THIRD_PARTY_NOTICES.txt, META-INF/licenses.";
     }
 
     @Override
@@ -756,7 +798,9 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
             if (a.getSerializedName().equals(api)) mc.options.preferredGraphicsBackend().set(a);
         }
         mc.options.save();
-        *///?}
+        *///?} else {
+        if (RendererSwitch.bundled) RendererSwitch.choose("vulkan".equals(api) ? "vulkan" : "opengl");
+        //?}
     }
 
     // ------------------------------------------------------------------ ScreenHost
@@ -833,6 +877,16 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
     public void openVanillaTitle() {
         Mw19Fabric.vanillaTitleOnce = true;
         FabricCompat.setScreen(mc, new TitleScreen());
+    }
+
+    @Override
+    public void openPause() {
+        mc.pauseGame(false);
+    }
+
+    @Override
+    public void closeScreen() {
+        FabricCompat.setScreen(mc, null);
     }
 
     @Override

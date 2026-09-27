@@ -734,6 +734,16 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
     }
 
     @Override
+    public void openPause() {
+        mc.displayInGameMenu();
+    }
+
+    @Override
+    public void closeScreen() {
+        mc.displayGuiScreen(null);
+    }
+
+    @Override
     public Kind current() {
         GuiScreen s = mc.currentScreen;
         if (s == null) return Kind.NONE;

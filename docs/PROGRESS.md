@@ -28,7 +28,7 @@
 - Full module set, plugin API + loader with per-jar consent, the Tier Tags addon and the Session Stats sample, own nametag.
 - **KeyCPS** (the owner's own mod) replaced the CPS and Keystrokes modules ([DECISIONS](DECISIONS.md) D-018). It counts per
   binding from input events ([`InputRates`](../core/src/main/java/dev/mw19/core/modules/InputRates.java)), and every smoke run feeds it 7 attack + 4 use presses and asserts the counts.
-- Docs: [README](../README.md) (hub + privacy/network list), [PLUGIN_API](PLUGIN_API.md), [THIRD_PARTY](THIRD_PARTY.md) (licences
+- Docs: [README](../README.md) (hub + privacy/network list), PLUGIN_API (removed with plugins in 0.5.0), [THIRD_PARTY](THIRD_PARTY.md) (licences
   checked from artifacts/repos; Mixin's MIT notice now ships in the 1.8.9 jar), [PRISM](PRISM.md), and a generated
   [CODE_MAP](CODE_MAP.md). The docs are a linked graph (repo root = Obsidian vault; [`scripts/docs-graph.py`](../scripts/docs-graph.py)).
 - `buildAll` also writes importable Prism instance zips (`dist/prism/`). 40 core unit tests pass.
@@ -81,3 +81,18 @@
 - Isolate the 26.1.1 exit hang (steps in [debug-log](debug-log.md)).
 - Phase 5: benchmark harness first, then measured optimisations ([PLAN](PLAN.md)).
 - Phase 6: the 1.8.9 Hypixel suite. Phase 7: production-layout launch tests, Prism/Dawn checks, final COMPAT_MATRIX.
+
+## 2026-09-27: 0.5.0 (owner requests: fast chests, Sodium or VulkanMod inside the jar, MW19-style menus, remove plugins)
+- **Fast Chests** (D-025): chests as block models from a built-in pack; verified against vanilla's renderer by
+  screenshot on every Fabric target, in dev and production, on OpenGL and under VulkanMod. Chest field: +22 % average
+  FPS, +29 % 1 % low ([PERF](PERF.md)).
+- **VulkanMod bundled** on 1.21.9–1.21.11 (D-024), LGPL-compliant (source zips in `dist/sources/`), behind a launch-time
+  switch (OpenGL first, GPU check, automatic fallback); its update check is off. Verified in production launches with
+  Mesa's software Vulkan, including the no-Vulkan crash-then-recover path; the check found this PC's RX 6500 XT.
+- **Production launch test** ([`scripts/prodlaunch.py`](../scripts/prodlaunch.py), `PROD=1 scripts/smoke.sh`): the dist jars pass on all 17 Fabric
+  targets ([COMPAT_MATRIX](COMPAT_MATRIX.md)).
+- **Menus:** vanilla buttons in the MW19 style and an MW19 Menu / Packs row on the pause menu (all 18 targets, D-027);
+  a new Mods page (tiles with icons and ENABLED/DISABLED bars, list view). **Plugins removed** (D-026).
+- **Block entity culling** and a lighter, unloaded-when-closed menu (from the 0.4.0 working tree).
+- Dev smoke 18/18, production 17/17 (1.8.9 has no production launcher here), 67 core tests pass (the plugin tests went with the plugins).
+

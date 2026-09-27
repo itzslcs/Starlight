@@ -23,12 +23,13 @@ public final class ClientSettings {
     public final ChoiceSetting theme = add(new ChoiceSetting("theme", "Theme", "Colour preset", "MW19", Theme.PRESETS));
     public final BoolSetting customAccent = add(new BoolSetting("custom_accent", "Custom accent", "Override the preset's accent colour", false));
     public final ColorSetting accent = add(new ColorSetting("accent", "Accent colour", "Used for highlights and toggles", 0xFFFF8A3D));
-    public final BoolSetting blur = add(new BoolSetting("blur", "Background blur", "Blur the game behind menus where the game supports it (dim fallback)", true));
+    public final BoolSetting blur = add(new BoolSetting("blur", "Background blur", "Blur the game behind menus (costs frames on weaker graphics; a dim is used when off)", false));
     public final NumberSetting uiScale = add(new NumberSetting("ui_scale", "Menu scale", "Size of the MW19 menu relative to the game's GUI scale", 1.0, 0.6, 1.6, 0.05, "x"));
     public final NumberSetting animSpeed = add(new NumberSetting("anim_speed", "Animation speed", "0 disables animations", 1.0, 0.0, 2.0, 0.1, "x"));
     public final BoolSetting customTitle = add(new BoolSetting("custom_title", "Custom home screen",
             "Replace Minecraft's title screen with the MW19 home screen", true));
-    public final BoolSetting menuButtons = add(new BoolSetting("menu_buttons", "Title/pause button", "Show a MW19 button on the title and pause screens", true));
+    public final BoolSetting menuButtons = add(new BoolSetting("menu_buttons", "Title/pause buttons", "MW19 Menu and Packs on the pause screen, a MW19 button on the vanilla title screen", true));
+    public final BoolSetting styleMenus = add(new BoolSetting("style_menus", "MW19 game menus", "Draw Minecraft's own buttons (pause menu, server list, options) in the MW19 style", true));
     public final BoolSetting competitiveSafe = add(new BoolSetting("competitive_safe", "Competitive-safe", "Disable every GRAY and server-restricted module everywhere", false));
     public final BoolSetting toasts = add(new BoolSetting("toasts", "Notifications", "Show toasts (module errors, server rules, profiles)", true));
     public final BoolSetting hudGrid = add(new BoolSetting("hud_grid", "Editor grid", "Show and snap to a grid in the HUD editor", false));

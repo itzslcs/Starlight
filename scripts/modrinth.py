@@ -60,6 +60,8 @@ def main():
     st, resp = call("PATCH", f"/project/{project}/icon?ext=png", open(icon, "rb").read(), "image/png")
     print("icon:", st, "" if st == 204 else resp)
     jars = sorted(glob.glob(os.path.join(dist, "MW19-*+mc*.jar")), key=mc_key)
+    # VulkanMod inside the jar (DECISIONS D-024): an "embedded" dependency, and its source zip attached (LGPL-3.0)
+    bundled = json.load(open(os.path.join(ROOT, "fabric", "bundled.json")))["vulkanmod"]
     current = {re.search(r"MW19-(.+)\+mc", os.path.basename(j)).group(1) for j in jars}
     st, versions = call("GET", f"/project/{project}/version")
     for v in versions if st == 200 else []:
@@ -73,10 +75,19 @@ def main():
         forge = mc == "1.8.9"
         req = "Requires " + ("Forge 11.15.1.2318." if forge else
                              ("Fabric Loader 0.18+ and Java 25." if mc.startswith("26") else "Fabric Loader 0.16+.") + " Fabric API is not needed.")
+        vk = bundled.get(mc)
+        files = {"file": (os.path.basename(jar), "application/java-archive", open(jar, "rb").read())}
+        deps = []
+        if vk:
+            src = os.path.join(dist, "sources", f"VulkanMod-{vk['version']}-src.zip")
+            files["sources"] = (os.path.basename(src), "application/zip", open(src, "rb").read())
+            deps.append({"version_id": vk["modrinth"], "dependency_type": "embedded"})
+            req += (f" Includes VulkanMod {vk['version']} (LGPL-3.0, unmodified; its source zip is attached and linked from"
+                    f" {vk['source']}); MW19 turns it on from the second start when the graphics card supports Vulkan.")
         data = {"name": f"MW19 {ver} ({mc})", "version_number": f"{ver}+mc{mc}", "changelog": (notes + "\n\n" + req).strip(),
-                "dependencies": [], "game_versions": [mc], "version_type": "alpha", "loaders": ["forge" if forge else "fabric"],
-                "featured": False, "project_id": project, "file_parts": ["file"], "primary_file": "file", "environment": "client_only"}
-        payload, ctype = multipart({"data": json.dumps(data)}, {"file": (os.path.basename(jar), "application/java-archive", open(jar, "rb").read())})
+                "dependencies": deps, "game_versions": [mc], "version_type": "alpha", "loaders": ["forge" if forge else "fabric"],
+                "featured": False, "project_id": project, "file_parts": list(files), "primary_file": "file", "environment": "client_only"}
+        payload, ctype = multipart({"data": json.dumps(data)}, files)
         st, resp = call("POST", "/version", payload, ctype)
         print(f"{mc:8}", "OK " + resp["id"] if st == 200 else f"FAILED {st}: {str(resp)[:300]}")
         if st != 200:

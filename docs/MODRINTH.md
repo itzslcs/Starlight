@@ -22,12 +22,15 @@ Open your singleplayer world to friends on your network, or over the internet: M
 - **Vulkan renderer** (26.2 and 26.3): uses Minecraft's own Vulkan backend. It falls back to OpenGL automatically.
 
 ## Features
-- **Menu** (Right Shift): Mods, HUD Editor, Profiles, Keybinds, Skins, Packs, Host World, Plugins, Server Rules, Performance, Themes.
+- **Menu** (Right Shift): Mods, HUD Editor, Profiles, Keybinds, Skins, Packs, Host World, Server Rules, Performance, Themes.
+  Minecraft's own pause menu and server list get MW19's look, and the pause menu opens the MW19 menu and the pack browser.
+- **Vulkan built in** (1.21.9 – 1.21.11): the jar contains VulkanMod (LGPL-3.0, unmodified, source linked), switched on
+  from the second start when your graphics card supports it, never at the cost of a crash. 26.2+ uses Minecraft's own Vulkan.
+- **Fast Chests**: chests are drawn as blocks, not every frame.
 - **HUD**: FPS, **KeyCPS** (keystrokes + CPS that follow your key bindings), Speed, Ping, Coordinates, Direction, Armor Status, Potion Effects, Item Counter, Clock, Memory/CPU, FPS Graph, Server Address, Combo Counter, Saturation, Session Time, Pack Display, Stopwatch, Day Counter, Reach Display.
 - **Visual**: Custom Crosshair, Brightness, Hit Color, Damage Tilt, Low Fire, Shield Overlay, Particle Multiplier, Show Own Nametag, 1.8 Combat Visuals, Clear Weather, Low Health Warning, Hitboxes, TNT Timer.
 - **Utility**: Zoom, Toggle Sprint/Sneak, Freelook, Screenshot Tools, Durability Alert, Chat Tools, Quick Commands, **Exploit Protection** (servers cannot detect your mods through sign/anvil text tricks or probe your home network through resource pack addresses; off by default).
 - **Themes**: nine colour presets including Black, White and Crystal, with smooth menu animations.
-- **Plugins**: add-on jars that run only after you approve them.
 
 KeyCPS is built in, so you don't need the standalone KeyCPS mod alongside MW19.
 

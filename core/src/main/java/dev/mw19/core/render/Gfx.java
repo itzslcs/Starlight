@@ -148,8 +148,50 @@ public final class Gfx implements Renderer {
         }
     }
 
+    /**
+     * Box with softened corners: the corner pixels are cut (a chamfer of at most 2 physical pixels), so any box costs 3
+     * fills. Menus and HUD boxes used to be scanline-filled per pixel row (dozens of fills each; the whole menu ran into
+     * thousands per frame), which is what made the menu slow (2026-09-26).
+     */
     @Override
     public void roundRect(float x, float y, float w, float h, float radius, int argb) {
+        int col = c(argb);
+        if ((col >>> 24) == 0 || w <= 0 || h <= 0) return;
+        float X0 = snap(ax(x)), Y0 = snap(ay(y)), X1 = snap(ax(x + w)), Y1 = snap(ay(y + h));
+        int k = chamfer(radius, X1 - X0, Y1 - Y0);
+        if (k == 0) {
+            b.fill(X0, Y0, X1, Y1, col);
+            return;
+        }
+        float c = k * px;
+        b.fill(X0 + c, Y0, X1 - c, Y1, col);
+        b.fill(X0, Y0 + c, X0 + c, Y1 - c, col);
+        b.fill(X1 - c, Y0 + c, X1, Y1 - c, col);
+    }
+
+    /** Outline with the same cut corners: 4 fills. */
+    @Override
+    public void roundOutline(float x, float y, float w, float h, float radius, float thickness, int argb) {
+        int col = c(argb);
+        if ((col >>> 24) == 0 || w <= 0 || h <= 0) return;
+        float X0 = snap(ax(x)), Y0 = snap(ay(y)), X1 = snap(ax(x + w)), Y1 = snap(ay(y + h));
+        float t = Math.max(1, Math.round(thickness * s * gs)) * px, c = chamfer(radius, X1 - X0, Y1 - Y0) * px;
+        b.fill(X0 + c, Y0, X1 - c, Y0 + t, col);
+        b.fill(X0 + c, Y1 - t, X1 - c, Y1, col);
+        b.fill(X0, Y0 + c, X0 + t, Y1 - c, col);
+        b.fill(X1 - t, Y0 + c, X1, Y1 - c, col);
+    }
+
+    /** Corner cut in physical pixels: none for radius 0, 1 for small radii, 2 for larger ones (never over a third of the box). */
+    private int chamfer(float radius, float wGui, float hGui) {
+        if (radius <= 0) return 0;
+        int k = radius * s * gs >= 5 ? 2 : 1;
+        int limit = (int) (Math.min(wGui, hGui) * gs / 3);
+        return Math.min(k, Math.max(0, limit));
+    }
+
+    /** True circular corners, scanline-filled per physical pixel row (costly: only for shapes that must be round). */
+    public void roundRectSmooth(float x, float y, float w, float h, float radius, int argb) {
         int col = c(argb);
         if ((col >>> 24) == 0 || w <= 0 || h <= 0) return;
         float X0 = snap(ax(x)), Y0 = snap(ay(y)), X1 = snap(ax(x + w)), Y1 = snap(ay(y + h));
@@ -210,8 +252,8 @@ public final class Gfx implements Renderer {
         }
     }
 
-    @Override
-    public void roundOutline(float x, float y, float w, float h, float radius, float thickness, int argb) {
+    /** Round outline, per physical pixel row (the Circle crosshair). */
+    public void roundOutlineSmooth(float x, float y, float w, float h, float radius, float thickness, int argb) {
         int col = c(argb);
         if ((col >>> 24) == 0 || w <= 0 || h <= 0) return;
         float X0 = snap(ax(x)), Y0 = snap(ay(y)), X1 = snap(ax(x + w)), Y1 = snap(ay(y + h));

@@ -87,12 +87,14 @@ Core lays out in **GUI units** (floats). Backends convert to physical pixels (×
 client has its own UI scale on top of vanilla GUI scale.
 
 ## D-014 Plugin trust model
+*Superseded by D-026: the plugin system was removed in 0.5.0.*
 There is no signing authority, so every plugin is "unsigned". The first load of each plugin (id + SHA-256) is blocked
 until the user accepts a warning that plugins run with full mod privileges. Java 17+ removed the SecurityManager, so
 no sandbox is possible. The API exposes name/UUID only and never the session or access token. That limits the API
 surface, not what reflective code could do.
 
 ## D-015 Tier tags addon (the user's "addons like TierTagger")
+*Superseded by D-026: removed with the plugin system in 0.5.0.*
 This is an addon **plugin** built on our plugin API. It reads MCTiers API v2 (`https://mctiers.com/api/v2/profile/{uuid}`, documented
 at mctiers.com/docs/v2, v1 removed 2026-06-01) and SubTiers (same v2 schema, `https://subtiers.net/api/v2`). PvPTiers
 returned HTTP 503 on 2026-09-25, so it is left out by default. The provider list is user-editable. Code is original: TierTagger
@@ -138,6 +140,7 @@ common nickname for Call of Duty: Modern Warfare (2019). That is fine as a name,
 use Call of Duty branding.
 
 ## D-020 "Max FPS client": performance packs by reference, native Vulkan, no bundling (owner request, 2026-09-26)
+*The "no bundling" part is revised by D-024 (VulkanMod ships inside MW19 where its source is public).*
 The owner pointed at Frost Client (frostclient.eu) as the bar. From its public site: Minecraft 1.21+, **Sodium and
 VulkanMod bundled**, "Vulkan by default", 50+ bundled mods, capes and badges, a paid tier, and a claim of 85 → 810 FPS
 (RTX 3060 Ti, 4K, 20 chunks). That gain comes from Sodium and VulkanMod, not from client code. Frost's launcher and files
@@ -216,3 +219,65 @@ configs with automatic detection on first start, since MW19's focus is maximum F
   servers. Bedrock and 1.8(.0) are other games/targets. Discord Rich Presence needs a Discord application id that only
   the owner can create. Motion blur, colour saturation and connected glass need shader or resource-pack work per
   version and are open for later. Monetisation was set aside by the owner.
+
+## D-024 VulkanMod inside the MW19 jar, not Sodium (owner request, 2026-09-26)
+The owner asked for Sodium or VulkanMod inside MW19 so the mods folder holds one jar.
+- **Not Sodium.** Its licence (PolyForm Shield 1.0.0) forbids using it to provide a product that competes with it, and
+  says a product marketed as a practical substitute "definitely competes". A max-FPS client that ships Sodium inside is
+  that substitute, so it is not bundled (the `.mrpack` packs still reference it, D-020).
+- **VulkanMod** (LGPL-3.0-only) may be redistributed with the licence texts and the exact source. It is nested unmodified
+  as Fabric jar-in-jar ([`fabric/build.gradle.kts`](../fabric/build.gradle.kts), checked against the SHA-512 pinned in [`bundled.json`](../fabric/bundled.json)). The jar carries
+  `THIRD_PARTY_NOTICES.txt` and `META-INF/licenses/` (LGPL + GPL), the About page names it (LGPL section 4(c)), and
+  `dist/sources/` holds the source zip of the release commit. A player can use another VulkanMod by dropping it in the
+  mods folder (Fabric loads the newer one), which is the "suitable shared library mechanism" of LGPL section 4(d).
+- **Only builds with a public release commit** ([`scripts/vulkanmod-pin.py`](../scripts/vulkanmod-pin.py)): 0.6.8 for 1.21.11 (dev branch,
+  d3db079) and 0.6.6 for 1.21.9/1.21.10 (tag 0.6.6). Upstream has not published the sources of its 1.21–1.21.5 and
+  26.1.x ports, and shipping a build without its source would break the licence, so those jars bundle nothing. 26.2+
+  have Minecraft's own Vulkan backend (D-020); 1.21.6–1.21.8 have no VulkanMod.
+- **Never a crash on PCs without Vulkan.** VulkanMod has no fallback: without a Vulkan 1.2 driver it stops the game
+  ("Failed to create instance"). [`RendererSwitch`](../fabric/src/main/java/dev/mw19/fabric/RendererSwitch.java) is a Fabric language adapter, which Fabric creates after choosing the
+  mods and before reading their entrypoints and mixin configs; when this session should be OpenGL it removes VulkanMod's
+  entrypoints and mixin configs from its metadata, so the jar stays loaded but none of it runs. It also removes VulkanMod's
+  "contains a Fabric renderer" flag, which would otherwise make Fabric API's own renderer (Indigo) stand down. A fresh install starts on
+  OpenGL, [`VulkanProbe`](../fabric/src/main/java/dev/mw19/fabric/VulkanProbe.java) asks the driver in the background for a real (non-CPU) Vulkan 1.2 device, and "ok" switches the next
+  start to Vulkan. A start that never reaches the menu leaves `MW19/vulkan-starting` behind and the following start stays
+  on OpenGL (and says why) until the player picks Vulkan again on the Performance page. Sodium, Iris or another renderer
+  mod also keeps it off. A VulkanMod the player installed separately is left alone.
+- Verified in a real Fabric production launch ([`scripts/prodlaunch.py`](../scripts/prodlaunch.py), `PROD=1 scripts/smoke.sh`) on Mesa's software Vulkan
+  driver: OpenGL with VulkanMod kept off, Vulkan chosen, the automatic first-start check then Vulkan, and a forced Vulkan
+  start on a machine without Vulkan followed by the automatic OpenGL recovery (debug-log 2026-09-27).
+
+## D-025 Fast Chests: chests as ordinary blocks from a built-in resource pack (owner request, 2026-09-26)
+"Make chests/block entities normal blocks on the client." A chest is drawn by a block entity renderer every frame;
+drawn as a block it is baked into the world mesh once.
+- The models are generated by [`scripts/fast-chests.py`](../scripts/fast-chests.py) from the vanilla texture layout (a standard box unwrap), not copied:
+  base, lid and latch per chest type, single and both halves, with each face's region rotated as the texture stores it.
+  The chest textures join the block atlas through an atlas source file (atlas definitions from every pack are merged).
+- The pack is offered by MW19's own entry in the client pack scan ([`PackSourceMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/PackSourceMixin.java)) only while the module is on, and
+  is "required" then, so the module is the only switch; toggling reloads resources once. `Pack`, `PackLocationInfo`,
+  `Pack.Metadata` and `PathPackResources` have the same shape from 1.21 to 26.3, so one code path serves every version.
+- The block entity renderer skips chests whose model the pack provides. Before 1.21.4 chests report the
+  ENTITYBLOCK_ANIMATED shape, so a mixin makes them MODEL while the pack is on; on 1.21.4–1.21.11 the special block
+  renderer that also draws a chest minecart's or block display's chest is skipped for them (26.x draws those from the
+  special model only). Result: lids no longer animate, which the module description says.
+- Block textures are mipmapped and entity textures are not, so a texture region that starts on an odd column bleeds into
+  its neighbour at a distance. On a double chest's seam that showed as a dark line; the generator drops that one column.
+- 26.x logs a warning for each chest texture that is now in two atlases and says a future version will reject that;
+  26.1–26.3 still render both correctly (debug-log 2026-09-27). A future version will need its own sprite names.
+- Verified: the smoke's chest scene (single, double both ways, trapped, ender, copper, a chest minecart and a block
+  display, front and top views) against vanilla's renderer, in dev and in production, on OpenGL and under VulkanMod.
+
+## D-026 Plugins removed (owner request, 2026-09-26)
+"Remove plugins." The plugin loader, its consent screen and Plugins page, the plugin API types, the Tier Tags and
+Session Stats addons, the name-decoration hooks that only plugins used (four mixins) and MCTiers/SubTiers network access
+are gone. The `api/` module keeps the module, setting, event and render types core itself is built from. Old configs
+keep working: their `pluginConsent`/`pluginDisabled` keys are simply unused.
+
+## D-027 Minecraft's own menus in the MW19 style (owner request, 2026-09-26)
+"Make [the pause menu and server list] MW19-like, for all versions." Vanilla screens are kept (their per-version
+behaviour, e.g. disconnecting, and buttons other mods add) and only their buttons are redrawn like the home screen's: dark
+glass, a thin edge that lights up on hover ([`ButtonStyleMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/ButtonStyleMixin.java); 1.8.9 [`GuiButtonMixin`](../legacy/src/main/java/dev/mw19/forge/mixin/GuiButtonMixin.java)). Up to 1.21.10
+the button draws its background and label in one method, so MW19 draws both; from 1.21.11 only the background sprite is
+replaced. The pause menu gets a row under Back to Game with **MW19 Menu** and **Packs** (the pack browser in game);
+everything below moves down one row. Themes → "MW19 game menus" turns the restyle off.
+

@@ -13,7 +13,6 @@ import dev.mw19.core.gui.page.KeybindsPage;
 import dev.mw19.core.gui.page.ModsPage;
 import dev.mw19.core.gui.page.Page;
 import dev.mw19.core.gui.page.PerfPage;
-import dev.mw19.core.gui.page.PluginsPage;
 import dev.mw19.core.gui.page.ProfilesPage;
 import dev.mw19.core.gui.page.RulesPage;
 import dev.mw19.core.gui.page.ThemesPage;
@@ -62,7 +61,6 @@ public final class GuiRoot implements Surface {
         pages.add(new dev.mw19.core.gui.page.SkinsPage(this));
         pages.add(new dev.mw19.core.gui.page.PacksPage(this));
         pages.add(new dev.mw19.core.gui.page.HostPage(this));
-        pages.add(new PluginsPage(this));
         pages.add(new RulesPage(this));
         pages.add(new PerfPage(this));
         pages.add(new ThemesPage(this));
@@ -113,6 +111,14 @@ public final class GuiRoot implements Surface {
         editing = false;
         popup = popupOwner = captured = null;
         k.config.markDirty();
+        k.unloadGui(this); // nothing of the menu stays loaded while it is closed
+    }
+
+    /** Frees every page's resources (textures). The instance is not used again. */
+    public void dispose() {
+        for (Page p : pages) p.dispose();
+        hudEditor.dispose();
+        chatSearch.dispose();
     }
 
     public void close() {
@@ -214,6 +220,8 @@ public final class GuiRoot implements Surface {
     @Override
     public void render(RenderBackend backend, int screenW, int screenH, float mouseX, float mouseY) {
         long now = System.currentTimeMillis();
+        k.adoptGui(this); // shown again after a child screen closed: this is the live menu, even if it was unloaded
+        long t0 = System.nanoTime();
         scale = k.client.uiScale.floatValue();
         width = screenW / scale;
         height = screenH / scale;
@@ -245,6 +253,7 @@ public final class GuiRoot implements Surface {
             Log.error("GUI render failed", t);
         } finally {
             g.end();
+            k.perf.menuUs = k.perf.menuUs * 0.9 + (System.nanoTime() - t0) / 1000.0 * 0.1;
         }
     }
 

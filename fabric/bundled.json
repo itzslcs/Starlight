@@ -1,0 +1,32 @@
+{
+  "_": "VulkanMod per Minecraft version, written by scripts/vulkanmod-pin.py",
+  "vulkanmod": {
+    "1.21.9": {
+      "version": "0.6.6",
+      "type": "release",
+      "modrinth": "jkDMvvWU",
+      "file": "VulkanMod_1.21.10-0.6.6.jar",
+      "sha512": "15d2dfb5f834e0335cfa69b50b1ae92d9c1583871d054c0c6a9c26ffb0f4f7a4d17cd110679bcb77147f30bcac304b92cfbd8fa0f37d7c1da64375ef3d99759f",
+      "source": "https://github.com/xCollateral/VulkanMod/tree/67e20f1f359a3a0611e2312a8a72e47fc9a09737",
+      "sourceZip": "https://github.com/xCollateral/VulkanMod/archive/67e20f1f359a3a0611e2312a8a72e47fc9a09737.zip"
+    },
+    "1.21.10": {
+      "version": "0.6.6",
+      "type": "release",
+      "modrinth": "jkDMvvWU",
+      "file": "VulkanMod_1.21.10-0.6.6.jar",
+      "sha512": "15d2dfb5f834e0335cfa69b50b1ae92d9c1583871d054c0c6a9c26ffb0f4f7a4d17cd110679bcb77147f30bcac304b92cfbd8fa0f37d7c1da64375ef3d99759f",
+      "source": "https://github.com/xCollateral/VulkanMod/tree/67e20f1f359a3a0611e2312a8a72e47fc9a09737",
+      "sourceZip": "https://github.com/xCollateral/VulkanMod/archive/67e20f1f359a3a0611e2312a8a72e47fc9a09737.zip"
+    },
+    "1.21.11": {
+      "version": "0.6.8+1.21.11",
+      "type": "release",
+      "modrinth": "hWKRTXbQ",
+      "file": "VulkanMod-0.6.8+1.21.11.jar",
+      "sha512": "cbc25c9baee5e3d0e187476ce0b461a5b278341140df9764f4032d1186d8eab8607680480ce09f63887772a7547626d57b11b6a8a90bd5f53de0196bbfc573bb",
+      "source": "https://github.com/xCollateral/VulkanMod/tree/d3db07925f60257433233409125a08d7c08bf023",
+      "sourceZip": "https://github.com/xCollateral/VulkanMod/archive/d3db07925f60257433233409125a08d7c08bf023.zip"
+    }
+  }
+}

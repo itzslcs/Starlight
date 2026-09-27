@@ -174,3 +174,102 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
 - **26.3:** the first try failed while configuring `:fabric:1.21.11`: Stonecutter always configures its active version,
   which then got 26.3's mods to remap. The extra mods now apply only to the requested target. Then **PASS** with
   fabric-api 0.161.0, sodium 0.9.2, immediatelyfast 1.17.1, lithium 0.26.1 and ferritecore 9.0.0 (audit 28/28).
+
+## 2026-09-26 · 1.8.9 entity culling cast its rays from the player's feet
+- **Found by reading** (while adding block entity culling), not by a report. `RenderGlobal.renderEntities` (javap)
+  passes `RenderManager.shouldRender` the render-view entity's interpolated `prevPos/pos` (feet), and MW19's
+  [`RenderManagerMixin`](../legacy/src/main/java/dev/mw19/forge/mixin/RenderManagerMixin.java) used that as the ray origin. The camera sits `eyeHeight` above it (and further back in third
+  person), so a mob visible over a one-block wall could be judged hidden and skipped. The Fabric targets were right:
+  there `LevelRenderer` passes `Camera.getPosition()`.
+- **Fix:** 1.8.9 adds `ActiveRenderInfo.getPosition()` (the camera's offset from that interpolated position, updated
+  every frame) to the origin, for entities and the new tile entity culling alike.
+- **Test:** covered by the smoke run's culling path only; the ray logic itself is unit-tested in [`OcclusionTest`](../core/src/test/java/dev/mw19/core/OcclusionTest.java).
+
+## 2026-09-26 · VulkanMod could not be tested headless (hang, then crash)
+- **Repro:** `WITH_MODS=vulkanmod smoke.sh 1.21.11` under Xvfb. Xvfb has no DRI3, so RADV's X11 presentation died
+  (`XIO: fatal IO error`); with `MESA_VK_WSI_DEBUG=sw` the render thread hung in `vkWaitForFences` after
+  `Failed to submit draw command buffer: VK_ERROR_UNKNOWN` (jstack, debug.log).
+- **Hypothesis:** the hardware driver cannot present into Xvfb; a software Vulkan device can.
+- **Fix (test setup):** Mesa's lavapipe, extracted from the Arch `vulkan-swrast` package of the installed Mesa
+  version (26.2.2) and selected with `VK_DRIVER_FILES`. **PASS** on 1.21.11 with VulkanMod 0.6.8, mixin audit 28/28.
+  The game's own screenshots are blank under VulkanMod (it does not render into the target they read), so smoke.sh
+  now also grabs the X11 screen for every screenshot (`x11-*.png`); those show the world, HUD and menus drawn.
+- **Found on the way:** without any Vulkan driver VulkanMod ends the game (`Failed to create instance:
+  VK_ERROR_INCOMPATIBLE_DRIVER`), so bundling it needed a launch-time switch (DECISIONS D-024).
+
+## 2026-09-26 · Fast Chests: a dark line on double chest lids
+- **Repro:** the smoke's chest scene, front view: the double chest's lid showed a faint dark line at the seam that
+  vanilla's renderer does not draw (zoomed side-by-side of `6b-chests-vanilla` vs `6a-chests-fast`).
+- **Hypothesis:** mipmaps. Entity textures are drawn without them; block atlas sprites have them. The left half's lid
+  top region starts on column 29 (odd), so its first mip-1 texel averages columns 28 and 29, and 28 is the dark lid
+  underside region.
+- **Fix:** [`scripts/fast-chests.py`](../scripts/fast-chests.py) drops the seam-side column of those two faces (left half's lid top, right half's
+  bottom). The rerun's zoom shows no line; the top view (`6c`/`6d`) matches vanilla's plank pattern and rims.
+
+## 2026-09-27 · The renderer switch did not load in dev runs
+- **Repro:** after adding [`RendererSwitch`](../fabric/src/main/java/dev/mw19/fabric/RendererSwitch.java) as a language adapter, the dev smoke died at start: `Failed to instantiate
+  language adapter ... can't load class dev.mw19.fabric.RendererSwitch at .../build/classes/java/main as it hasn't been
+  exposed to the game (yet? The system property fabric.classPathGroups may not be set correctly in-dev)`. Production
+  launches had passed.
+- **Hypothesis:** in dev the mod's classes directory is not grouped with its resources (where fabric.mod.json is), so
+  Fabric only exposes it with the game's classpath, after language adapters are created.
+- **Fix:** Loom's `mods { register("mw19") { sourceSet(main) } }` in [fabric/build.gradle.kts](../fabric/build.gradle.kts). The dev smoke passes again.
+
+## 2026-09-27 · The Vulkan check failed with "Vulkan has already been created"
+- **Repro:** the first production start with VulkanMod kept off wrote `vulkan-probe.txt` = `no (IllegalStateException:
+  Vulkan has already been created.)`.
+- **Hypothesis:** something in the OpenGL session had already loaded LWJGL's Vulkan binding (GLFW's Vulkan support), so
+  `VK.create()` refused a second time.
+- **Fix:** [`VulkanProbe`](../fabric/src/main/java/dev/mw19/fabric/VulkanProbe.java) shares an already created binding and leaves it loaded. Rerun: `no (llvmpipe ... is not
+  enough)` on the CPU driver (correct: not a real GPU), and `ok llvmpipe ...` with `VK_SOFT=1`.
+
+## 2026-09-27 · A crashed first start skipped the automatic preset
+- **Repro:** forced Vulkan on a machine without Vulkan (`PROD=1 RENDERER=vulkan VK_DRIVER_FILES=none smoke.sh`), then a
+  second start with the state kept: the second start ran on OpenGL as designed, but failed the smoke's check that the
+  first-run preset was applied.
+- **Hypothesis:** "fresh install" meant "no saved profile", and the shutdown hook saves the profile even when the game
+  crashes, so the start after a crashed first start was no longer fresh.
+- **Fix:** a fresh install records `video.fresh` until the first-run step has actually run
+  ([`VideoPresets`](../core/src/main/java/dev/mw19/core/VideoPresets.java)). Regression test `aFirstStartThatCrashedStillGetsThePresetNextTime`; the two-start run
+  then passes. (The same run also showed smoke.sh overwrote `config.json` even with `KEEP_STATE`; it now merges.)
+
+## 2026-09-27 · The bundled VulkanMod checks Modrinth for updates at every start
+- **Found by** searching the bundled jars for network code before writing [THIRD_PARTY](THIRD_PARTY.md): `UpdateChecker` sends a request
+  to `api.modrinth.com` from VulkanMod's client initializer, unconditionally (its source at the pinned commits).
+- **Fix:** [`VulkanUpdateMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/VulkanUpdateMixin.java) (`@Pseudo`, only when VulkanMod runs) cancels it: MW19 uses the network only
+  when the player asks. Checked in the exported class of a Vulkan run (`checkForUpdates` calls `mw19$offline` first);
+  [`scripts/mixin-audit.py`](../scripts/mixin-audit.py) checks it whenever VulkanMod was loaded.
+
+## 2026-09-27 · Hitboxes stayed on with the module off (1.21.9+)
+- **Repro:** the smoke's chest scene showed entity hitboxes (and look vectors) although a fresh MW19 config has the
+  Hitboxes module off. The run directory had been used by earlier runs that switched every module on.
+- **Hypothesis:** on 1.21.9+ the module set vanilla's `ENTITY_HITBOXES` debug entry, and `DebugScreenEntryList.setStatus`
+  saves the debug profile at once (javap: `rebuildCurrentList` then `save`). A game closed with the module on keeps
+  hitboxes on for good, whatever MW19's config says later.
+- **Fix:** the module no longer changes the entry. [`HitboxesMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/HitboxesMixin.java) reports it as enabled while the module is on,
+  and the platform refreshes the debug renderer's list on each toggle (`LevelRenderer.debugRenderer` up to 26.1,
+  `levelExtractor.debugRenderer` on 26.2+). The player's own F3+B choice stays untouched. The mixin audit checks it.
+
+## 2026-09-27 · 26.x: the new Mods page threw on the title screen
+- **Repro:** smoke-all: every 26.x target failed with 130-160 `GUI render failed` records: `NullPointerException:
+  Components not bound yet` from `new ItemStack(item)` in `FabricPlatform.itemIcon`, called by the Mods page's tiles.
+- **Hypothesis:** 26.x binds item data components when the first world loads; before that (title screen) an
+  `ItemStack` cannot be made. The HUD only asks for icons in a world, so nothing hit it before the tiles.
+- **Fix:** `itemIcon` returns an empty, uncached icon when that happens and tries again next time; tiles show the
+  module's initial until then. Rerun: 26.1, 26.1.1, 26.1.2, 26.2 and 26.3 pass.
+
+## 2026-09-27 · 26.x warns about chest sprites in two atlases
+- **Seen in** the 26.x smoke logs: `Duplicate sprite minecraft:entity/chest/... from atlas ...chest.png, already defined
+  in atlas ...blocks.png. This will be rejected in a future version` (one per chest texture per resource reload, only
+  with Fast Chests on).
+- **Checked:** 26.3's `AtlasManager` still keys sprites by atlas and name (javap: the duplicate check is a separate
+  map filled with `putIfAbsent`, then the warning), and the chest scene renders identically with Fast Chests on and
+  off. So it works on 26.1–26.3; a future Minecraft that enforces this will need Fast Chests to draw from its own
+  sprite names (DECISIONS D-025).
+
+## 2026-09-27 · Fabric API's renderer would stand down for a VulkanMod that is kept off
+- **Found by reading** Fabric API's Indigo (`IndigoMixinConfigPlugin`, 1.21.11 branch): Indigo disables itself when any
+  mod's metadata has `fabric-renderer-api-v1:contains_renderer`, which VulkanMod's has. With VulkanMod kept off (OpenGL
+  session) and Fabric API installed, mods that use the Fabric Rendering API would have no renderer.
+- **Fix:** RendererSwitch removes that custom value from VulkanMod's metadata along with its entrypoints and mixin
+  configs (Indigo reads it later, from its mixin plugin).

@@ -94,7 +94,7 @@ public final class ModuleManager {
         return s;
     }
 
-    /** Removes all modules of an owner (plugin unload), disabling them first. */
+    /** Removes all modules of an owner, disabling them first. */
     public void unregisterOwner(String owner) {
         for (int i = order.size() - 1; i >= 0; i--) {
             State s = order.get(i);

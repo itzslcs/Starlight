@@ -6,7 +6,10 @@ See also: [MODRINTH](MODRINTH.md) (the listing text), [COMPAT_MATRIX](COMPAT_MAT
 ## Modrinth
 The project is a **draft** (id `TVWRTUcc`, still named Kestrel from 0.1.0) until the owner submits it for review.
 [`scripts/modrinth.py`](../scripts/modrinth.py) renames it to MW19, uploads the description ([MODRINTH](MODRINTH.md)) and icon, deletes versions that
-are not in `dist/`, and uploads every `dist/` jar as an alpha version.
+are not in `dist/`, and uploads every `dist/` jar as an alpha version. The 1.21.9 – 1.21.11 versions list VulkanMod as an
+*embedded* dependency and carry its source zip (`dist/sources/`) as a second file, which the LGPL asks for ([DECISIONS](DECISIONS.md)
+D-024). Modrinth's moderators may ask about the bundled mod; the answer is D-024 (licence, unmodified, source attached,
+replaceable).
 
 1. On modrinth.com, click your avatar → **Settings** → **Personal access tokens** → **Create a PAT**.
 2. Name it `MW19 upload`, set it to expire tomorrow, and tick **Create versions**, **Write projects**, **Delete versions**
