@@ -11,8 +11,8 @@ import glob, json, os, re, sys, time, urllib.error, urllib.request, uuid
 API = "https://api.modrinth.com/v2"
 UA = "itzslcs/mw19-publish (modrinth.com/user/itzslcs)"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SUMMARY = ("Max-FPS client for 1.8.9 and 1.21-26.3: auto-detected graphics presets, entity culling, skin changer, "
-           "in-game pack browser, world hosting, KeyCPS. Legit only; no Fabric API needed.")
+SUMMARY = ("Max-FPS client for 1.8.9 and 1.21-26.3: Vulkan built in, fast chests, culling, auto graphics presets, "
+           "skin changer, in-game pack browser, world hosting, KeyCPS. Legit only; one jar, no Fabric API.")
 
 
 def multipart(fields, files):
@@ -64,15 +64,22 @@ def main():
     bundled = json.load(open(os.path.join(ROOT, "fabric", "bundled.json")))["vulkanmod"]
     current = {re.search(r"MW19-(.+)\+mc", os.path.basename(j)).group(1) for j in jars}
     st, versions = call("GET", f"/project/{project}/version")
+    kept = set()
     for v in versions if st == 200 else []:
         if v["version_number"].split("+mc")[0] not in current:
             print("delete", v["version_number"], call("DELETE", f"/version/{v['id']}")[0])
             time.sleep(0.3)
+        else:
+            kept.add(v["version_number"])  # already uploaded (a re-run after a partial upload): skipped below
     ok = 0
     for jar in jars:
         mc = re.search(r"\+mc(.+)\.jar$", jar).group(1)
         ver = re.search(r"MW19-(.+)\+mc", os.path.basename(jar)).group(1)
         forge = mc == "1.8.9"
+        if f"{ver}+mc{mc}" in kept:
+            print(f"{mc:8}", "already there")
+            ok += 1
+            continue
         req = "Requires " + ("Forge 11.15.1.2318." if forge else
                              ("Fabric Loader 0.18+ and Java 25." if mc.startswith("26") else "Fabric Loader 0.16+.") + " Fabric API is not needed.")
         vk = bundled.get(mc)
