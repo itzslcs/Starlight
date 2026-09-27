@@ -141,3 +141,6 @@
   - Production 17/17, and the 3 VulkanMod jars on lavapipe.
   - 1.21.11 beside the Performance pack mods.
   - 68 core tests.
+- **Modrinth:** uploaded to the draft with a token the owner gave: 18 versions `0.7.0+mc<mc>`, every file's SHA-512 matching
+  dist/, VulkanMod's embedded dependency and source zip on 1.21.9–1.21.11, and the listing text matching
+  docs/MODRINTH.md. Still a draft.

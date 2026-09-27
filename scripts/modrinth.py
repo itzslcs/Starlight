@@ -51,8 +51,13 @@ def main():
     dist = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, "dist")
     notes = sys.argv[3] if len(sys.argv) > 3 else ""
     body = open(os.path.join(ROOT, "docs", "MODRINTH.md")).read().split("<!-- body -->\n", 1)[1]
-    st, resp = call("PATCH", f"/project/{project}", json.dumps({"slug": "mw19", "title": "MW19 Client", "description": SUMMARY, "body": body}).encode(),
-                    "application/json")
+    fields = {"title": "MW19 Client", "description": SUMMARY, "body": body}
+    # The slug only when it changes: Modrinth refuses to re-set "mw19" ("Slug collides with other project's id",
+    # 2026-09-27), and that 400 would drop the title, summary and description with it.
+    st, info = call("GET", f"/project/{project}")
+    if st != 200 or info.get("slug") != "mw19":
+        fields["slug"] = "mw19"
+    st, resp = call("PATCH", f"/project/{project}", json.dumps(fields).encode(), "application/json")
     print("project:", st, "" if st == 204 else resp)
     if st == 401:
         sys.exit("the token was refused (revoked or missing scopes)")

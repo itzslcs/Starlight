@@ -334,3 +334,13 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
     state, on every Fabric target.
 
   Not tested: a real upload to Mojang (no account here).
+
+## 2026-09-27 · Modrinth: the listing text stopped updating ("Slug collides with other project's id!")
+- **Repro:** the 0.7.0 upload replaced all 18 versions (hashes match dist), but the project's summary and description
+  stayed 0.5.0's. A re-run printed `project: 400 {"error":"request_error","description":"Slug collides with other
+  project's id!"}`.
+- **Hypothesis:** `scripts/modrinth.py` sends `slug: "mw19"` in every project PATCH. Modrinth now validates the slug
+  even when it is the project's current one, and refuses it. The 400 drops the whole PATCH, so the title, summary and
+  description go with it. The icon (a separate call) and the versions were unaffected.
+- **Fix:** the script reads the project first and sends the slug only when it differs. The re-run answered `project:
+  204`, and the description on Modrinth now matches docs/MODRINTH.md byte for byte.
