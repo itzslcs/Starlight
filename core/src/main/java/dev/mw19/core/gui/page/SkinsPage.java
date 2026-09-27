@@ -139,10 +139,25 @@ public final class SkinsPage extends Page {
         say("Uploading " + e.label() + "…", root.k.theme.textDim);
         SkinService.upload(root.k.http, root.k.platform.skins().accessToken(), e.png, e.slim, new SkinService.Result() {
             @Override
-            public void done(boolean ok, String message) {
-                busy = false;
-                say(message, ok ? root.k.theme.good : root.k.theme.bad);
-                root.k.toast(ok ? "Skin changed" : "Skin not changed", message, ok ? root.k.theme.good : root.k.theme.bad);
+            public void done(boolean ok, String message, String texture) {
+                if (!ok) {
+                    busy = false;
+                    say(message, root.k.theme.bad);
+                    root.k.toast("Skin not changed", message, root.k.theme.bad);
+                    return;
+                }
+                // Mojang has it; the game still shows the skin it loaded at start until the profile is fetched again.
+                say("Skin changed. Loading it in game…", root.k.theme.good);
+                root.k.platform.skins().refreshOwnSkin(texture, new dev.mw19.core.platform.Skins.Refreshed() {
+                    @Override
+                    public void done(boolean shown) {
+                        busy = false;
+                        String m = shown ? "Skin changed. You see it now; other players see it after you rejoin a server."
+                                : "Skin changed on your account. It shows in game after you restart Minecraft.";
+                        say(m, root.k.theme.good);
+                        root.k.toast("Skin changed", m, root.k.theme.good);
+                    }
+                });
             }
         });
     }

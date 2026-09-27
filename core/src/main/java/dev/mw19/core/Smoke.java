@@ -24,7 +24,7 @@ final class Smoke {
     private long clickTicks;
     private String guiClick = CLICKS ? "pending" : "skipped (no xdotool)";
     private String packs = "not run", packEnable = "not run", host = "not run", exploit = "not run", presets = "not run";
-    private String chests = "not run", pauseRow = "not run", optimizers = "not run";
+    private String chests = "not run", pauseRow = "not run", optimizers = "not run", skinRefresh = "not run";
     private int chestStep;
     private long chestWait;
 
@@ -142,11 +142,16 @@ final class Smoke {
                     shot("mw19-smoke-3b-pause");
                     pauseRow = k.platform.selfTest("pauserow");
                     if (pauseRow.startsWith("FAIL")) fail("pause menu: " + pauseRow);
+                    else if (!k.hooks.backdrop) fail("the pause menu did not draw the MW19 backdrop (hook never fired)");
                 } else if (stageTicks == 90) {
                     k.platform.screens().openMultiplayer();
                 } else if (stageTicks == 120) {
                     shot("mw19-smoke-3c-multiplayer");
                 } else if (stageTicks == 130) {
+                    k.platform.screens().openOptions(); // keycaps next to a slider (FOV) on the MW19 backdrop
+                } else if (stageTicks == 155) {
+                    shot("mw19-smoke-3d-options");
+                } else if (stageTicks == 165) {
                     k.platform.screens().closeScreen();
                     next();
                 }
@@ -202,6 +207,12 @@ final class Smoke {
                 } else if (stageTicks == 30) {
                     if (screen != ScreenHost.Kind.OURS) fail("Skins page did not open (screen=" + screen + ")");
                     else shot("mw19-smoke-7-skins");
+                } else if (stageTicks == 34) {
+                    // After a skin change the game's start-up profile is swapped for the new one (no account here: the
+                    // self-test swaps a fresh profile in and back out)
+                    skinRefresh = k.platform.selfTest("skinrefresh");
+                    Log.info("SMOKE: skin refresh " + skinRefresh);
+                    if (skinRefresh.startsWith("FAIL")) fail("skin refresh: " + skinRefresh);
                 } else if (stageTicks == 40) {
                     k.gui().openPage(dev.mw19.core.gui.page.PacksPage.class);
                 } else if (stageTicks == 150) {
@@ -496,7 +507,7 @@ final class Smoke {
         }
         Log.info("SMOKE: top HUD costs " + costs.toString().trim());
         Log.info("MW19 SMOKE PASS hooks[" + k.hooks.describe() + "] guiClick[" + guiClick + "] keycps[" + keyCps + "] presets[" + presets + "] packs[" + packs + "] packEnable[" + packEnable + "] host[" + host
-                + "] exploit[" + exploit + "] pause[" + pauseRow + "] chests[" + chests + "] optimizers[" + optimizers + "] renderer[" + k.platform.rendererStatus() + "] modules["
+                + "] exploit[" + exploit + "] pause[" + pauseRow + "] chests[" + chests + "] optimizers[" + optimizers + "] skin[" + skinRefresh + "] renderer[" + k.platform.rendererStatus() + "] modules["
                 + k.modules.describeEnabled() + "] avgFrameMs=" + k.perf.avgFrameMs() + " ownUsPerFrame=" + k.perf.avgOwnUs());
         k.config.flush();
         shutdownWatchdog();

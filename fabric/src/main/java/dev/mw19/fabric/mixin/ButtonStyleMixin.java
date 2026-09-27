@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * "MW19 game menus": vanilla buttons (pause menu, server list, options...) get the home screen's button look. Up to
+ * "MW19 game menus": vanilla buttons (pause menu, server list, options...) become MW19 keycaps (MenuStyle). Up to
  * 1.21.10 the button draws background and label in one method, so both are drawn here; from 1.21.11 only the
  * background sprite is replaced and vanilla draws the label. Buttons with their own drawing (icons, checkboxes) keep it.
  */
@@ -45,7 +45,7 @@ public abstract class ButtonStyleMixin extends AbstractWidget.WithInactiveMessag
     private void mw19$style(net.minecraft.client.gui.GuiGraphics g, int mouseX, int mouseY, float partialTick, CallbackInfo ci) {
         boolean hot = isHoveredOrFocused();
         if (!Mw19Fabric.button(g, getX(), getY(), getWidth(), getHeight(), hot, active, alpha)) return;
-        int rgb = !active ? 0xA0A0A0 : hot ? 0xFFFFA0 : 0xE8E8E8;
+        int rgb = (!active ? dev.mw19.core.gui.MenuStyle.LABEL_OFF : hot ? dev.mw19.core.gui.MenuStyle.LABEL_HOVER : dev.mw19.core.gui.MenuStyle.LABEL) & 0xFFFFFF;
         renderString(g, net.minecraft.client.Minecraft.getInstance().font, rgb | Math.round(alpha * 255f) << 24);
         ci.cancel();
     }

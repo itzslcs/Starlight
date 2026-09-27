@@ -125,16 +125,51 @@ public final class Mw19Fabric implements ClientModInitializer {
         return Mw19.vanillaButton(MENU.bind(g), x, y, w, h, hovered, active, alpha);
     }
 
+    /** SliderStyleMixin: a vanilla slider's track and handle in the MW19 style; false = vanilla draws its own. */
+    //? if >=26.1 {
+    /*public static boolean slider(GuiGraphicsExtractor g, int x, int y, int w, int h, float value, boolean hovered, boolean active, float alpha) {
+    *///?} else {
+    public static boolean slider(GuiGraphics g, int x, int y, int w, int h, float value, boolean hovered, boolean active, float alpha) {
+    //?}
+        return Mw19.vanillaSlider(MENU.bind(g), x, y, w, h, value, hovered, active, alpha);
+    }
+
+    /**
+     * ScreenBackdropMixin: the MW19 backdrop behind a vanilla screen; false = vanilla's background. Inventories,
+     * chat and the death screen keep vanilla's: there the world is the point.
+     */
+    //? if >=26.1 {
+    /*public static boolean backdrop(net.minecraft.client.gui.screens.Screen s, GuiGraphicsExtractor g) {
+    *///?} else {
+    public static boolean backdrop(net.minecraft.client.gui.screens.Screen s, GuiGraphics g) {
+    //?}
+        if (s instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> || s instanceof net.minecraft.client.gui.screens.ChatScreen
+                || s instanceof net.minecraft.client.gui.screens.DeathScreen) return false;
+        return Mw19.menuBackdrop(MENU.bind(g), s.width, s.height, Minecraft.getInstance().level != null);
+    }
+
     /**
      * PauseScreenMixin: [MW19 Menu][Packs] under "Back to Game" (the topmost wide button); everything below moves down a
      * row. Nothing is added to the menu-less pause (F3+Esc) or a layout without such a button.
      */
-    public static void pauseRow(net.minecraft.client.gui.screens.Screen screen, java.util.function.Consumer<net.minecraft.client.gui.components.Button> add) {
+    /** The topmost wide button ("Back to Game"). Buttons only: up to 1.21.8 the "Game Menu" title is a screen-wide
+     *  text widget among the children, and the row went under it (debug-log 2026-09-27). */
+    static net.minecraft.client.gui.components.AbstractWidget pauseAnchor(net.minecraft.client.gui.screens.Screen screen) {
         net.minecraft.client.gui.components.AbstractWidget back = null;
         for (net.minecraft.client.gui.components.events.GuiEventListener l : screen.children()) {
-            if (l instanceof net.minecraft.client.gui.components.AbstractWidget w && w.visible && w.getWidth() >= 150
-                    && (back == null || w.getY() < back.getY())) back = w;
+            if (l instanceof net.minecraft.client.gui.components.AbstractButton w && w.visible && w.getWidth() >= 150
+                    && !isPauseRow(w) && (back == null || w.getY() < back.getY())) back = w;
         }
+        return back;
+    }
+
+    static boolean isPauseRow(net.minecraft.client.gui.components.AbstractWidget w) {
+        String s = w.getMessage().getString();
+        return "MW19 Menu".equals(s) || "Packs".equals(s);
+    }
+
+    public static void pauseRow(net.minecraft.client.gui.screens.Screen screen, java.util.function.Consumer<net.minecraft.client.gui.components.Button> add) {
+        net.minecraft.client.gui.components.AbstractWidget back = pauseAnchor(screen);
         if (back == null) return;
         int row = back.getY() + back.getHeight() + 4, half = (back.getWidth() - 4) / 2;
         for (net.minecraft.client.gui.components.events.GuiEventListener l : screen.children()) {

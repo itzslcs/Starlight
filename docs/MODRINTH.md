@@ -5,7 +5,7 @@
 > **Alpha.** Every version is launched in an automated headless test that clicks the menu with a real mouse, opens the Skins, Packs and Host World pages, runs a live pack search, hosts the test world, compares Fast Chests with vanilla and checks Exploit Protection, and every Fabric jar is also started in a real Fabric launch. Please report anything that breaks.
 
 ## Home screen
-MW19 replaces the title screen: the game's panorama, your skin in 3D (drag to turn it), and one click to **Skins**, **Host World**, **Packs** and the MW19 menu. *Vanilla menu* opens the original title screen, and you can turn the home screen off in the settings.
+MW19 replaces the title screen: MW19's ember backdrop and block skyline, your skin in 3D (drag to turn it), and one click to **Skins**, **Host World**, **Packs** and the MW19 menu. *Vanilla menu* opens the original title screen, and you can turn the home screen off in the settings.
 
 ## Skins
 Preview skins in 3D, copy any player's skin by name, drop PNG files on the window, and change your own skin without leaving the game (Microsoft accounts; it uses Mojang's official skin service, and your login token is only sent there, only when you press *Use this skin*).
@@ -29,7 +29,8 @@ Open your singleplayer world to friends on your network, or over the internet: M
 
 ## Features
 - **Menu** (Right Shift): Mods, HUD Editor, Profiles, Keybinds, Skins, Packs, Host World, Server Rules, Performance, Themes.
-  Minecraft's own pause menu and server list get MW19's look, and the pause menu opens the MW19 menu and the pack browser.
+  Minecraft's own menus (pause menu, server list, options) get MW19's look: keycap buttons and sliders that glow orange
+  on hover, over a dark backdrop with rising embers. The pause menu opens the MW19 menu and the pack browser.
 - **HUD**: FPS, **KeyCPS** (keystrokes + CPS that follow your key bindings), Speed, Ping, Coordinates, Direction, Armor Status, Potion Effects, Item Counter, Clock, Memory/CPU, FPS Graph, Server Address, Combo Counter, Saturation, Session Time, Pack Display, Stopwatch, Day Counter, Reach Display.
 - **Visual**: Custom Crosshair, Brightness, Hit Color, Damage Tilt, Low Fire, Shield Overlay, Particle Multiplier, Show Own Nametag, 1.8 Combat Visuals, Clear Weather, Low Health Warning, Hitboxes, TNT Timer.
 - **Utility**: Zoom, Toggle Sprint/Sneak, Freelook, Screenshot Tools, Durability Alert, Chat Tools, Quick Commands, **Exploit Protection** (servers cannot detect your mods through sign/anvil text tricks or probe your home network through resource pack addresses; off by default), **Marlow's Crystal Optimizer** and **Hero's Anchor Optimizer** (1.21+, off by default).

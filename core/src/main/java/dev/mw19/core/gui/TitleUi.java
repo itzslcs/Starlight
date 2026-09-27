@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The MW19 home screen that replaces Minecraft's title screen (Themes → Custom home screen). Vanilla's panorama
- * behind a pixel-block logo, the usual buttons in the middle, the player's skin on the left (drag to turn it) and
- * MW19's own screens on the right. "Vanilla menu" shows Minecraft's own title screen once, where buttons from other
- * mods live.
+ * The MW19 home screen that replaces Minecraft's title screen (Themes → Custom home screen): the MW19 backdrop
+ * (vanilla's panorama with "MW19 game menus" off), a pixel-block logo, the usual buttons as keycaps in the middle, the
+ * player's skin on the left (drag to turn it) and MW19's own screens on the right. "Vanilla menu" shows Minecraft's own
+ * title screen once, where buttons from other mods live.
  */
 public final class TitleUi implements Surface {
     /** Pixel logo, 7 rows per glyph ('#' = block). Drawn from rects: no bundled image (DECISIONS D-009). */
@@ -124,8 +124,8 @@ public final class TitleUi implements Surface {
             ui.my = mouseY;
             ui.now = now;
             ui.tooltip = null;
-            // Keep the panorama; only shade where text sits.
-            g.gradient(0, h * 0.62f, w, h, 0x00000000, 0x7A000000);
+            if (k.client.styleMenus.on()) MenuStyle.backdrop(g, w, h, false, MenuStyle.glow(k.theme.accent), now, Anim.speed <= 0);
+            else g.gradient(0, h * 0.62f, w, h, 0x00000000, 0x7A000000); // over the panorama: shade where text sits
             intro.to(1, 350, now);
             g.pushAlpha(intro.get(now));
             content();
@@ -322,12 +322,13 @@ public final class TitleUi implements Surface {
         return false;
     }
 
+    /** Vanilla's panorama only with "MW19 game menus" off; otherwise the MW19 backdrop is drawn in {@link #render}. */
     @Override
     public boolean wantsPanorama() {
-        return true;
+        return !k.client.styleMenus.on();
     }
 
-    /** Flat translucent button in the vanilla layout's spirit; {@code flat} draws text only (the Vanilla menu link). */
+    /** A keycap button (MenuStyle); {@code flat} draws text only (the Vanilla menu link). */
     private static final class HomeButton extends Widget {
         final String label;
         private final Runnable action;
@@ -353,13 +354,8 @@ public final class TitleUi implements Surface {
                 ui.g.textCentered(label, x + w / 2f, y + (h - 8) / 2f, Colors.lerp(0xFFC8C8C8, 0xFFFFFFFF, t), true);
                 if (t > 0.01f) ui.g.rect(x + 5, y + h - 2, x + w - 5, y + h - 1, Colors.fade(0xFFFFFFFF, t));
             } else {
-                ui.g.rect(x, y, x + w, y + h, Colors.lerp(0xA0000000, 0xC8282828, t));
-                int edge = Colors.lerp(0x50FFFFFF, 0xFFFFFFFF, t);
-                ui.g.rect(x, y, x + w, y + 1, edge);
-                ui.g.rect(x, y + h - 1, x + w, y + h, edge);
-                ui.g.rect(x, y + 1, x + 1, y + h - 1, edge);
-                ui.g.rect(x + w - 1, y + 1, x + w, y + h - 1, edge);
-                ui.g.textCentered(label, x + w / 2f, y + (h - 8) / 2f, Colors.lerp(0xFFE8E8E8, 0xFFFFFFA0, t), true);
+                MenuStyle.key(ui.g, x, y, w, h, t, true, MenuStyle.glow(ui.t.accent));
+                ui.g.textCentered(label, x + w / 2f, y + (h - 8) / 2f, Colors.lerp(MenuStyle.LABEL, MenuStyle.LABEL_HOVER, t), true);
             }
             if (hv && tooltip != null) ui.tooltip = tooltip;
         }

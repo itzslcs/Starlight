@@ -157,10 +157,11 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [Anim.java](../core/src/main/java/dev/mw19/core/gui/Anim.java): Eased value (ease-out cubic) that animates toward a target over a fixed duration.
 - [GuiRoot.java](../core/src/main/java/dev/mw19/core/gui/GuiRoot.java): The whole menu: sidebar + pages + popup layer + tooltips, or the full-screen HUD editor.
 - [Icons.java](../core/src/main/java/dev/mw19/core/gui/Icons.java): Original pixel icons drawn from rects in a 10x10 box (no bundled assets; DECISIONS D-009).
+- [MenuStyle.java](../core/src/main/java/dev/mw19/core/gui/MenuStyle.java): MW19's own look, taken from its logo: letters built from blocks, with depth, and the "19" in the accent colour.
 - [ModIcons.java](../core/src/main/java/dev/mw19/core/gui/ModIcons.java): The item shown on each module's tile in the Mods page.
 - [Surface.java](../core/src/main/java/dev/mw19/core/gui/Surface.java): A full-screen UI the platform's screen class hosts: the MW19 menu (GuiRoot) or the home screen (TitleUi).
 - [Theme.java](../core/src/main/java/dev/mw19/core/gui/Theme.java): Colour tokens.
-- [TitleUi.java](../core/src/main/java/dev/mw19/core/gui/TitleUi.java): The MW19 home screen that replaces Minecraft's title screen (Themes → Custom home screen).
+- [TitleUi.java](../core/src/main/java/dev/mw19/core/gui/TitleUi.java): The MW19 home screen that replaces Minecraft's title screen (Themes → Custom home screen): the MW19 backdrop (vanilla's panorama with "MW19 game menus" off),...
 - [Toasts.java](../core/src/main/java/dev/mw19/core/gui/Toasts.java): Corner notifications.
 - [Ui.java](../core/src/main/java/dev/mw19/core/gui/Ui.java): Per-frame GUI context handed to every widget.
 - [Widget.java](../core/src/main/java/dev/mw19/core/gui/Widget.java): Base of all GUI widgets.
@@ -280,7 +281,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [AnvilNameMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/AnvilNameMixin.java): Exploit Protection: the anvil's name field (sent back when renaming) gets the item name as an unmodded client resolves it.
 - [BlockEntityCullingMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/BlockEntityCullingMixin.java): Entity Culling for block entities: hidden ones are not drawn (1.21.9+: no render state is extracted for them).
 - [BlockPlaceContextMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/BlockPlaceContextMixin.java): Anchor Optimizer (port of Hero's Anchor Optimizer): its ghost block takes a placed block like a fern does.
-- [ButtonStyleMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ButtonStyleMixin.java): "MW19 game menus": vanilla buttons (pause menu, server list, options...) get the home screen's button look.
+- [ButtonStyleMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ButtonStyleMixin.java): "MW19 game menus": vanilla buttons (pause menu, server list, options...) become MW19 keycaps (MenuStyle).
 - [CameraMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/CameraMixin.java): Freelook: the camera takes its angles from Hooks while active (every getView*Rot read).
 - [ChatComponentMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ChatComponentMixin.java): Chat Tools + plugin chat events: filter, timestamp, highlight, stack duplicates.
 - [ChestShapeMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ChestShapeMixin.java): Fast Chests before 1.21.4: chests report RenderShape.ENTITYBLOCK_ANIMATED, which the world mesh skips; with the pack on they report MODEL so their (pack) blo...
@@ -302,6 +303,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [LightTextureMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/LightTextureMixin.java): Brightness: substitute the gamma read (the saved option is untouched).
 - [LivingEntityRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/LivingEntityRendererMixin.java): Show own nametag in third person (vanilla hides the camera entity's name).
 - [MinecraftMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MinecraftMixin.java)
+- [MinecraftProfileAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MinecraftProfileAccessor.java): Skin changes: the profile the game fetched once at start (FabricMedia.refreshOwnSkin puts the new one in).
 - [MouseHandlerMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MouseHandlerMixin.java)
 - [MultiPlayerGameModeMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MultiPlayerGameModeMixin.java): The player's attacks and block uses: observed for the combo counter; the Crystal Optimizer acts after a hit went to the server, the Anchor Optimizer on a use...
 - [OverlayTextureAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/OverlayTextureAccessor.java)
@@ -312,10 +314,13 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [ParticleEngineMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ParticleEngineMixin.java): Particle multiplier: extra client-side crit / enchanted-hit bursts on hits.
 - [PauseScreenMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PauseScreenMixin.java)
 - [PayloadCodecMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PayloadCodecMixin.java): Crystal Optimizer: vanilla's custom payload codec writes MW19's outgoing messages as id + bytes before it looks up a codec for the id.
+- [PlayerInfoAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PlayerInfoAccessor.java): Skin changes: the player's list entry draws the new skin (vanilla's own lookup for the refreshed profile).
 - [PlayerSkinWidgetAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PlayerSkinWidgetAccessor.java): Lets the home screen and Skins page turn vanilla's player model (rotationX is pitch, rotationY yaw).
+- [ScreenBackdropMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ScreenBackdropMixin.java): "MW19 game menus": a vanilla screen's background (panorama, blur, dark overlay) becomes the MW19 backdrop.
 - [ScreenEffectRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ScreenEffectRendererMixin.java): Low fire: the overlay's vertical offset (-0.3) and alpha are plain constants.
 - [SignEditMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SignEditMixin.java): Exploit Protection: the lines a sign editor sends back are resolved as an unmodded client would (ExploitGuard).
 - [SignEditScreenAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SignEditScreenAccessor.java): Smoke self-test: reads the lines a sign editor would send back.
+- [SliderStyleMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SliderStyleMixin.java): "MW19 game menus": vanilla sliders (options, volume, FOV) match the keycap buttons.
 - [SpecialChestMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SpecialChestMixin.java): Fast Chests, 1.21.4 - 1.21.11: a chest shown as a block outside the world mesh (chest minecart, block display) is drawn from its block model plus this specia...
 - [TitleScreenMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/TitleScreenMixin.java)
 - [TitleSwapMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/TitleSwapMixin.java): Home screen: vanilla's TitleScreen is swapped for MW19's as it is set (Minecraft.setScreen until 26.1, Gui.setScreen from 26.2).
@@ -393,7 +398,8 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [EffectRendererMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/EffectRendererMixin.java): Particle multiplier: extra client-side crit / sharpness bursts on hits.
 - [EntityMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/EntityMixin.java): Freelook: mouse movement turns the camera instead of the player (setAngles subtracts pitch on 1.8.9).
 - [EntityRendererMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/EntityRendererMixin.java): Damage tilt (the 14° hurt-cam constant) and freelook camera angles (orientCamera's rotation reads).
-- [GuiButtonMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/GuiButtonMixin.java): "MW19 game menus" on 1.8.9: vanilla buttons get the home screen's look.
+- [GuiButtonMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/GuiButtonMixin.java): "MW19 game menus" on 1.8.9: vanilla buttons become MW19 keycaps (MenuStyle).
+- [GuiScreenMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/GuiScreenMixin.java): "MW19 game menus" on 1.8.9: a vanilla screen's background (dirt, or the dimmed world) becomes the MW19 backdrop.
 - [IntegratedServerAccessor.java](../legacy/src/main/java/dev/mw19/forge/mixin/IntegratedServerAccessor.java): Host World: the LAN announcer holds the port the world was opened on.
 - [ItemRendererMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/ItemRendererMixin.java): Low fire: renderFireInFirstPerson's vertical offset (-0.3) and alpha (0.9).
 - [MinecraftMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/MinecraftMixin.java)

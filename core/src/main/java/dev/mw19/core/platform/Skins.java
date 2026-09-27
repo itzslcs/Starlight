@@ -15,4 +15,18 @@ public interface Skins {
      * to change their skin. Null when there is none (offline or demo). Never log, store or pass it on.
      */
     String accessToken();
+
+    /** Answer of {@link #refreshOwnSkin}, on the game thread. */
+    interface Refreshed {
+        void done(boolean shown);
+    }
+
+    /**
+     * After a skin change: the game still holds the profile it fetched at start, so the player would keep seeing the
+     * old skin until a restart. This fetches the profile again until Mojang serves the skin with {@code texture} (null:
+     * any skin other than the current one), then shows it on the player in menus and in the world. Default: cannot.
+     */
+    default void refreshOwnSkin(String texture, Refreshed done) {
+        done.done(false);
+    }
 }

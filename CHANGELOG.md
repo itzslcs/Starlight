@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.0
+- **A look of its own:** buttons are now keycaps, with a lit top edge and a side that glows orange on hover. Sliders
+  match. Behind the menus there is a dark backdrop with a warm glow and rising embers, and on the home screen a
+  blocky skyline catches that glow. This covers Minecraft's pause menu, server list and options (every version), the
+  home screen and MW19's own menu. Themes → *MW19 game menus* switches it all back to vanilla.
+- **Skin changes show at once:** after *Use this skin*, MW19 loads the new skin from Mojang and puts it on your player
+  in the menus and in your world (other players see it after you rejoin a server). Before, you kept seeing the old skin
+  until you restarted the game.
+- **Fixed:** on 1.21–1.21.8 the pause menu's *MW19 Menu* and *Packs* row sat above *Back to Game*, as wide as the
+  screen. MW19's menu opened from the home screen had a black background.
+
 ## 0.6.0
 - **Marlow's Crystal Optimizer and Hero's Anchor Optimizer, built in** (1.21+, Mods → Utility, off by default): the two
   MIT mods by Bram & Marlow and by HerobaneNair, ported into MW19 with credit.

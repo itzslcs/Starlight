@@ -524,6 +524,7 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
         if ("exploit".equals(what)) return ExploitGuard.selfTest();
         if ("fastchests".equals(what)) return FastChests.selfTest();
         if ("chestfaces".equals(what)) return Integer.toString(FastChests.chestFaces());
+        if ("skinrefresh".equals(what)) return FabricMedia.INSTANCE.selfTest();
         if (what.startsWith("crystal:")) return dev.mw19.fabric.port.CrystalOptimizer.selfTest(what.substring(8));
         if (what.startsWith("anchor:")) { // anchor:<step>:x:y:z
             String[] p = what.split(":");
@@ -533,11 +534,19 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
             Screen s = FabricCompat.screen(mc);
             if (!(s instanceof net.minecraft.client.gui.screens.PauseScreen)) return "FAIL (not the pause menu)";
             int n = 0;
+            var back = Mw19Fabric.pauseAnchor(s);
             for (var l : s.children()) {
-                if (l instanceof net.minecraft.client.gui.components.Button b
-                        && ("Packs".equals(b.getMessage().getString()) || "MW19 Menu".equals(b.getMessage().getString()))) n++;
+                if (l instanceof net.minecraft.client.gui.components.Button b && Mw19Fabric.isPauseRow(b)) {
+                    n++;
+                    // right under "Back to Game", inside its width
+                    if (back == null || b.getY() != back.getY() + back.getHeight() + 4 || b.getX() < back.getX()
+                            || b.getX() + b.getWidth() > back.getX() + back.getWidth()) {
+                        return "FAIL (" + b.getMessage().getString() + " at " + b.getX() + "," + b.getY() + " " + b.getWidth()
+                                + " wide; Back to Game " + (back == null ? "not found" : "at " + back.getX() + "," + back.getY() + " " + back.getWidth() + " wide") + ")";
+                    }
+                }
             }
-            return n == 2 ? "ok (MW19 Menu + Packs)" : "FAIL (" + n + " of 2 MW19 buttons)";
+            return n == 2 ? "ok (MW19 Menu + Packs under Back to Game)" : "FAIL (" + n + " of 2 MW19 buttons)";
         }
         return "n/a";
     }

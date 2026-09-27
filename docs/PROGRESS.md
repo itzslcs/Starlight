@@ -123,3 +123,21 @@
   Mojang profile lookup timing out needed a smoke allowlist entry. Also, the 0.5.0 update had mangled the COMPAT_MATRIX
   "Alongside other mods" table, which is now restored.
 - **Declined:** No Chat Restrictions (it bypasses Microsoft account chat restrictions; D-028).
+
+## 2026-09-27: 0.7.0 (owner feedback on 1.21.11: skin changes do not show; menus look bland and generic)
+- **MW19's own look** (D-029, [`MenuStyle`](../core/src/main/java/dev/mw19/core/gui/MenuStyle.java)):
+  - Keycap buttons: notched pixel corners, a lit top edge, and a side that glows in the accent on hover. They are used
+    for Minecraft's buttons (every version), the home screen and MW19's own menu buttons.
+  - Keycap sliders (1.21+).
+  - An ember backdrop with a blocky skyline behind vanilla screens and the home screen; over a world it is see-through.
+  - MW19's menu over the home screen no longer shows black.
+- **Skin changes show at once** (debug-log): after an upload, the signed profile is fetched again until Mojang serves
+  the new skin. It then replaces the game's start-up profile, and the player list entry gets a new skin lookup. The
+  mechanism is tested by a smoke self-test on every Fabric target. A real upload was not tested (no account here).
+- **Fixed** (debug-log): on 1.21–1.21.8 the pause menu's MW19 row was anchored to the title widget. The smoke now checks
+  where the row sits, requires the backdrop on the pause menu, and opens the Options screen to exercise the sliders.
+- **Results:**
+  - Dev smoke 18/18 on snapshot dfb66f0, with the mixin audit fully wired (43–44 checks on Fabric, 13 on 1.8.9).
+  - Production 17/17, and the 3 VulkanMod jars on lavapipe.
+  - 1.21.11 beside the Performance pack mods.
+  - 68 core tests.

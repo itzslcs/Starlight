@@ -18,7 +18,8 @@ public final class SkinService {
     private static final Pattern NAME = Pattern.compile("[A-Za-z0-9_]{3,16}");
 
     public interface Result {
-        void done(boolean ok, String message);
+        /** {@code texture}: the new skin's texture id from Mojang's answer (for the in-game refresh), or null. */
+        void done(boolean ok, String message, String texture);
     }
 
     public interface Fetched {
@@ -34,11 +35,11 @@ public final class SkinService {
 
     static void upload(HttpClient http, String endpoint, String token, byte[] png, boolean slim, final Result result) {
         if (token == null || token.isEmpty()) {
-            result.done(false, "Sign in with a Microsoft account to change your skin.");
+            result.done(false, "Sign in with a Microsoft account to change your skin.", null);
             return;
         }
         if (!SkinLibrary.isSkin(png)) {
-            result.done(false, "That file is not a 64×64 PNG skin.");
+            result.done(false, "That file is not a 64×64 PNG skin.", null);
             return;
         }
         String boundary = "MW19" + Long.toHexString(System.nanoTime());
@@ -49,14 +50,44 @@ public final class SkinService {
         http.request("POST", endpoint, headers, multipart(boundary, slim ? "slim" : "classic", png), 1 << 16, new HttpClient.BytesCallback() {
             @Override
             public void done(int status, byte[] body, String error) {
-                if (status == 200) result.done(true, "Skin changed. Other players see it after you rejoin a server.");
-                else if (status == 401 || status == 403) result.done(false, "Your login has expired. Restart the game from your launcher and try again.");
-                else if (status == 400) result.done(false, "Mojang did not accept this skin.");
-                else if (status == 429) result.done(false, "Too many skin changes. Wait a minute and try again.");
-                else if (status == 0) result.done(false, "Could not reach Mojang (" + error + ").");
-                else result.done(false, "Mojang answered HTTP " + status + ".");
+                if (status == 200) result.done(true, "Skin changed.", activeSkin(body));
+                else if (status == 401 || status == 403) result.done(false, "Your login has expired. Restart the game from your launcher and try again.", null);
+                else if (status == 400) result.done(false, "Mojang did not accept this skin.", null);
+                else if (status == 429) result.done(false, "Too many skin changes. Wait a minute and try again.", null);
+                else if (status == 0) result.done(false, "Could not reach Mojang (" + error + ").", null);
+                else result.done(false, "Mojang answered HTTP " + status + ".", null);
             }
         });
+    }
+
+    /** The texture id of the ACTIVE skin in Mojang's answer to a skin change (the account's profile), or null. */
+    static String activeSkin(byte[] body) {
+        if (body == null || body.length == 0) return null;
+        try {
+            for (Object o : Json.arr(Json.obj(Json.parse(new String(body, StandardCharsets.UTF_8))).get("skins"))) {
+                Map<String, Object> s = Json.obj(o);
+                if ("ACTIVE".equals(Json.str(s, "state", ""))) return texture(Json.str(s, "url", null));
+            }
+        } catch (RuntimeException e) {
+            return null;
+        }
+        return null;
+    }
+
+    /** The skin's texture id in a profile's "textures" property (base64 JSON), or null when it has none. */
+    public static String skinTexture(String texturesProperty) {
+        if (texturesProperty == null) return null;
+        try {
+            String decoded = new String(java.util.Base64.getDecoder().decode(texturesProperty), StandardCharsets.UTF_8);
+            return texture(Json.str(Json.obj(Json.obj(Json.obj(Json.parse(decoded)).get("textures")).get("SKIN")), "url", null));
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    /** A texture address's last path part (http and https addresses of one texture compare equal). */
+    static String texture(String url) {
+        return url == null || url.isEmpty() ? null : url.substring(url.lastIndexOf('/') + 1);
     }
 
     static byte[] multipart(String boundary, String variant, byte[] png) {

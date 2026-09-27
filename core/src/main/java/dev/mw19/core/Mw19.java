@@ -574,20 +574,65 @@ public final class Mw19 {
         Gfx g = k.menuGfx;
         try {
             g.begin(backend, 0);
-            int fill = !active ? 0x60000000 : hovered ? 0xC8282828 : 0xA0000000;
-            int edge = !active ? 0x28FFFFFF : hovered ? 0xFFFFFFFF : 0x50FFFFFF;
             g.pushAlpha(alpha);
-            g.rect(x, y, x + w, y + h, fill);
-            g.rect(x, y, x + w, y + 1, edge);
-            g.rect(x, y + h - 1, x + w, y + h, edge);
-            g.rect(x, y + 1, x + 1, y + h - 1, edge);
-            g.rect(x + w - 1, y + 1, x + w, y + h - 1, edge);
+            dev.mw19.core.gui.MenuStyle.key(g, x, y, w, h, hovered ? 1f : 0f, active, dev.mw19.core.gui.MenuStyle.glow(k.theme.accent));
             g.popAlpha();
             return true;
         } catch (VirtualMachineError e) {
             throw e;
         } catch (Throwable t) {
             Log.error("hook vanillaButton failed", t);
+            return false;
+        } finally {
+            try {
+                g.end();
+            } catch (Throwable ignored) {
+            }
+        }
+    }
+
+    /** A vanilla slider (options, volume, FOV) in the MW19 style: its track and handle; vanilla draws the label. */
+    public static boolean vanillaSlider(RenderBackend backend, float x, float y, float w, float h, float value, boolean hovered, boolean active, float alpha) {
+        Mw19 k = instance;
+        if (k == null || !k.client.styleMenus.on()) return false;
+        Gfx g = k.menuGfx;
+        try {
+            g.begin(backend, 0);
+            g.pushAlpha(alpha);
+            dev.mw19.core.gui.MenuStyle.slider(g, x, y, w, h, value, hovered ? 1f : 0f, active, dev.mw19.core.gui.MenuStyle.glow(k.theme.accent));
+            g.popAlpha();
+            return true;
+        } catch (VirtualMachineError e) {
+            throw e;
+        } catch (Throwable t) {
+            Log.error("hook vanillaSlider failed", t);
+            return false;
+        } finally {
+            try {
+                g.end();
+            } catch (Throwable ignored) {
+            }
+        }
+    }
+
+    /**
+     * A vanilla screen's background (pause menu, server list, options...): the MW19 backdrop instead of the panorama,
+     * blur and dark overlay. False = vanilla draws its own (MW19 game menus off, or it failed).
+     */
+    public static boolean menuBackdrop(RenderBackend backend, float w, float h, boolean overWorld) {
+        Mw19 k = instance;
+        if (k == null || !k.client.styleMenus.on()) return false;
+        k.hooks.backdrop = true;
+        Gfx g = k.menuGfx;
+        long now = System.currentTimeMillis();
+        try {
+            g.begin(backend, now);
+            dev.mw19.core.gui.MenuStyle.backdrop(g, w, h, overWorld, dev.mw19.core.gui.MenuStyle.glow(k.theme.accent), now, dev.mw19.core.gui.Anim.speed <= 0);
+            return true;
+        } catch (VirtualMachineError e) {
+            throw e;
+        } catch (Throwable t) {
+            Log.error("hook menuBackdrop failed", t);
             return false;
         } finally {
             try {

@@ -296,3 +296,41 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
 - **Fix:** smoke.sh allowlists that record head, as it already does for the similar "Failed to fetch user properties"
   and yggdrasil key timeouts. It was swapped in by rename, because a running smoke.sh keeps reading its old copy.
   1.21.5 was rerun after the round (COMPAT_MATRIX).
+
+## 2026-09-27 · 1.21–1.21.8: the pause menu's MW19 row sat under the title, screen-wide
+- **Found** while checking the new menu look: on 1.21 the "MW19 Menu | Packs" row was right under "Game Menu", each
+  button half the screen wide, above "Back to Game". The 0.6.0 (and 0.5.0) screenshots show it on 1.21–1.21.8; from
+  1.21.9 it sits correctly. The smoke only counted the two buttons, so it passed.
+- **Hypothesis:** `pauseRow` anchors the row to the topmost visible widget at least 150 wide, meaning "Back to Game".
+  Up to 1.21.8 the "Game Menu" title is a text widget as wide as the screen among the screen's children, so it won.
+- **Evidence:** the row's x and width match the title widget's (0, screen width), and the misplacement ends exactly
+  where 1.21.9 stopped adding the title as a child.
+- **Fix:** the anchor is the topmost wide *button*, never the MW19 row itself. The smoke's `pauserow` self-test now
+  fails unless both MW19 buttons are right under "Back to Game" and inside its width.
+
+## 2026-09-27 · A skin change did not show in game (owner report, 1.21.11)
+- **Report:** "skin changing doesnt actually change it".
+- **Reproduction:** not possible here. An upload needs a Microsoft account, and the test setup uses none (CLAUDE.md
+  forbids reading the launcher's accounts). The upload request itself is covered: a unit test against a local fake
+  endpoint checks the multipart body and the bearer token.
+- **Hypothesis:** Mojang takes the new skin, but the game never learns about it. The game fetches the player's profile
+  once, at start, and keeps it. MW19's own-skin preview and the player list entry (the player in the world) both read
+  that profile, and the integrated server of each new world is started with it.
+- **Evidence** (javap, 1.21–26.3): `Minecraft.getGameProfile()` returns `profileFuture.join().profile()`, filled once
+  by the startup lambda's `sessionService.fetchProfile(uuid, true)`. `PlayerInfo.skinLookup` is made once from the
+  profile by `createSkinLookup`. Nothing refreshes either of them. authlib's `fetchProfile(uuid, true)` bypasses its
+  own profile cache, so fetching again returns fresh data.
+- **Fix:** after the upload is accepted, `Skins.refreshOwnSkin`:
+  - Fetches the signed profile again (1 s, then every 5 s, for up to a minute) until Mojang serves the new skin. The
+    new skin's texture id comes from the upload's answer.
+  - Puts that profile into the game's `profileFuture` (`obtrudeValue`), and the player list entry gets a new skin
+    lookup made from it.
+
+  The Skins page then says so; if a minute passes, it says the new skin shows after a restart.
+- **Regression tests:**
+  - The upload test checks that the texture id is read from Mojang's answer.
+  - A unit test covers reading the texture from a profile's textures property.
+  - The smoke's `skinrefresh` self-test swaps a fresh profile and the player's entry lookup in, then restores the start
+    state, on every Fabric target.
+
+  Not tested: a real upload to Mojang (no account here).

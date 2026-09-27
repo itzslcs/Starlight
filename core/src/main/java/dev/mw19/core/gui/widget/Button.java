@@ -3,6 +3,7 @@ package dev.mw19.core.gui.widget;
 import dev.mw19.api.util.Colors;
 import dev.mw19.core.gui.Anim;
 import dev.mw19.core.gui.Icons;
+import dev.mw19.core.gui.MenuStyle;
 import dev.mw19.core.gui.Ui;
 import dev.mw19.core.gui.Widget;
 
@@ -32,18 +33,30 @@ public class Button extends Widget {
         boolean hv = enabled && hovered(ui);
         hover.to(hv ? 1 : 0, 150, ui.now);
         float t = hover.get(ui.now);
-        int bg, fg;
+        int fg;
+        // Keycaps in the theme's colours (MenuStyle); a ghost button stays a plain label with a soft hover.
         switch (style) {
-            case PRIMARY: bg = Colors.lerp(ui.t.accent, 0xFFFFFFFF, t * 0.15f); fg = ui.t.onAccent; break;
-            case DANGER: bg = Colors.lerp(Colors.fade(ui.t.bad, 0.25f), ui.t.bad, t * 0.6f); fg = t > 0.5f ? 0xFFFFFFFF : ui.t.bad; break;
-            case GHOST: bg = Colors.fade(ui.t.surface2, t); fg = Colors.lerp(ui.t.textDim, ui.t.text, t); break;
-            default: bg = Colors.lerp(ui.t.surface2, Colors.lerp(ui.t.surface2, ui.t.text, 0.12f), t); fg = ui.t.text; break;
+            case PRIMARY:
+                MenuStyle.key(ui.g, x, y, w, h, t, enabled, Colors.lerp(ui.t.accent, 0xFFFFFFFF, 0.18f), ui.t.accent,
+                        Colors.lerp(ui.t.accent, 0xFF000000, 0.45f), MenuStyle.glow(ui.t.text));
+                fg = ui.t.onAccent;
+                break;
+            case DANGER:
+                MenuStyle.key(ui.g, x, y, w, h, t, enabled, Colors.lerp(ui.t.bad, 0xFF000000, 0.35f), Colors.lerp(ui.t.bad, 0xFF000000, 0.5f),
+                        Colors.lerp(ui.t.bad, 0xFF000000, 0.75f), ui.t.bad);
+                fg = 0xFFFFFFFF;
+                break;
+            case GHOST:
+                ui.g.roundRect(x, y, w, h, 3, Colors.fade(ui.t.surface2, t));
+                fg = Colors.lerp(ui.t.textDim, ui.t.text, t);
+                break;
+            default:
+                MenuStyle.key(ui.g, x, y, w, h, t, enabled, Colors.lerp(ui.t.surface2, ui.t.text, 0.10f), ui.t.surface2,
+                        Colors.lerp(ui.t.surface2, 0xFF000000, 0.45f), MenuStyle.glow(ui.t.accent));
+                fg = ui.t.text;
+                break;
         }
-        if (!enabled) {
-            bg = Colors.fade(bg, 0.4f);
-            fg = Colors.fade(fg, 0.5f);
-        }
-        ui.g.roundRect(x, y, w, h, 3, bg);
+        if (!enabled) fg = Colors.fade(fg, 0.5f);
         float lw = label == null || label.isEmpty() ? 0 : ui.g.textWidth(label);
         float iw = icon == null ? 0 : 10 + (lw > 0 ? 4 : 0);
         float cx = x + (w - lw - iw) / 2f;

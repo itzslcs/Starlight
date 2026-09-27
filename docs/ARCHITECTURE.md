@@ -104,7 +104,9 @@ Themes, About. A closed menu is released (textures, pages) and rebuilt on the ne
 redrawn in the menu style by [`ButtonStyleMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/ButtonStyleMixin.java) / [`GuiButtonMixin`](../legacy/src/main/java/dev/mw19/forge/mixin/GuiButtonMixin.java) (D-027).
 Animations use [`Anim`](../core/src/main/java/dev/mw19/core/gui/Anim.java) (value, target, 150–250 ms, ease-out-cubic) and are ticked with frame dt, which allocates nothing.
 Themes are token sets (bg, surface, surface2, border, text, textDim, accent, good, warn, bad) with presets and a
-user accent colour. Blur comes from vanilla `Screen` background rendering (1.20.5+). The 1.8.9 fallback is a dim overlay.
+user accent colour. [`MenuStyle`](../core/src/main/java/dev/mw19/core/gui/MenuStyle.java) is MW19's own look (D-029): keycap buttons and sliders, and the ember backdrop
+with its block skyline. Minecraft's screens get it through `Mw19.vanillaButton` / `vanillaSlider` / `menuBackdrop`
+(ButtonStyleMixin, SliderStyleMixin and ScreenBackdropMixin; on 1.8.9 GuiButtonMixin and GuiScreenMixin). Blur comes from vanilla `Screen` background rendering (1.20.5+). The 1.8.9 fallback is a dim overlay.
 
 ## HUD
 [`HudModule`](../api/src/main/java/dev/mw19/api/module/HudModule.java) has a [`HudElement`](../core/src/main/java/dev/mw19/core/hud/HudElement.java) (anchor ∈ 9 points, offset in GUI units or % of screen, scale, opacity, colours,

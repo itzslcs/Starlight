@@ -32,15 +32,17 @@ Both are covered step by step in [PRISM](docs/PRISM.md). Prism has not yet been 
 Prism column of [COMPAT_MATRIX](docs/COMPAT_MATRIX.md).
 
 ## Using it
-- **Home screen:** MW19 replaces Minecraft's title screen: the game's panorama, your own skin in 3D (drag it to turn
+- **Home screen:** MW19 replaces Minecraft's title screen: MW19's ember backdrop and block skyline, your own skin in 3D (drag it to turn
   it) with a *Skins* button, the usual buttons, and *Host World*, *Packs* and *MW19 Menu* on the right. *Vanilla menu*
   (bottom right) shows the original once, for buttons other mods add there. Turn it off under Themes → Custom home screen.
 - **Right Shift** opens the menu: Mods (tiles with an ENABLED/DISABLED bar, or a list), HUD Editor, Profiles, Keybinds,
   Skins, Packs, Host World, Server Rules, Performance, Themes, About. The pause menu has **MW19 Menu** and **Packs**, and
-  Minecraft's own menus (pause, server list, options) use MW19's button style (Themes → MW19 game menus).
+  Minecraft's own menus (pause, server list, options) use MW19's look: keycap buttons and sliders over the ember
+  backdrop (Themes → MW19 game menus, [D-029](docs/DECISIONS.md)).
 - **Skins:** preview skins in 3D and change your Minecraft skin (Microsoft account) without leaving the game. Skins are
   64×64 PNG files in `MW19/skins/`: drop files on the window (1.21+), use *Open folder*, or type a player's name and
-  press *Copy* to add their current skin. *Use this skin* uploads it to Mojang; others see it after you rejoin a server.
+  press *Copy* to add their current skin. *Use this skin* uploads it to Mojang, and you see it on your player within
+  seconds (1.21+; on 1.8.9 after a restart). Others see it after you rejoin a server.
 - **Packs:** search Modrinth's resource packs from inside the game (your Minecraft version or all), *Install* downloads
   one into `resourcepacks/` (checked against Modrinth's SHA-512), and *Enable* puts it on top of your packs.
 - **Host World:** opens your singleplayer world to friends. On your network it works like *Open to LAN* (game mode and
@@ -86,7 +88,7 @@ feature that needs them:
 | What | When | Where to |
 |---|---|---|
 | Resource pack search, icons and downloads | while you use the Packs page | `api.modrinth.com`, `cdn.modrinth.com` |
-| Changing your skin | you press *Use this skin* | `api.minecraftservices.com` (with your session token) |
+| Changing your skin | you press *Use this skin* | `api.minecraftservices.com` (with your session token), then `sessionserver.mojang.com` to load the new skin |
 | Copying a player's skin | you press *Copy* on the Skins page | `api.mojang.com`, `sessionserver.mojang.com`, `textures.minecraft.net` |
 | Inviting a player to your world | you press *Invite* on Host World | `api.mojang.com` (name to player id) |
 | Port forwarding (UPnP) | you switch on *Over the internet* on Host World | your router only (local network) |

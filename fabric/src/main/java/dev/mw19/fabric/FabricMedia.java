@@ -201,6 +201,113 @@ public final class FabricMedia implements Skins, Packs {
         //?}
     }
 
+    // ------------------------------------------------------------------ own skin after a change
+
+    @Override
+    public void refreshOwnSkin(final String texture, final Refreshed done) {
+        final java.util.UUID id = mc.getUser().getProfileId();
+        final String before = skinTexture(mc.getGameProfile());
+        if (texture != null && texture.equals(before)) { // the skin it already had: nothing to load
+            done.done(true);
+            return;
+        }
+        Thread t = new Thread(() -> {
+            // Mojang's session server takes a moment to serve a new skin. The signed fetch skips authlib's cache.
+            for (int i = 0; i < 12; i++) {
+                try {
+                    Thread.sleep(i == 0 ? 1000 : 5000);
+                    Object result = fetchProfile(id);
+                    String now = result == null ? null : skinTexture(profileOf(result));
+                    if (now != null && (texture != null ? texture.equals(now) : !now.equals(before))) {
+                        mc.execute(() -> done.done(useProfile(result)));
+                        return;
+                    }
+                } catch (InterruptedException e) {
+                    break;
+                } catch (RuntimeException e) {
+                    dev.mw19.core.Log.warn("skin refresh: " + e); // offline for a moment: try again
+                }
+            }
+            mc.execute(() -> done.done(false));
+        }, "MW19 skin refresh");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    private Object fetchProfile(java.util.UUID id) {
+        //? if >=1.21.9 {
+        return mc.services().sessionService().fetchProfile(id, true);
+        //?} else {
+        /*return mc.getMinecraftSessionService().fetchProfile(id, true);
+        *///?}
+    }
+
+    private static com.mojang.authlib.GameProfile profileOf(Object result) {
+        //? if >=26.3 {
+        /*return ((com.mojang.authlib.services.ProfileResult) result).profile();
+        *///?} else {
+        return ((com.mojang.authlib.yggdrasil.ProfileResult) result).profile();
+        //?}
+    }
+
+    private static String skinTexture(com.mojang.authlib.GameProfile p) {
+        if (p == null) return null;
+        //? if >=1.21.9 {
+        for (com.mojang.authlib.properties.Property prop : p.properties().get("textures")) return dev.mw19.core.skin.SkinService.skinTexture(prop.value());
+        //?} else {
+        /*for (com.mojang.authlib.properties.Property prop : p.getProperties().get("textures")) return dev.mw19.core.skin.SkinService.skinTexture(prop.value());
+        *///?}
+        return null;
+    }
+
+    /** Game thread: the fetched profile becomes the game's own (MW19's previews, the next world) and the player's list
+     *  entry looks its skin up again (the player in this world). False when an accessor did not apply. */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private boolean useProfile(Object result) {
+        try {
+            ((java.util.concurrent.CompletableFuture) ((dev.mw19.fabric.mixin.MinecraftProfileAccessor) mc).mw19$profileFuture()).obtrudeValue(result);
+            own = null;
+            net.minecraft.client.multiplayer.ClientPacketListener c = mc.getConnection();
+            net.minecraft.client.multiplayer.PlayerInfo info = c == null ? null : c.getPlayerInfo(mc.getUser().getProfileId());
+            if (info != null) {
+                ((dev.mw19.fabric.mixin.PlayerInfoAccessor) info).mw19$setSkinLookup(dev.mw19.fabric.mixin.PlayerInfoAccessor.mw19$createSkinLookup(profileOf(result)));
+            }
+            return true;
+        } catch (RuntimeException e) {
+            dev.mw19.core.Log.error("skin refresh: could not put the new profile in", e);
+            return false;
+        }
+    }
+
+    /**
+     * Smoke: a fresh profile goes in (the game's profile and the player's list entry change), then the start state goes
+     * back. The start value can be null: an offline test account has no profile, and the game then makes one per call.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    String selfTest() {
+        try {
+            java.util.concurrent.CompletableFuture future = ((dev.mw19.fabric.mixin.MinecraftProfileAccessor) mc).mw19$profileFuture();
+            Object start = future.getNow(null);
+            com.mojang.authlib.GameProfile copy = new com.mojang.authlib.GameProfile(mc.getUser().getProfileId(), mc.getUser().getName());
+            //? if >=26.3 {
+            /*Object fresh = new com.mojang.authlib.services.ProfileResult(copy);
+            *///?} else {
+            Object fresh = new com.mojang.authlib.yggdrasil.ProfileResult(copy);
+            //?}
+            net.minecraft.client.multiplayer.PlayerInfo info = mc.getConnection() == null ? null : mc.getConnection().getPlayerInfo(mc.getUser().getProfileId());
+            if (info == null) return "FAIL (no player list entry for the player)";
+            dev.mw19.fabric.mixin.PlayerInfoAccessor entry = (dev.mw19.fabric.mixin.PlayerInfoAccessor) info;
+            java.util.function.Supplier lookup = entry.mw19$skinLookup();
+            boolean in = useProfile(fresh) && mc.getGameProfile() == copy && entry.mw19$skinLookup() != lookup;
+            future.obtrudeValue(start);
+            entry.mw19$setSkinLookup(lookup);
+            boolean back = future.getNow(null) == start && entry.mw19$skinLookup() == lookup;
+            return in && back ? "ok (profile and player list entry swapped and restored)" : "FAIL (in=" + in + " back=" + back + ")";
+        } catch (RuntimeException e) {
+            return "FAIL (" + e + ")";
+        }
+    }
+
     /**
      * The session token for the official skin endpoint. Only a Microsoft-account token (a JWT) is returned, so offline
      * and development sessions get a clear message instead of a failed upload.

@@ -66,7 +66,9 @@ class NetTest {
             auth = ex.getRequestHeaders().getFirst("Authorization");
             contentType = ex.getRequestHeaders().getFirst("Content-Type");
             uploaded = readAll(ex.getRequestBody());
-            reply(ex, uploadStatus, "{}");
+            // Mojang answers a skin change with the account's profile
+            reply(ex, uploadStatus, uploadStatus != 200 ? "{}" : "{\"id\":\"0\",\"skins\":[{\"state\":\"INACTIVE\",\"url\":\"http://textures.minecraft.net/texture/old\"},"
+                    + "{\"state\":\"ACTIVE\",\"url\":\"http://textures.minecraft.net/texture/abc123\",\"variant\":\"SLIM\"}]}");
         });
         server.start();
     }
@@ -139,9 +141,10 @@ class NetTest {
         HttpClient http = new HttpClient(main, "test");
         byte[] png = dev.mw19.core.PacksAndSkinsTest.png(64, 64);
         AtomicReference<String> result = new AtomicReference<String>();
-        SkinServiceAccess.upload(http, base + "/skins", "eyJ.a.b", png, true, (ok, msg) -> result.set(ok + " " + msg));
+        SkinServiceAccess.upload(http, base + "/skins", "eyJ.a.b", png, true, (ok, msg, texture) -> result.set(ok + " " + msg + " " + texture));
         pump(main, result);
         assertTrue(result.get().startsWith("true"), result.get());
+        assertTrue(result.get().endsWith(" abc123"), "the new skin's texture id from Mojang's answer: " + result.get());
         assertEquals("Bearer eyJ.a.b", auth);
         assertTrue(contentType.startsWith("multipart/form-data; boundary=MW19"), contentType);
         String body = new String(uploaded, StandardCharsets.ISO_8859_1);
@@ -150,12 +153,12 @@ class NetTest {
 
         uploadStatus = 401;
         result.set(null);
-        SkinServiceAccess.upload(http, base + "/skins", "eyJ.a.b", png, false, (ok, msg) -> result.set(ok + " " + msg));
+        SkinServiceAccess.upload(http, base + "/skins", "eyJ.a.b", png, false, (ok, msg, texture) -> result.set(ok + " " + msg + " " + texture));
         pump(main, result);
         assertTrue(result.get().startsWith("false Your login has expired"), result.get());
 
         result.set(null);
-        SkinServiceAccess.upload(http, base + "/skins", null, png, false, (ok, msg) -> result.set(ok + " " + msg));
+        SkinServiceAccess.upload(http, base + "/skins", null, png, false, (ok, msg, texture) -> result.set(ok + " " + msg + " " + texture));
         assertTrue(result.get().startsWith("false Sign in"), result.get());
         http.shutdown();
         main.shutdown();

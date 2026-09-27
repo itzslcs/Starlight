@@ -82,7 +82,9 @@ public final class GuiRoot implements Surface {
 
     @Override
     public boolean wantsVanillaBackground() {
-        return k.client.blur.on() && !isHudEditorOpen();
+        // Without a world there is nothing to show through: the menu's background (the MW19 backdrop with "MW19 game
+        // menus" on) instead of black. In a world only when the player asked for the menu background (Menu blur).
+        return !isHudEditorOpen() && (k.client.blur.on() || !k.platform.inWorld());
     }
 
     @Override

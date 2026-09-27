@@ -35,6 +35,14 @@ public final class Mw19Forge {
         return Mw19.vanillaButton(MENU.bind(guiScale()), x, y, w, h, hovered, enabled, 1f);
     }
 
+    /** GuiScreenMixin: the MW19 backdrop behind a vanilla screen; false = vanilla's. Inventories, chat and the death
+     *  screen keep vanilla's: there the world is the point. */
+    public static boolean backdrop(net.minecraft.client.gui.GuiScreen s) {
+        if (s instanceof net.minecraft.client.gui.inventory.GuiContainer || s instanceof net.minecraft.client.gui.GuiChat
+                || s instanceof net.minecraft.client.gui.GuiGameOver) return false;
+        return Mw19.menuBackdrop(MENU.bind(guiScale()), s.width, s.height, net.minecraft.client.Minecraft.getMinecraft().theWorld != null);
+    }
+
     /** The GUI scale factor as ScaledResolution computes it, without allocating one per button. */
     private static int guiScale() {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getMinecraft();

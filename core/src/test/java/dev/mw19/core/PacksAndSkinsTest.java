@@ -117,4 +117,17 @@ public class PacksAndSkinsTest {
         again.refresh();
         for (SkinLibrary.Entry e : again.entries()) assertEquals(e.file.equals("Steve Fan (2).png"), e.slim, e.file);
     }
+
+    @Test
+    void skinTextureIsReadFromAProfilesTexturesProperty() {
+        // What Mojang's session server puts in a profile (base64 JSON), with an http texture address
+        String json = "{\"timestamp\":1,\"profileId\":\"0\",\"textures\":{\"SKIN\":{\"url\":\"http://textures.minecraft.net/texture/abc123\","
+                + "\"metadata\":{\"model\":\"slim\"}},\"CAPE\":{\"url\":\"http://textures.minecraft.net/texture/cape9\"}}}";
+        String property = java.util.Base64.getEncoder().encodeToString(json.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        assertEquals("abc123", dev.mw19.core.skin.SkinService.skinTexture(property));
+        String noSkin = java.util.Base64.getEncoder().encodeToString("{\"textures\":{}}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        assertNull(dev.mw19.core.skin.SkinService.skinTexture(noSkin));
+        assertNull(dev.mw19.core.skin.SkinService.skinTexture("not base64 !"));
+        assertNull(dev.mw19.core.skin.SkinService.skinTexture(null));
+    }
 }

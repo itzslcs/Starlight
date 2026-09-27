@@ -316,3 +316,29 @@ optimizers").
 
   Singleplayer counts as a server only for the anchor step (upstream turns the anchor optimizer off there). No real
   server with an opt-out plugin was tested.
+
+## D-029 MW19's own look: keycaps, embers, a blocky skyline (owner feedback, 2026-09-27)
+"instead of just making the cubes black in the menus make it like actual buttons that look nice, and instead of the
+normal backdrop make it something like mw19, the buttons are just bland and everything looks AI, make it unique."
+The look comes from what is already MW19's own: the logo's letters made of blocks, with depth, and the orange "19".
+- **Keycaps** ([`MenuStyle`](../core/src/main/java/dev/mw19/core/gui/MenuStyle.java)):
+  - Each button has a dark outline with notched corners, in whole GUI pixels.
+  - The face has a lit top edge, and below it a 2 px side shows the key's depth.
+  - On hover the side glows in the accent, like a backlit key (and KeyCPS, the owner's mod, draws keys too).
+  - The same keycap is used for Minecraft's buttons (all versions), the home screen, and MW19's own menu buttons (in
+    theme colours: primary is an accent key).
+  - Sliders (1.21+) get a keycap track whose side is lit up to the value, with a small keycap handle.
+  - The label stays vanilla's, so its position and scrolling are unchanged.
+- **Backdrop**, for every vanilla screen that has a background (pause menu, server list, options, loading screens,
+  other mods' screens) and for the home screen:
+  - Deep charcoal, with a warm glow in the accent from below.
+  - Pixel embers rise through it: a third are sparks in the accent, the rest ash. They are still when animations are
+    off.
+  - Without a world, a skyline of stepped block columns in two rows stands in front of the glow, catching it on their
+    top edges.
+  - Over a world the backdrop is see-through and has no skyline.
+  - Inventories, chat and the death screen keep vanilla's background, because there the world is the point.
+  - It is about 100 quads with no allocation per frame. Vanilla's blur is not used.
+- All of it follows Themes → "MW19 game menus" (on by default). Off gives vanilla's buttons and backdrop, and the
+  panorama on the home screen.
+- MW19's menu over the home screen now draws the backdrop too. It used to be flat black when menu blur was off.

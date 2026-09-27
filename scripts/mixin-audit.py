@@ -19,6 +19,7 @@ if mc == "1.8.9":
               ("net.minecraft.client.renderer.entity.RenderManager", "shouldRender", "mw19$cull"),
               ("net.minecraft.world.World", "getRainStrength", "mw19$rain"),
               ("net.minecraft.client.network.NetHandlerPlayClient", "handleResourcePack", "mw19$guard"),
+              ("net.minecraft.client.gui.GuiScreen", "drawWorldBackground", "mw19$backdrop"),
               ("net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher", "renderTileEntity", "mw19$cull")]
     jars = [j for j in glob.glob(os.path.expanduser("~/.gradle/caches/essential-loom/minecraftMaven/**/*.jar"), recursive=True)
             if "sources" not in j and "-srg-" not in j and "-intermediary-" not in j]
@@ -73,7 +74,13 @@ else:
               ("net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl", "handleCustomPayload", "mw19$crystalMessage"),
               ("net.minecraft.network.protocol.common.custom.DiscardedPayload", "codec", "mw19$crystalChannels"),
               ("net.minecraft.network.protocol.common.custom.CustomPacketPayload$1", "encode", "mw19$crystalMessage"),
-              ("net.minecraft.world.item.context.BlockPlaceContext", "BlockPlaceContext", "mw19$anchorGhost")]
+              ("net.minecraft.world.item.context.BlockPlaceContext", "BlockPlaceContext", "mw19$anchorGhost"),
+              # MW19 look (keycaps are checked through the pause menu row; this is the backdrop) and the skin refresh
+              ("net.minecraft.client.gui.screens.Screen", "extractBackground" if unobf else "renderBackground", "mw19$backdrop"),
+              ("net.minecraft.client.gui.components.AbstractSliderButton", "extractWidgetRenderState" if unobf else "renderWidget", "mw19$style"),
+              ("net.minecraft.client.gui.components.AbstractSliderButton", "extractWidgetRenderState" if unobf else "renderWidget", "mw19$hideSprite"),
+              ("net.minecraft.client.Minecraft", "mw19$profileFuture", "profileFuture"),
+              ("net.minecraft.client.multiplayer.PlayerInfo", "mw19$setSkinLookup", "skinLookup")]
     if V >= (1, 21, 9):  # Hitboxes without touching the saved debug profile
         checks += [("net.minecraft.client.gui.components.debug.DebugScreenEntryList", "isCurrentlyEnabled", "mw19$hitboxes")]
     if V < (1, 21, 4):

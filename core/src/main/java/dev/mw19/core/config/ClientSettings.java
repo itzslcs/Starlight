@@ -29,7 +29,7 @@ public final class ClientSettings {
     public final BoolSetting customTitle = add(new BoolSetting("custom_title", "Custom home screen",
             "Replace Minecraft's title screen with the MW19 home screen", true));
     public final BoolSetting menuButtons = add(new BoolSetting("menu_buttons", "Title/pause buttons", "MW19 Menu and Packs on the pause screen, a MW19 button on the vanilla title screen", true));
-    public final BoolSetting styleMenus = add(new BoolSetting("style_menus", "MW19 game menus", "Draw Minecraft's own buttons (pause menu, server list, options) in the MW19 style", true));
+    public final BoolSetting styleMenus = add(new BoolSetting("style_menus", "MW19 game menus", "MW19's keycap buttons and ember backdrop for Minecraft's own menus (pause menu, server list, options) and the home screen", true));
     public final BoolSetting competitiveSafe = add(new BoolSetting("competitive_safe", "Competitive-safe", "Disable every GRAY and server-restricted module everywhere", false));
     public final BoolSetting toasts = add(new BoolSetting("toasts", "Notifications", "Show toasts (module errors, server rules, profiles)", true));
     public final BoolSetting hudGrid = add(new BoolSetting("hud_grid", "Editor grid", "Show and snap to a grid in the HUD editor", false));

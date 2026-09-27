@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * "MW19 game menus" on 1.8.9: vanilla buttons get the home screen's look. The slider knob (drawn by mouseDragged with
+ * "MW19 game menus" on 1.8.9: vanilla buttons become MW19 keycaps (MenuStyle). The slider knob (drawn by mouseDragged with
  * the button texture bound) and custom label colours keep working; buttons with their own drawing keep it.
  */
 @Mixin(GuiButton.class)
@@ -36,7 +36,8 @@ public abstract class GuiButtonMixin {
         mc.getTextureManager().bindTexture(buttonTextures);
         GlStateManager.color(1f, 1f, 1f, 1f);
         mouseDragged(mc, mouseX, mouseY);
-        int color = packedFGColour != 0 ? packedFGColour : !enabled ? 0xA0A0A0 : hot ? 0xFFFFA0 : 0xE8E8E8;
+        int color = packedFGColour != 0 ? packedFGColour : (!enabled ? dev.mw19.core.gui.MenuStyle.LABEL_OFF
+                : hot ? dev.mw19.core.gui.MenuStyle.LABEL_HOVER : dev.mw19.core.gui.MenuStyle.LABEL) & 0xFFFFFF;
         mc.fontRendererObj.drawStringWithShadow(displayString, xPosition + width / 2 - mc.fontRendererObj.getStringWidth(displayString) / 2,
                 yPosition + (height - 8) / 2, color);
         ci.cancel();
