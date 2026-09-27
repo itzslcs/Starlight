@@ -24,7 +24,32 @@ final class Smoke {
     private long clickTicks;
     private String guiClick = CLICKS ? "pending" : "skipped (no xdotool)";
     private String packs = "not run", packEnable = "not run", host = "not run", exploit = "not run", presets = "not run";
-    private String chests = "not run", pauseRow = "not run", optimizers = "not run", skinRefresh = "not run";
+    private String chests = "not run", pauseRow = "not run", optimizers = "not run", skinRefresh = "not run", tiers = "not run";
+    private String startTheme = "Starlight", bindsCheck = "not run";
+
+    /** Bind profiles against the real game: hotbar slot 1 moved to Z by a profile, then back, through Minecraft's options. */
+    private String bindProfiles() {
+        java.util.Map<String, Integer> before = k.platform.vanillaBindingMap();
+        Integer slot1 = before.get("key.hotbar.1");
+        if (slot1 == null) return "FAIL (no key.hotbar.1 binding among " + before.size() + ")";
+        java.util.Map<String, Integer> moved = new java.util.LinkedHashMap<String, Integer>(before);
+        moved.put("key.hotbar.1", Keys.Z);
+        k.binds.put("Smoke A", before);
+        k.binds.put("Smoke B", moved);
+        int there = k.platform.applyVanillaBindings(k.binds.get("Smoke B"));
+        Integer now = k.platform.vanillaBindingMap().get("key.hotbar.1");
+        int back = k.platform.applyVanillaBindings(k.binds.get("Smoke A"));
+        Integer restored = k.platform.vanillaBindingMap().get("key.hotbar.1");
+        k.binds.delete("Smoke A");
+        k.binds.delete("Smoke B");
+        if (there != 1 || now == null || now != Keys.Z || back != 1 || !slot1.equals(restored)) {
+            return "FAIL (changed " + there + " to " + now + ", back " + back + " to " + restored + ", was " + slot1 + ")";
+        }
+        return "ok (hotbar 1 on Z and back, " + before.size() + " bindings)";
+    }
+    private static final int THEME_TOUR_END = 60 + dev.mw19.core.gui.Theme.PRESETS.length * 20;
+    /** Marlowww on MCTiers (retired HT1): the Tier Tagger's live check. */
+    private static final java.util.UUID TIER_PLAYER = java.util.UUID.fromString("d219c8ee-d32e-4da2-b22e-0aa69d36c88a");
     private int chestStep;
     private long chestWait;
 
@@ -92,9 +117,18 @@ final class Smoke {
                     stageTicks = 0;
                 } else if (stageTicks == 60) {
                     shot("mw19-smoke-0-home");
-                } else if (stageTicks == 70) {
+                    startTheme = k.client.theme.get();
+                } else if (stageTicks > 60 && stageTicks <= THEME_TOUR_END) {
+                    // Every theme's scene at full size on the home screen: set it, a shot 8 ticks later, and the next theme
+                    // only after smoke.sh's X11 grab (about 6 ticks after the shot) has happened
+                    int i = (int) ((stageTicks - 61) / 20), at = (int) ((stageTicks - 61) % 20);
+                    if (at == 0) k.client.theme.set(dev.mw19.core.gui.Theme.PRESETS[i]);
+                    else if (at == 8) shot("mw19-smoke-0-theme-" + dev.mw19.core.gui.Theme.PRESETS[i].toLowerCase(java.util.Locale.ROOT));
+                } else if (stageTicks == THEME_TOUR_END + 2) {
+                    k.client.theme.set(startTheme);
+                } else if (stageTicks == THEME_TOUR_END + 10) {
                     k.platform.screens().openVanillaTitle();
-                } else if (stageTicks == 90) {
+                } else if (stageTicks == THEME_TOUR_END + 30) {
                     next();
                 }
                 break;
@@ -173,6 +207,14 @@ final class Smoke {
                     Log.info("SMOKE: enabled " + n + " modules: " + k.modules.describeEnabled());
                 } else if (stageTicks == 20 || stageTicks == 22) {
                     k.platform.debugIncomingChat("MW19 smoke chat line");
+                } else if (stageTicks == 30 && k.tierTagger != null) {
+                    k.tierTagger.suffix(TIER_PLAYER, true); // starts the lookup (the module was switched on above)
+                } else if (stageTicks == 190 && k.tierTagger != null) {
+                    // A live MCTiers lookup of a retired HT1 player (network: reported, not required, like the pack search)
+                    String tag = k.tierTagger.suffix(TIER_PLAYER, true);
+                    tiers = tag == null ? "no tag (" + k.tierTagger.status() + ")" : tag.replaceAll("§.", "").trim() + " (" + k.tierTagger.status() + ")";
+                    Log.info("SMOKE: tier tagger " + tiers);
+                    if (tag != null && !tag.matches(" §8\\[§.R?[HL]T[1-5].*§8]")) fail("Tier Tagger formatted " + tag);
                 } else if (stageTicks == 198) {
                     // KeyCPS end to end minus the input mixins (whose firing HookWatchdog reports separately): the
                     // platform's binding lookup must map these to attack/use, and the screenshot shows the counts.
@@ -213,6 +255,10 @@ final class Smoke {
                     skinRefresh = k.platform.selfTest("skinrefresh");
                     Log.info("SMOKE: skin refresh " + skinRefresh);
                     if (skinRefresh.startsWith("FAIL")) fail("skin refresh: " + skinRefresh);
+                } else if (stageTicks == 36) {
+                    bindsCheck = bindProfiles();
+                    Log.info("SMOKE: bind profiles " + bindsCheck);
+                    if (bindsCheck.startsWith("FAIL")) fail("bind profiles: " + bindsCheck);
                 } else if (stageTicks == 40) {
                     k.gui().openPage(dev.mw19.core.gui.page.PacksPage.class);
                 } else if (stageTicks == 150) {
@@ -263,18 +309,30 @@ final class Smoke {
                 } else if (stageTicks == 330) {
                     shot("mw19-smoke-9b-performance");
                     Log.info(String.format(java.util.Locale.ROOT, "SMOKE: menu draws in %.0f us/frame (Performance page)", k.perf.menuUs));
+                } else if (stageTicks == 340) {
+                    k.gui().openPage(dev.mw19.core.gui.page.ThemesPage.class);
+                } else if (stageTicks == 352) {
+                    shot("mw19-smoke-9e-themes"); // every theme's scene on its card
+                } else if (stageTicks == 362) {
                     k.gui().openPage(dev.mw19.core.gui.page.AboutPage.class);
-                } else if (stageTicks == 338) {
+                } else if (stageTicks == 372) {
                     shot("mw19-smoke-9c-about"); // credits of the built-in ports and the bundled VulkanMod
-                } else if (stageTicks == 339) {
+                } else if (stageTicks == 380) {
                     k.gui().mouseScrolled(0, 0, -20); // through the GUI's scroll path: the notices at the end must be reachable
-                } else if (stageTicks == 347) {
+                } else if (stageTicks == 388) {
                     shot("mw19-smoke-9d-about-scrolled");
-                } else if (stageTicks == 350) {
+                } else if (stageTicks == 396) {
+                    k.binds.put("Smoke PvP", k.platform.vanillaBindingMap()); // one profile for the screenshot
+                    k.gui().openPage(dev.mw19.core.gui.page.KeybindsPage.class);
+                } else if (stageTicks == 408) {
+                    shot("mw19-smoke-9f-keybinds");
+                } else if (stageTicks == 412) {
+                    k.binds.delete("Smoke PvP");
+                } else if (stageTicks == 420) {
                     exploit = k.platform.selfTest("exploit"); // last: its probe toast would cover the screenshots
                     Log.info("SMOKE: exploit protection " + exploit);
                     if (exploit.startsWith("FAIL")) fail("exploit protection self-test: " + exploit);
-                } else if (stageTicks == 360) {
+                } else if (stageTicks == 430) {
                     k.gui().close();
                     next();
                 }
@@ -507,7 +565,7 @@ final class Smoke {
         }
         Log.info("SMOKE: top HUD costs " + costs.toString().trim());
         Log.info("MW19 SMOKE PASS hooks[" + k.hooks.describe() + "] guiClick[" + guiClick + "] keycps[" + keyCps + "] presets[" + presets + "] packs[" + packs + "] packEnable[" + packEnable + "] host[" + host
-                + "] exploit[" + exploit + "] pause[" + pauseRow + "] chests[" + chests + "] optimizers[" + optimizers + "] skin[" + skinRefresh + "] renderer[" + k.platform.rendererStatus() + "] modules["
+                + "] exploit[" + exploit + "] pause[" + pauseRow + "] chests[" + chests + "] optimizers[" + optimizers + "] skin[" + skinRefresh + "] binds[" + bindsCheck + "] tiers[" + tiers + "] renderer[" + k.platform.rendererStatus() + "] modules["
                 + k.modules.describeEnabled() + "] avgFrameMs=" + k.perf.avgFrameMs() + " ownUsPerFrame=" + k.perf.avgOwnUs());
         k.config.flush();
         shutdownWatchdog();

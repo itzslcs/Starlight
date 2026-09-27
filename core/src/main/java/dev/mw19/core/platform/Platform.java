@@ -42,6 +42,15 @@ public interface Platform extends Game {
     /** Vanilla key bindings (name, GLFW code) for conflict display. */
     void vanillaBindings(BindingSink sink);
 
+    /** Minecraft's own key bindings by id ("key.hotbar.1") with canonical codes, in its order (bind profiles). */
+    java.util.Map<String, Integer> vanillaBindingMap();
+
+    /**
+     * Sets Minecraft's key bindings by id to canonical codes and saves its options. Ids this version does not have are
+     * skipped. Returns how many bindings changed. Game thread.
+     */
+    int applyVanillaBindings(java.util.Map<String, Integer> binds);
+
     /** Canonical code currently bound to {@code b} (GLFW key or {@code Keys.mouse(button)}), or {@code Keys.NONE}. */
     int bindingKey(Binding b);
 

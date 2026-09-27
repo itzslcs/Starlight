@@ -124,7 +124,7 @@ public final class TitleUi implements Surface {
             ui.my = mouseY;
             ui.now = now;
             ui.tooltip = null;
-            if (k.client.styleMenus.on()) MenuStyle.backdrop(g, w, h, false, MenuStyle.glow(k.theme.accent), now, Anim.speed <= 0);
+            if (k.client.styleMenus.on()) MenuStyle.backdrop(g, k.theme, 0, 0, w, h, false, now, Anim.speed <= 0);
             else g.gradient(0, h * 0.62f, w, h, 0x00000000, 0x7A000000); // over the panorama: shade where text sits
             intro.to(1, 350, now);
             g.pushAlpha(intro.get(now));
@@ -354,7 +354,7 @@ public final class TitleUi implements Surface {
                 ui.g.textCentered(label, x + w / 2f, y + (h - 8) / 2f, Colors.lerp(0xFFC8C8C8, 0xFFFFFFFF, t), true);
                 if (t > 0.01f) ui.g.rect(x + 5, y + h - 2, x + w - 5, y + h - 1, Colors.fade(0xFFFFFFFF, t));
             } else {
-                MenuStyle.key(ui.g, x, y, w, h, t, true, MenuStyle.glow(ui.t.accent));
+                MenuStyle.key(ui.g, ui.t, x, y, w, h, t, true);
                 ui.g.textCentered(label, x + w / 2f, y + (h - 8) / 2f, Colors.lerp(MenuStyle.LABEL, MenuStyle.LABEL_HOVER, t), true);
             }
             if (hv && tooltip != null) ui.tooltip = tooltip;

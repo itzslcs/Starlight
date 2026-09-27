@@ -83,7 +83,8 @@ Modrinth when you import the pack. They are not included in MW19's jars.
 |---|---|---|
 | Modrinth API v2 `https://api.modrinth.com/v2` (search, project versions) and CDN `https://cdn.modrinth.com` | Packs page | while the player uses the Packs page (search, icons, *Install*) |
 | Minecraft Services `https://api.minecraftservices.com/minecraft/profile/skins` | Skins page | the player presses *Use this skin* (sends the session token, D-022) |
-| Mojang profile APIs `https://api.mojang.com/users/profiles/minecraft/{name}`, `https://sessionserver.mojang.com/session/minecraft/profile/{id}`, `https://textures.minecraft.net` | Skins page (*Copy*), Host World (*Invite*) | the player presses those buttons |
+| Mojang profile APIs `https://api.mojang.com/users/profiles/minecraft/{name}`, `https://sessionserver.mojang.com/session/minecraft/profile/{id}`, `https://textures.minecraft.net` | Skins page (*Copy*, and loading the new skin after *Use this skin*), Host World (*Invite*) | the player presses those buttons |
+| MCTiers API v2 `https://mctiers.com/api/v2/profile/{uuid}` (or SubTiers `https://subtiers.net/api/v2`, or a list the player enters) | Tier Tagger module | the module is on (off by default): one lookup per player per 4 hours, sending only the UUID |
 | The player's router (UPnP IGD: SSDP multicast, then SOAP on the local network) | Host World | the player switches on *Over the internet* |
 
 No other network access exists in MW19 (see [README](../README.md) → Privacy). The bundled VulkanMod's only network code

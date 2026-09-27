@@ -373,6 +373,29 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
     }
 
     @Override
+    public java.util.Map<String, Integer> vanillaBindingMap() {
+        java.util.Map<String, Integer> out = new java.util.LinkedHashMap<String, Integer>();
+        for (KeyBinding kb : mc.gameSettings.keyBindings) out.put(kb.getKeyDescription(), LwjglKeys.fromBinding(kb.getKeyCode()));
+        return out;
+    }
+
+    @Override
+    public int applyVanillaBindings(java.util.Map<String, Integer> binds) {
+        int changed = 0;
+        for (KeyBinding kb : mc.gameSettings.keyBindings) {
+            Integer code = binds.get(kb.getKeyDescription());
+            if (code == null || code == LwjglKeys.fromBinding(kb.getKeyCode())) continue;
+            kb.setKeyCode(Keys.isMouse(code) ? code - Keys.MOUSE_BASE - 100 : code == Keys.NONE ? 0 : LwjglKeys.toLwjgl(code));
+            changed++;
+        }
+        if (changed > 0) {
+            KeyBinding.resetKeyBindingArrayAndHash();
+            mc.gameSettings.saveOptions();
+        }
+        return changed;
+    }
+
+    @Override
     public void openFolder(Path dir) {
         try {
             java.nio.file.Files.createDirectories(dir);

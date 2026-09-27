@@ -58,11 +58,16 @@ public final class Mw19 {
     /** Block entities get their own cache so they never evict entity results. */
     public final dev.mw19.core.perf.Occlusion blockOcclusion = new dev.mw19.core.perf.Occlusion();
     public final dev.mw19.core.net.HttpClient http;
+    /** Bind profiles: saved sets of Minecraft's key bindings, shared by every instance (Keybinds page). */
+    public dev.mw19.core.binds.BindProfiles binds;
+    private boolean bindsChecked;
+    /** For the nametag and tab list hooks (null until the built-in modules are registered, or after it failed). */
+    public volatile dev.mw19.core.modules.TierTaggerModule tierTagger;
     public final dev.mw19.core.host.WorldHost host = new dev.mw19.core.host.WorldHost(this);
     public final dev.mw19.core.skin.SkinLibrary skins;
     /** Set by the home screen's Host World: open the Host page once a singleplayer world has loaded. */
     public boolean hostWhenWorldOpens;
-    public Theme theme = Theme.preset("MW19");
+    public Theme theme = Theme.preset("Starlight");
     public String currentServer;
     private GuiRoot gui;
     private final Gfx hudGfx = new Gfx();
@@ -150,6 +155,8 @@ public final class Mw19 {
         BuiltinModules.registerAll(this);
         config.load();
         if (config.freshInstall) video.markFresh();
+        binds = new dev.mw19.core.binds.BindProfiles(dev.mw19.core.binds.BindProfiles.location(config.root,
+                System.getProperty("mw19.smoke") != null || System.getProperty("mw19.bench") != null));
         modules.setListener(new ModuleManager.Listener() {
             @Override
             public void changed(ModuleManager.State s) {
@@ -322,12 +329,27 @@ public final class Mw19 {
     private final Runnable tickStart = new Runnable() {
         @Override
         public void run() {
-            if (modules.gameReady() && bench == null) video.firstRun(config.freshInstall); // first tick only
+            if (modules.gameReady() && bench == null) {
+                video.firstRun(config.freshInstall); // first tick only
+                bindsFirstRun();
+            }
             scheduler.tick();
             tickEvent.end = false;
             events.post(tickEvent);
         }
     };
+
+    /** A new instance starts with the default bind profile: the player's own binds, in every instance. Once. */
+    private void bindsFirstRun() {
+        if (bindsChecked) return;
+        bindsChecked = true;
+        String name = binds == null || !config.freshInstall ? null : binds.defaultName();
+        java.util.Map<String, Integer> b = name == null ? null : binds.get(name);
+        if (b == null) return;
+        int n = platform.applyVanillaBindings(b);
+        Log.info("bind profile " + name + " applied to this new instance (" + n + " changed)");
+        toast("Bind profile: " + name, "Your default key binds are set in this new instance (" + n + " changed). Keybinds page to switch.", theme.accent);
+    }
 
     private final Runnable tickEnd = new Runnable() {
         @Override
@@ -575,7 +597,7 @@ public final class Mw19 {
         try {
             g.begin(backend, 0);
             g.pushAlpha(alpha);
-            dev.mw19.core.gui.MenuStyle.key(g, x, y, w, h, hovered ? 1f : 0f, active, dev.mw19.core.gui.MenuStyle.glow(k.theme.accent));
+            dev.mw19.core.gui.MenuStyle.key(g, k.theme, x, y, w, h, hovered ? 1f : 0f, active);
             g.popAlpha();
             return true;
         } catch (VirtualMachineError e) {
@@ -599,7 +621,7 @@ public final class Mw19 {
         try {
             g.begin(backend, 0);
             g.pushAlpha(alpha);
-            dev.mw19.core.gui.MenuStyle.slider(g, x, y, w, h, value, hovered ? 1f : 0f, active, dev.mw19.core.gui.MenuStyle.glow(k.theme.accent));
+            dev.mw19.core.gui.MenuStyle.slider(g, k.theme, x, y, w, h, value, hovered ? 1f : 0f, active);
             g.popAlpha();
             return true;
         } catch (VirtualMachineError e) {
@@ -627,7 +649,7 @@ public final class Mw19 {
         long now = System.currentTimeMillis();
         try {
             g.begin(backend, now);
-            dev.mw19.core.gui.MenuStyle.backdrop(g, w, h, overWorld, dev.mw19.core.gui.MenuStyle.glow(k.theme.accent), now, dev.mw19.core.gui.Anim.speed <= 0);
+            dev.mw19.core.gui.MenuStyle.backdrop(g, k.theme, 0, 0, w, h, overWorld, now, dev.mw19.core.gui.Anim.speed <= 0);
             return true;
         } catch (VirtualMachineError e) {
             throw e;
@@ -639,6 +661,22 @@ public final class Mw19 {
                 g.end();
             } catch (Throwable ignored) {
             }
+        }
+    }
+
+    /** Nametag and tab list hooks: the Tier Tagger's tag after this player's name (leading space), or null. */
+    public static String nameSuffix(java.util.UUID uuid, boolean tabList) {
+        Mw19 k = instance;
+        dev.mw19.core.modules.TierTaggerModule t = k == null ? null : k.tierTagger;
+        if (t == null) return null;
+        try {
+            return t.suffix(uuid, tabList);
+        } catch (VirtualMachineError e) {
+            throw e;
+        } catch (Throwable ex) {
+            k.tierTagger = null; // every frame would fail the same way: stop tagging rather than flood the log
+            Log.error("hook nameSuffix failed; Tier Tagger tags are off until the next start", ex);
+            return null;
         }
     }
 

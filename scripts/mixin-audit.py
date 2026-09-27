@@ -20,6 +20,9 @@ if mc == "1.8.9":
               ("net.minecraft.world.World", "getRainStrength", "mw19$rain"),
               ("net.minecraft.client.network.NetHandlerPlayClient", "handleResourcePack", "mw19$guard"),
               ("net.minecraft.client.gui.GuiScreen", "drawWorldBackground", "mw19$backdrop"),
+              # Tier Tagger (nametags and the tab list)
+              ("net.minecraft.client.renderer.entity.Render", "renderLivingLabel", "mw19$label"),
+              ("net.minecraft.client.gui.GuiPlayerTabOverlay", "getPlayerName", "mw19$decorate"),
               ("net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher", "renderTileEntity", "mw19$cull")]
     jars = [j for j in glob.glob(os.path.expanduser("~/.gradle/caches/essential-loom/minecraftMaven/**/*.jar"), recursive=True)
             if "sources" not in j and "-srg-" not in j and "-intermediary-" not in j]
@@ -80,7 +83,10 @@ else:
               ("net.minecraft.client.gui.components.AbstractSliderButton", "extractWidgetRenderState" if unobf else "renderWidget", "mw19$style"),
               ("net.minecraft.client.gui.components.AbstractSliderButton", "extractWidgetRenderState" if unobf else "renderWidget", "mw19$hideSprite"),
               ("net.minecraft.client.Minecraft", "mw19$profileFuture", "profileFuture"),
-              ("net.minecraft.client.multiplayer.PlayerInfo", "mw19$setSkinLookup", "skinLookup")]
+              ("net.minecraft.client.multiplayer.PlayerInfo", "mw19$setSkinLookup", "skinLookup"),
+              # Tier Tagger (nametags and the tab list)
+              ("net.minecraft.client.renderer.entity.EntityRenderer", "getNameTag" if V >= (1, 21, 2) else "renderNameTag", "mw19$decorate"),
+              ("net.minecraft.client.gui.components.PlayerTabOverlay", "getNameForDisplay", "mw19$decorate")]
     if V >= (1, 21, 9):  # Hitboxes without touching the saved debug profile
         checks += [("net.minecraft.client.gui.components.debug.DebugScreenEntryList", "isCurrentlyEnabled", "mw19$hitboxes")]
     if V < (1, 21, 4):

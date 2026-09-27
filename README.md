@@ -92,6 +92,7 @@ feature that needs them:
 | Copying a player's skin | you press *Copy* on the Skins page | `api.mojang.com`, `sessionserver.mojang.com`, `textures.minecraft.net` |
 | Inviting a player to your world | you press *Invite* on Host World | `api.mojang.com` (name to player id) |
 | Port forwarding (UPnP) | you switch on *Over the internet* on Host World | your router only (local network) |
+| Player tier lookups (their UUID only) | the Tier Tagger module is on and other players are near or in the tab list | `mctiers.com` (or `subtiers.net`, or the list you enter) |
 | Crystal optimizer channels and version (`marlowcrystal:*`) | Marlow's Crystal Optimizer is on and you join a server | only the server you play on, over the game connection |
 
 The bundled VulkanMod's own update check (which would ask Modrinth for a newer version at every start) is switched off.

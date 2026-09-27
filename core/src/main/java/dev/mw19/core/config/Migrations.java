@@ -9,7 +9,7 @@ import java.util.Map;
  * Never delete a step: old files must always load.
  */
 public final class Migrations {
-    public static final int GLOBAL = 1;
+    public static final int GLOBAL = 2;
     public static final int PROFILE = 1;
 
     private Migrations() {}
@@ -31,8 +31,18 @@ public final class Migrations {
     public static Map<String, Object> global(Map<String, Object> root) {
         int v = schemaOf(root);
         if (v > GLOBAL) throw new IllegalStateException("config schema " + v + " is newer than this client (" + GLOBAL + ")");
+        if (v < 2) global1to2(root);
         root.put("schema", (double) GLOBAL);
         return root;
+    }
+
+    /** v2 (0.8.0): theme presets renamed with the new scenes: MW19 -> Starlight, Violet -> Nebula, Forest -> Aurora, Rose -> Sakura. */
+    @SuppressWarnings("unchecked")
+    static void global1to2(Map<String, Object> root) {
+        Object client = root.get("client");
+        if (!(client instanceof Map)) return;
+        Object theme = ((Map<String, Object>) client).get("theme");
+        if (theme instanceof String) ((Map<String, Object>) client).put("theme", dev.mw19.core.gui.Theme.current((String) theme));
     }
 
     /**

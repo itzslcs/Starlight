@@ -59,12 +59,16 @@ public final class BuiltinModules {
         m.add(new FreelookModule());
         m.add(new CrystalOptimizerModule());
         m.add(new AnchorOptimizerModule());
+        m.add(new TierTaggerModule());
         m.add(new SimpleVisuals.OwnNametag());
         m.add(new SimpleVisuals.OldVisuals());
         return m;
     }
 
     public static void registerAll(Mw19 k) {
-        for (Module m : create(k.rates)) k.register(m, "core");
+        for (Module m : create(k.rates)) {
+            k.register(m, "core");
+            if (m instanceof TierTaggerModule) k.tierTagger = (TierTaggerModule) m;
+        }
     }
 }

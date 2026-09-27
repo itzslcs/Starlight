@@ -58,6 +58,7 @@ public final class ModIcons {
         put("old_animations", "minecraft:fishing_rod");
         put("crystal_optimizer", "minecraft:end_crystal");
         put("anchor_optimizer", "minecraft:respawn_anchor");
+        put("tiertagger", "minecraft:netherite_sword|minecraft:golden_sword");
     }
 
     private ModIcons() {}

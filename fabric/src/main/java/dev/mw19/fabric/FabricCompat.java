@@ -102,6 +102,19 @@ public final class FabricCompat {
         //?}
     }
 
+    /** A canonical code back to a vanilla key (bind profiles): the inverse of {@link #canonical}. */
+    public static InputConstants.Key vanillaKey(int code) {
+        if (code == Keys.NONE) return InputConstants.UNKNOWN;
+        //? if >=26.3 {
+        /*if (Keys.isMouse(code)) return InputConstants.Type.MOUSE.getOrCreate(SdlKeys.sdlButton(code - Keys.MOUSE_BASE));
+        int sdl = SdlKeys.toSdl(code);
+        return sdl < 0 ? InputConstants.UNKNOWN : InputConstants.Type.KEYBOARD.getOrCreate(sdl);
+        *///?} else {
+        if (Keys.isMouse(code)) return InputConstants.Type.MOUSE.getOrCreate(code - Keys.MOUSE_BASE);
+        return InputConstants.Type.KEYSYM.getOrCreate(code);
+        //?}
+    }
+
     /** A vanilla key (e.g. a KeyMapping's) as a canonical code: GLFW key, {@code Keys.mouse(button)} or {@code Keys.NONE}. */
     public static int canonical(InputConstants.Key k) {
         if (k.getType() == InputConstants.Type.MOUSE) return Keys.mouse(button(k.getValue()));

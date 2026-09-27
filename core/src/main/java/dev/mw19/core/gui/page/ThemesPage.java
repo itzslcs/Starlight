@@ -2,7 +2,9 @@ package dev.mw19.core.gui.page;
 
 import dev.mw19.api.setting.Setting;
 import dev.mw19.api.util.Colors;
+import dev.mw19.core.gui.Anim;
 import dev.mw19.core.gui.GuiRoot;
+import dev.mw19.core.gui.MenuStyle;
 import dev.mw19.core.gui.Theme;
 import dev.mw19.core.gui.Ui;
 import dev.mw19.core.gui.Widget;
@@ -35,7 +37,7 @@ public final class ThemesPage extends Page {
 
     @Override
     public void render(Ui ui) {
-        heading(ui, "Themes & Menu", "Presets, accent colour, blur, scale and animations");
+        heading(ui, "Themes & Menu", "Each theme has its own animated scene; also the accent colour, blur, scale and animations");
         list.bounds(x, y + 28, w, h - 28);
         list.render(ui);
     }
@@ -55,11 +57,14 @@ public final class ThemesPage extends Page {
         list.reveal(w);
     }
 
+    /** Every theme as a card showing its live scene and a sample keycap (the preset's own colours). */
     private final class Presets extends Widget {
         private static final int PER_ROW = 5;
-        private static final float CARD_H = 46;
+        private static final float CARD_H = 58;
+        private final Theme[] themes = new Theme[Theme.PRESETS.length];
 
         Presets() {
+            for (int i = 0; i < themes.length; i++) themes[i] = Theme.preset(Theme.PRESETS[i]);
             int rows = (Theme.PRESETS.length + PER_ROW - 1) / PER_ROW;
             h = rows * CARD_H + (rows - 1) * 4;
         }
@@ -79,16 +84,17 @@ public final class ThemesPage extends Page {
         @Override
         public void render(Ui ui) {
             float cw = cw();
-            for (int i = 0; i < Theme.PRESETS.length; i++) {
-                Theme t = Theme.preset(Theme.PRESETS[i]);
+            for (int i = 0; i < themes.length; i++) {
+                Theme t = themes[i];
                 float cx = cx(i), cy = cy(i);
                 boolean sel = root.k.client.theme.is(t.name), hv = ui.hover(cx, cy, cw, CARD_H);
-                ui.g.roundRect(cx, cy, cw, CARD_H, 5, t.panel);
-                ui.g.roundRect(cx + 4, cy + 4, cw - 8, 11, 3, t.surface);
-                ui.g.roundRect(cx + 4, cy + 18, (cw - 8) * 0.6f, 6, 3, t.accent);
-                ui.g.roundRect(cx + 4, cy + 27, (cw - 8) * 0.8f, 4, 2, Colors.fade(t.text, 0.5f));
-                ui.g.textCentered(t.name, cx + cw / 2f, cy + CARD_H - 11, t.text, false);
-                if (sel || hv) ui.g.roundOutline(cx, cy, cw, CARD_H, 5, 1, sel ? ui.t.accent : ui.t.border);
+                ui.g.pushClip(cx, cy, cw, CARD_H);
+                MenuStyle.backdrop(ui.g, t, cx, cy, cw, CARD_H, false, ui.now, Anim.speed <= 0);
+                MenuStyle.key(ui.g, t, cx + 8, cy + 9, cw - 16, 14, hv ? 1 : 0, true);
+                ui.g.rect(cx, cy + CARD_H - 13, cx + cw, cy + CARD_H, 0x96000000);
+                ui.g.textCentered(t.name, cx + cw / 2f, cy + CARD_H - 11, 0xFFFFFFFF, false);
+                ui.g.popClip();
+                if (sel || hv) ui.g.roundOutline(cx - 1, cy - 1, cw + 2, CARD_H + 2, 2, 1, sel ? ui.t.accent : ui.t.border);
             }
         }
 

@@ -78,6 +78,7 @@ truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/mw19/core/
 | hypixel_chat | Hypixel Chat | 1.8.9 | AESTHETIC | ALLOWED | off | Filters, tabs, mention highlights. Display only |
 | scoreboard | Scoreboard Tweaks | 1.8.9 | HUD | ALLOWED | off | Hide numbers, move, retitle |
 | lobby_clutter | Lobby Clutter | 1.8.9 | AESTHETIC | ALLOWED | off | Hides lobby spam and holograms client-side |
+| tiertagger | Tier Tagger | all | fails HUD ("extra information … other player") | DISALLOWED@hypixel | off | PvP tier-list ranks (MCTiers by default, SubTiers or a custom list) after other players' names, on nametags and in the tab list. It is information vanilla does not have, fetched online (one HTTPS lookup per player per 4 hours, and only the UUID is sent). Server-gated by serverrules.json. It came back as a built-in module after the Tier Tags addon went with the plugins (D-026, D-030) |
 | quick_commands | Quick Commands | all | none | GRAY | off | **One command per keypress** (at most one a second, only with no screen open). No sequences, no timers |
 | opt_* | Optimizations (Phase 5) | 1.21+ | PERF | ALLOWED | per benchmark | Only kept if measured; see docs/PERF.md |
 
@@ -85,7 +86,7 @@ truth, and a unit test ([`RulesMatrixTest`](../core/src/test/java/dev/mw19/core/
 
 ```json
 { "schema": 1, "servers": [ { "name": "Hypixel", "match": ["hypixel.net", "*.hypixel.net"],
-  "disallow": ["freelook", "reach"], "note": "Allowed Modifications policy, perspective + extra player info" } ] }
+  "disallow": ["freelook", "reach", "tiertagger"], "note": "Allowed Modifications policy, perspective + extra player info" } ] }
 ```
 
 The user can update `<gameDir>/MW19/serverrules.json` without a new jar (it is merged over the bundled default).

@@ -20,7 +20,7 @@ public final class ClientSettings {
     private final List<Setting<?>> all = new ArrayList<Setting<?>>();
 
     public final KeySetting openGui = add(new KeySetting("open_gui", "Open menu", "Key that opens the MW19 menu", Keys.RIGHT_SHIFT));
-    public final ChoiceSetting theme = add(new ChoiceSetting("theme", "Theme", "Colour preset", "MW19", Theme.PRESETS));
+    public final ChoiceSetting theme = add(new ChoiceSetting("theme", "Theme", "Colours and the animated scene behind the menus", "Starlight", Theme.PRESETS));
     public final BoolSetting customAccent = add(new BoolSetting("custom_accent", "Custom accent", "Override the preset's accent colour", false));
     public final ColorSetting accent = add(new ColorSetting("accent", "Accent colour", "Used for highlights and toggles", 0xFFFF8A3D));
     public final BoolSetting blur = add(new BoolSetting("blur", "Background blur", "Blur the game behind menus (costs frames on weaker graphics; a dim is used when off)", false));

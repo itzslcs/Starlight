@@ -36,4 +36,21 @@ class RenameCompatTest {
         assertEquals(dir, Mw19.configDir(game));
         assertTrue(Files.exists(dir.resolve("config.json")));
     }
+
+    @Test
+    void themeNamesFromBefore080Migrate() {
+        for (String[] pair : new String[][]{{"MW19", "Starlight"}, {"Violet", "Nebula"}, {"Forest", "Aurora"}, {"Rose", "Sakura"},
+                {"Glacier", "Glacier"}, {"White", "White"}}) {
+            Map<String, Object> client = new HashMap<String, Object>();
+            client.put("theme", pair[0]);
+            Map<String, Object> root = new HashMap<String, Object>();
+            root.put("schema", 1.0);
+            root.put("client", client);
+            dev.mw19.core.config.Migrations.global(root);
+            assertEquals(pair[1], client.get("theme"), pair[0]);
+            assertEquals(2, dev.mw19.core.config.Migrations.schemaOf(root));
+            assertEquals(pair[1], dev.mw19.core.gui.Theme.preset(pair[1]).name);
+        }
+        for (String name : dev.mw19.core.gui.Theme.PRESETS) assertEquals(name, dev.mw19.core.gui.Theme.preset(name).name);
+    }
 }

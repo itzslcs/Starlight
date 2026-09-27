@@ -83,6 +83,26 @@ final class TestPlatform implements Platform, ScreenHost, ChatAccess, ModList {
     public String clipboard() { return ""; }
     public void setClipboard(String text) {}
     public void vanillaBindings(BindingSink sink) {}
+
+    /** Minecraft's key bindings as a test sees them (bind profiles). */
+    final java.util.Map<String, Integer> binds = new java.util.LinkedHashMap<String, Integer>();
+
+    @Override
+    public java.util.Map<String, Integer> vanillaBindingMap() {
+        return new java.util.LinkedHashMap<String, Integer>(binds);
+    }
+
+    @Override
+    public int applyVanillaBindings(java.util.Map<String, Integer> b) {
+        int n = 0;
+        for (java.util.Map.Entry<String, Integer> e : b.entrySet()) {
+            if (binds.containsKey(e.getKey()) && !e.getValue().equals(binds.get(e.getKey()))) {
+                binds.put(e.getKey(), e.getValue());
+                n++;
+            }
+        }
+        return n;
+    }
     final java.util.Map<String, String> options = new java.util.HashMap<String, String>();
     public java.util.Map<String, String> applyVideo(java.util.Map<String, String> values) {
         java.util.Map<String, String> prev = new java.util.LinkedHashMap<String, String>();

@@ -4,8 +4,8 @@
     {
       "name": "Hypixel",
       "match": ["hypixel.net", "*.hypixel.net"],
-      "disallow": ["freelook", "reach"],
-      "note": "Hypixel Allowed Modifications: no perspective changes (freelook); the policy names player distance/range (reach)."
+      "disallow": ["freelook", "reach", "tiertagger"],
+      "note": "Hypixel Allowed Modifications: no perspective changes (freelook); the policy names player distance/range (reach) and extra information about other players (tiertagger)."
     }
   ]
 }

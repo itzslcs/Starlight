@@ -417,6 +417,29 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
     }
 
     @Override
+    public java.util.Map<String, Integer> vanillaBindingMap() {
+        java.util.Map<String, Integer> out = new java.util.LinkedHashMap<>();
+        for (KeyMapping km : mc.options.keyMappings) out.put(km.getName(), FabricCompat.canonical(((KeyMappingAccessor) km).mw19$key()));
+        return out;
+    }
+
+    @Override
+    public int applyVanillaBindings(java.util.Map<String, Integer> binds) {
+        int changed = 0;
+        for (KeyMapping km : mc.options.keyMappings) {
+            Integer code = binds.get(km.getName());
+            if (code == null || code == FabricCompat.canonical(((KeyMappingAccessor) km).mw19$key())) continue;
+            km.setKey(FabricCompat.vanillaKey(code));
+            changed++;
+        }
+        if (changed > 0) {
+            KeyMapping.resetMapping();
+            mc.options.save();
+        }
+        return changed;
+    }
+
+    @Override
     public int bindingKey(Binding b) {
         return FabricCompat.canonical(((KeyMappingAccessor) mapping(b)).mw19$key());
     }

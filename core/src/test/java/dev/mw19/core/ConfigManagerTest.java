@@ -56,7 +56,7 @@ class ConfigManagerTest {
         e.anchor = Anchor.BOTTOM_LEFT;
         e.x = 11;
         e.scale = 1.75f;
-        a.client.theme.set("Violet");
+        a.client.theme.set("Nebula");
         a.cfg.flush();
 
         Rig b = new Rig(dir);
@@ -68,7 +68,7 @@ class ConfigManagerTest {
         assertEquals(Anchor.BOTTOM_LEFT, e2.anchor);
         assertEquals(11, e2.x, 1e-6);
         assertEquals(1.75f, e2.scale, 1e-6);
-        assertEquals("Violet", b.client.theme.get());
+        assertEquals("Nebula", b.client.theme.get());
     }
 
     @Test

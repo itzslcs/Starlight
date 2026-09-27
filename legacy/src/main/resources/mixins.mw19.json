@@ -8,6 +8,7 @@
     "EntityMixin",
     "EntityRendererMixin",
     "GuiButtonMixin",
+    "GuiPlayerTabOverlayMixin",
     "GuiScreenMixin",
     "IntegratedServerAccessor",
     "ItemRendererMixin",
@@ -15,6 +16,7 @@
     "NetHandlerPlayClientMixin",
     "RendererLivingEntityMixin",
     "RenderManagerMixin",
+    "RenderMixin",
     "ThreadLanServerPingAccessor",
     "TileEntityRendererDispatcherMixin",
     "WorldMixin"
