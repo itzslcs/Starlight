@@ -109,6 +109,7 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
     void tick() {
         pollServer();
         if (++ticks % 20 == 0) FastChests.check();
+        dev.mw19.fabric.port.CrystalOptimizer.tick(mc);
         if (upTicks >= 0 && (mc.level != null || current() == Kind.TITLE || current() == Kind.OURS) && ++upTicks >= 40) {
             upTicks = -1; // loading is over and the game has run for 2 s: Vulkan (if on) got through its start
             if ("vulkan".equals(RendererSwitch.state)) RendererSwitch.started();
@@ -334,6 +335,8 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     @Override
     public boolean supports(String feature) {
+        if ("crystal_optimizer".equals(feature)) return !FabricLoader.getInstance().isModLoaded("marlowcrystal"); // the original runs itself
+        if ("anchor_optimizer".equals(feature)) return !FabricLoader.getInstance().isModLoaded("herosanchoroptimizer");
         return "offhand".equals(feature) || "shield".equals(feature) || "blur".equals(feature) || "fast_chests".equals(feature);
     }
 
@@ -521,6 +524,11 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
         if ("exploit".equals(what)) return ExploitGuard.selfTest();
         if ("fastchests".equals(what)) return FastChests.selfTest();
         if ("chestfaces".equals(what)) return Integer.toString(FastChests.chestFaces());
+        if (what.startsWith("crystal:")) return dev.mw19.fabric.port.CrystalOptimizer.selfTest(what.substring(8));
+        if (what.startsWith("anchor:")) { // anchor:<step>:x:y:z
+            String[] p = what.split(":");
+            return dev.mw19.fabric.port.AnchorOptimizer.selfTest(p[1], Integer.parseInt(p[2]), Integer.parseInt(p[3]), Integer.parseInt(p[4]));
+        }
         if ("pauserow".equals(what)) {
             Screen s = FabricCompat.screen(mc);
             if (!(s instanceof net.minecraft.client.gui.screens.PauseScreen)) return "FAIL (not the pause menu)";
@@ -786,8 +794,10 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
 
     @Override
     public String bundledNotice() {
-        if (!RendererSwitch.bundled || "none".equals(RendererSwitch.state)) return "";
-        return "Includes VulkanMod " + RendererSwitch.version + " by Collateral, under the GNU LGPL 3.0 (source: github.com/xCollateral/VulkanMod)."
+        String ports = "Includes Marlow's Crystal Optimizer by Bram and Marlow and Hero's Anchor Optimizer by HerobaneNair, ported"
+                + " into MW19 under their MIT licences (texts in the jar: META-INF/licenses).";
+        if (!RendererSwitch.bundled || "none".equals(RendererSwitch.state)) return ports;
+        return ports + " Includes VulkanMod " + RendererSwitch.version + " by Collateral, under the GNU LGPL 3.0 (source: github.com/xCollateral/VulkanMod)."
                 + " The licence texts and the exact source link are in the MW19 jar: THIRD_PARTY_NOTICES.txt, META-INF/licenses.";
     }
 

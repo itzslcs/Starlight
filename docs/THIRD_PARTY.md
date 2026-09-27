@@ -8,10 +8,22 @@ project's source repository. The *Evidence* column names the source.
 | Component | Version | Where | License | Evidence | How we comply |
 |---|---|---|---|---|---|
 | SpongePowered Mixin | 0.7.11-SNAPSHOT | shaded into the **1.8.9** jar only (`org/spongepowered/asm`) | MIT | POM: "MIT license"; jar: `LICENSE.txt` (The MIT License) | notice shipped as `LICENSE_mixin` in the jar; the build-only `org/spongepowered/tools` part is not shipped |
+| Marlow's Crystal Optimizer (by Bram and Marlow) | 2.0.0-SNAPSHOT, commit [62831e6](https://github.com/Bram1903/MarlowsCrystalOptimizer/tree/62831e69755797a1572e76d091af880584556653) | ported code in every 1.21+ jar ([`CrystalOptimizer`](../fabric/src/main/java/dev/mw19/fabric/port/CrystalOptimizer.java) and its mixins) | MIT, © 2026 Bram and Marlow | `LICENSE` at that commit (the repository's licence) | see "Ported optimizers" below ([DECISIONS](DECISIONS.md) D-028) |
+| HerosAnchorOptimizer (by HerobaneNair) | 1.1.3, commit [8e70b8a](https://github.com/HerobaneNair/herosanchoroptimizer/tree/8e70b8aba3f23d83805469b721725c6062b0d4c2) | ported code in every 1.21+ jar ([`AnchorOptimizer`](../fabric/src/main/java/dev/mw19/fabric/port/AnchorOptimizer.java) and its mixins) | MIT, © 2024 HerobaneNair | `LICENSE` at that commit; `"license": "MIT"` in its [`fabric.mod.json`](../fabric/src/main/resources/fabric.mod.json) | see "Ported optimizers" below (D-028) |
 | VulkanMod (by Collateral) | 0.6.8+1.21.11 (1.21.11 jar); 0.6.6 (1.21.9 and 1.21.10 jars) | nested unmodified as jar-in-jar (`META-INF/jars/vulkanmod-<modrinth id>.jar`); it nests its own Fabric API modules (Apache-2.0) and LWJGL Vulkan/VMA/shaderc bindings (BSD-3-Clause) | LGPL-3.0-only | Modrinth project licence; `LICENSE` at the source commits below; `LICENSE_VulkanMod` in its jar | see "VulkanMod" below ([DECISIONS](DECISIONS.md) D-024) |
 
 The Fabric jars otherwise contain only MW19 classes (`dev/mw19/{api,core,fabric}`) and resources, checked by listing
 the built jars.
+
+### Ported optimizers
+- **What:** the owner asked for these two client mods to be built in "from the code, … give credits" (D-028). Their
+  logic and Marlow's Crystal Optimizer's server protocol are ported. Each file's header names the source commit, the
+  authors, the licence and every change (for example, vanilla purple stained glass stands in for the anchor mod's own
+  ghost block, and no Fabric API is needed). The update checker of Marlow's Crystal Optimizer is not ported.
+- **How we comply with the MIT licence:** the copyright and permission notice of each ships in every Fabric jar as
+  `META-INF/licenses/MIT-MarlowsCrystalOptimizer.txt` and [`MIT-HerosAnchorOptimizer.txt`](licenses/MIT-HerosAnchorOptimizer.txt) (copied unchanged from
+  [`docs/licenses`](licenses/), which match the upstream `LICENSE` files byte for byte). `THIRD_PARTY_NOTICES.txt` and
+  the About page name both mods and their authors, and each module's name and description in the Mods page credit them.
 
 ### VulkanMod
 - **Which builds:** only those whose release commit is public, pinned in [`fabric/bundled.json`](../fabric/bundled.json) by

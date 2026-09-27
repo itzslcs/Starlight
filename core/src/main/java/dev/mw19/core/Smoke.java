@@ -5,7 +5,8 @@ import dev.mw19.core.module.ModuleManager;
 import dev.mw19.core.platform.ScreenHost;
 
 /**
- * Self-driving smoke run (-Dmw19.smoke=1): title → GUI → HUD editor → world → GUI → every module on + chat lines →
+ * Self-driving smoke run (-Dmw19.smoke=1): title → GUI → HUD editor → world → GUI → game menus → Fast Chests →
+ * crystal/anchor optimizers → every module on + chat lines →
  * HUD / HUD-editor screenshots → N seconds in world → checks → quit.
  * Prints "MW19 SMOKE PASS" or "MW19 SMOKE FAIL: <reason>"; scripts/smoke.sh checks the log.
  */
@@ -23,7 +24,7 @@ final class Smoke {
     private long clickTicks;
     private String guiClick = CLICKS ? "pending" : "skipped (no xdotool)";
     private String packs = "not run", packEnable = "not run", host = "not run", exploit = "not run", presets = "not run";
-    private String chests = "not run", pauseRow = "not run";
+    private String chests = "not run", pauseRow = "not run", optimizers = "not run";
     private int chestStep;
     private long chestWait;
 
@@ -153,7 +154,10 @@ final class Smoke {
             case 5: // Fast Chests: a chest scene drawn from block models, then by vanilla's block entity renderer, compared
                 chestStage(screen);
                 break;
-            case 6: // every module on, then feed chat through the incoming path
+            case 6: // the built-in crystal and anchor optimizers against the integrated server
+                optimizerStage();
+                break;
+            case 7: // every module on, then feed chat through the incoming path
                 if (stageTicks == 1) {
                     int n = 0;
                     for (ModuleManager.State s : k.modules.all()) {
@@ -185,7 +189,7 @@ final class Smoke {
                     next();
                 }
                 break;
-            case 7: // 0.3.0 screens: Skins, Packs (a live Modrinth search), Host World (Open to LAN), exploit self-check
+            case 8: // 0.3.0 screens: Skins, Packs (a live Modrinth search), Host World (Open to LAN), exploit self-check
                 if (stageTicks == 1) {
                     k.gui().openPage(dev.mw19.core.gui.page.SkinsPage.class);
                     try {
@@ -248,22 +252,29 @@ final class Smoke {
                 } else if (stageTicks == 330) {
                     shot("mw19-smoke-9b-performance");
                     Log.info(String.format(java.util.Locale.ROOT, "SMOKE: menu draws in %.0f us/frame (Performance page)", k.perf.menuUs));
-                } else if (stageTicks == 340) {
+                    k.gui().openPage(dev.mw19.core.gui.page.AboutPage.class);
+                } else if (stageTicks == 338) {
+                    shot("mw19-smoke-9c-about"); // credits of the built-in ports and the bundled VulkanMod
+                } else if (stageTicks == 339) {
+                    k.gui().mouseScrolled(0, 0, -20); // through the GUI's scroll path: the notices at the end must be reachable
+                } else if (stageTicks == 347) {
+                    shot("mw19-smoke-9d-about-scrolled");
+                } else if (stageTicks == 350) {
                     exploit = k.platform.selfTest("exploit"); // last: its probe toast would cover the screenshots
                     Log.info("SMOKE: exploit protection " + exploit);
                     if (exploit.startsWith("FAIL")) fail("exploit protection self-test: " + exploit);
-                } else if (stageTicks == 350) {
+                } else if (stageTicks == 360) {
                     k.gui().close();
                     next();
                 }
                 break;
-            case 8:
+            case 9:
                 if (inWorldTotal >= 20L * WORLD_SECONDS) {
                     shot("mw19-smoke-10-final");
                     next();
                 }
                 break;
-            case 9:
+            case 10:
                 if (stageTicks == 20) finish();
                 break;
             default:
@@ -358,6 +369,60 @@ final class Smoke {
 
     private static final String CHEST_VIEW = "tp @s 5.5 202 -1.5 0 30";
 
+    /**
+     * Stage 6: Marlow's Crystal Optimizer and Hero's Anchor Optimizer (Fabric ports). Each is checked right after the
+     * client acts and again after the server answered, on obsidian away from the chests, because the explosions are
+     * real. The player is put back before each step (explosions push a creative player). Last step: a server opt-out
+     * through the packet listener, after which a hit must be left alone.
+     */
+    private void optimizerStage() {
+        if (stageTicks == 1) {
+            if (!k.platform.supports("crystal_optimizer") || !k.platform.supports("anchor_optimizer")) {
+                optimizers = "n/a";
+                next();
+                return;
+            }
+            k.modules.setEnabled(k.modules.get("crystal_optimizer"), true);
+            k.modules.setEnabled(k.modules.get("anchor_optimizer"), true);
+            for (String c : new String[]{"gamemode creative", "fill -26 198 -8 -14 198 6 minecraft:obsidian",
+                    "fill -26 199 -8 -14 204 6 minecraft:air", OPT_SPOT, "summon minecraft:end_crystal -19.5 199 -0.5 {ShowBottom:0b}"}) {
+                k.platform.chat().sendCommand(c);
+            }
+            optimizers = "";
+            return;
+        }
+        String r = null;
+        if (stageTicks == 40) {
+            r = "codec=" + k.platform.selfTest("crystal:codec");
+        } else if (stageTicks == 45) {
+            r = "hit=" + k.platform.selfTest("crystal:hit");
+        } else if (stageTicks == 85) {
+            r = "removed=" + k.platform.selfTest("crystal:gone");
+            k.platform.chat().sendCommand(OPT_SPOT);
+            k.platform.chat().sendCommand("setblock -20 199 0 minecraft:respawn_anchor[charges=1]");
+        } else if (stageTicks == 115) {
+            r = "anchor=" + k.platform.selfTest("anchor:use:-20:199:0");
+        } else if (stageTicks == 155) {
+            r = "exploded=" + k.platform.selfTest("anchor:gone:-20:199:0");
+            k.platform.chat().sendCommand(OPT_SPOT);
+            k.platform.chat().sendCommand("summon minecraft:end_crystal -19.5 199 -0.5 {ShowBottom:0b}");
+        } else if (stageTicks == 185) {
+            r = "optout=" + k.platform.selfTest("crystal:optout");
+        } else if (stageTicks == 190) {
+            r = "honoured=" + k.platform.selfTest("crystal:optout-check");
+        } else if (stageTicks == 250) {
+            shot("mw19-smoke-6e-optimizers"); // upstream's opt-out notice is in chat 2 s after the opt-out
+        } else if (stageTicks == 260) {
+            next();
+        }
+        if (r == null) return;
+        optimizers += (optimizers.isEmpty() ? "" : " ") + r;
+        Log.info("SMOKE: optimizers " + r);
+        if (r.contains("FAIL")) fail("optimizers: " + r);
+    }
+
+    private static final String OPT_SPOT = "tp @s -20.5 199 -3.5 0 0";
+
     /** A valid 64x64 RGBA PNG in the skin layout: coloured head, body, arms and legs (uncompressed rows, zlib stream). */
     static byte[] testSkin() throws java.io.IOException {
         int w = 64, h = 64;
@@ -431,7 +496,7 @@ final class Smoke {
         }
         Log.info("SMOKE: top HUD costs " + costs.toString().trim());
         Log.info("MW19 SMOKE PASS hooks[" + k.hooks.describe() + "] guiClick[" + guiClick + "] keycps[" + keyCps + "] presets[" + presets + "] packs[" + packs + "] packEnable[" + packEnable + "] host[" + host
-                + "] exploit[" + exploit + "] pause[" + pauseRow + "] chests[" + chests + "] renderer[" + k.platform.rendererStatus() + "] modules["
+                + "] exploit[" + exploit + "] pause[" + pauseRow + "] chests[" + chests + "] optimizers[" + optimizers + "] renderer[" + k.platform.rendererStatus() + "] modules["
                 + k.modules.describeEnabled() + "] avgFrameMs=" + k.perf.avgFrameMs() + " ownUsPerFrame=" + k.perf.avgOwnUs());
         k.config.flush();
         shutdownWatchdog();

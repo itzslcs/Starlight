@@ -86,6 +86,17 @@ A built-in resource pack in the Fabric jar (`mw19packs/fast_chests`, generated b
 blockstates, block models and a block-atlas source for the chest textures. [`FastChests`](../fabric/src/main/java/dev/mw19/fabric/FastChests.java) offers it from the client
 pack scan while the module is on; the block entity renderer then skips the chests it covers (D-025).
 
+## Ported optimizers (1.21+)
+`fabric/.../port/` holds the only third-party-derived code in the Fabric tree (D-028, MIT, credited in each file):
+[`CrystalOptimizer`](../fabric/src/main/java/dev/mw19/fabric/port/CrystalOptimizer.java) (Marlow's Crystal Optimizer) and [`AnchorOptimizer`](../fabric/src/main/java/dev/mw19/fabric/port/AnchorOptimizer.java) (Hero's Anchor Optimizer). Their mixins stay
+one-liners into those classes and do nothing while `Hooks.crystalOptimizer` / `Hooks.anchorOptimizer` are off. The
+crystal optimizer's plugin messages use vanilla's custom-payload codec, not Fabric API:
+- **Incoming:** [`DiscardedPayloadMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/DiscardedPayloadMixin.java) supplies a codec for the two upstream receive channels. Vanilla asks it
+  only for ids nobody registered.
+- **Outgoing:** [`PayloadCodecMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/PayloadCodecMixin.java) writes MW19's own messages before any id lookup. This matters beside
+  Fabric API, which has its own codec for `minecraft:register`.
+- **Handling:** [`CrystalPacketListenerMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/CrystalPacketListenerMixin.java) moves each message onto the game thread.
+
 ## GUI
 A retained widget tree in core ([`Widget`](../core/src/main/java/dev/mw19/core/gui/Widget.java): bounds, children, `render(Renderer, mouse, dt)`, input handlers, focus).
 Pages: Mods (tiles or list), HUD Editor, Profiles, Keybinds, Skins, Packs, Host World, Server Rules, Performance,
@@ -106,6 +117,8 @@ Text is cached per element and rebuilt only when the underlying value changes, s
 - Main/render thread: all Minecraft access.
 - `MW19-IO` (1 thread): config saves and backups.
 - `MW19-Net` (2 threads): HTTP. Results return to the main thread through `Scheduler.runOnMain`, drained at tick start.
+- Netty's network thread: decodes the crystal optimizer's server messages and hands them to the game thread with
+  `Minecraft.execute` (only `Hooks.crystalOptimizer`, a volatile, is read there).
 
 ## Performance budget
 Own overhead < 0.3 ms/frame with default modules. Each hook is timed (`System.nanoTime` pairs, ~20 ns). Per-module

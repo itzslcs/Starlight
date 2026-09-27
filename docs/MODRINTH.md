@@ -32,16 +32,19 @@ Open your singleplayer world to friends on your network, or over the internet: M
   Minecraft's own pause menu and server list get MW19's look, and the pause menu opens the MW19 menu and the pack browser.
 - **HUD**: FPS, **KeyCPS** (keystrokes + CPS that follow your key bindings), Speed, Ping, Coordinates, Direction, Armor Status, Potion Effects, Item Counter, Clock, Memory/CPU, FPS Graph, Server Address, Combo Counter, Saturation, Session Time, Pack Display, Stopwatch, Day Counter, Reach Display.
 - **Visual**: Custom Crosshair, Brightness, Hit Color, Damage Tilt, Low Fire, Shield Overlay, Particle Multiplier, Show Own Nametag, 1.8 Combat Visuals, Clear Weather, Low Health Warning, Hitboxes, TNT Timer.
-- **Utility**: Zoom, Toggle Sprint/Sneak, Freelook, Screenshot Tools, Durability Alert, Chat Tools, Quick Commands, **Exploit Protection** (servers cannot detect your mods through sign/anvil text tricks or probe your home network through resource pack addresses; off by default).
+- **Utility**: Zoom, Toggle Sprint/Sneak, Freelook, Screenshot Tools, Durability Alert, Chat Tools, Quick Commands, **Exploit Protection** (servers cannot detect your mods through sign/anvil text tricks or probe your home network through resource pack addresses; off by default), **Marlow's Crystal Optimizer** and **Hero's Anchor Optimizer** (1.21+, off by default).
 - **Themes**: nine colour presets including Black, White and Crystal, with smooth menu animations.
 
-KeyCPS is built in, so you don't need the standalone KeyCPS mod alongside MW19.
+KeyCPS is built in, so you don't need the standalone KeyCPS mod alongside MW19. Marlow's Crystal Optimizer (by Bram &
+Marlow) and Hero's Anchor Optimizer (by HerobaneNair) are ported in under their MIT licences, with credit. A crystal you
+break, or an anchor you blow up, clears at once instead of after the server's reply. The crystal optimizer uses the
+original's server protocol, so servers can see it and switch it off.
 
 ## Fair play
 Modules that some servers restrict are off by default, and server rules can switch modules off (for example, Freelook is disabled on Hypixel).
 
 ## Privacy
-No telemetry, no accounts, no analytics. MW19 only goes online when you use a feature that needs it: the Packs page (Modrinth), changing or copying a skin (Mojang), inviting a player (Mojang) and internet hosting (your router). The bundled VulkanMod's own update check is switched off.
+No telemetry, no accounts, no analytics. MW19 only goes online when you use a feature that needs it: the Packs page (Modrinth), changing or copying a skin (Mojang), inviting a player (Mojang) and internet hosting (your router). With Marlow's Crystal Optimizer on, the server you join gets that mod's channel registration and version packet over the game connection. The bundled VulkanMod's own update check is switched off.
 
 ## Install
 Put the jar for your Minecraft version in your `mods` folder:

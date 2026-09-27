@@ -12,7 +12,7 @@ API = "https://api.modrinth.com/v2"
 UA = "itzslcs/mw19-publish (modrinth.com/user/itzslcs)"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SUMMARY = ("Max-FPS client for 1.8.9 and 1.21-26.3: Vulkan built in, fast chests, culling, auto graphics presets, "
-           "skin changer, in-game pack browser, world hosting, KeyCPS. Legit only; one jar, no Fabric API.")
+           "skin changer, in-game pack browser, world hosting, KeyCPS, crystal and anchor optimizers. Legit only; one jar, no Fabric API.")
 
 
 def multipart(fields, files):

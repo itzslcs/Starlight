@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0
+- **Marlow's Crystal Optimizer and Hero's Anchor Optimizer, built in** (1.21+, Mods → Utility, off by default): the two
+  MIT mods by Bram & Marlow and by HerobaneNair, ported into MW19 with credit.
+  - Crystal optimizer: a crystal you break stops blocking your next click at once, instead of after the server's reply.
+    It uses the original mod's server protocol, so a server can see it and switch it off; when one does, you get the
+    original's chat notice.
+  - Anchor optimizer: a respawn anchor you blow up turns into a see-through ghost block at once, and you can build into it.
+  - Neither needs Fabric API. If the original mod is installed, MW19's copy steps aside.
+
 ## 0.5.0
 - **Vulkan inside MW19 (1.21.9 – 1.21.11):** the jar now carries VulkanMod (LGPL-3.0, unmodified), so one file in the
   mods folder gives you the Vulkan renderer. It never stops your game: the first start runs on OpenGL while MW19 checks in

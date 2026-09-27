@@ -56,6 +56,8 @@ public final class ModIcons {
         put("freelook", "minecraft:skeleton_skull|minecraft:skull");
         put("own_nametag", "minecraft:name_tag");
         put("old_animations", "minecraft:fishing_rod");
+        put("crystal_optimizer", "minecraft:end_crystal");
+        put("anchor_optimizer", "minecraft:respawn_anchor");
     }
 
     private ModIcons() {}

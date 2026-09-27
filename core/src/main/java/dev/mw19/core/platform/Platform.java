@@ -70,7 +70,7 @@ public interface Platform extends Game {
     /** Sets that preference; the game applies it on the next start and falls back to OpenGL if Vulkan fails. */
     void setGraphicsApi(String api);
 
-    /** Notice for third-party code bundled into this build (VulkanMod, LGPL-3.0), or "" (About page). */
+    /** Credits for third-party code in this build (the ported optimizers, MIT; VulkanMod, LGPL-3.0), or "" (About page). */
     default String bundledNotice() {
         return "";
     }

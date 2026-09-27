@@ -65,14 +65,23 @@ val verifyBundled = tasks.register("verifyBundled") {
     }
 }
 
-// What the jar carries besides MW19: a notice naming the bundled VulkanMod, its source and the licenses.
+// What the jar carries besides MW19: the ported optimizers' credits and, where bundled, VulkanMod with its source and licenses.
 val thirdPartyNotice = tasks.register("thirdPartyNotice") {
     val out = layout.buildDirectory.file("generated/notice/THIRD_PARTY_NOTICES.txt")
     val pinned = vulkanmod
     inputs.property("vulkanmod", pinned?.toString() ?: "none")
     outputs.file(out)
     doLast {
-        val text = if (pinned == null) "This build of MW19 bundles no third-party code.\n" else """
+        val ports = """
+            MW19 contains code ported from two MIT-licensed mods (dev/mw19/fabric/port/, changes described there):
+            - Marlow's Crystal Optimizer by Bram and Marlow, https://github.com/Bram1903/MarlowsCrystalOptimizer
+              (2.0.0-SNAPSHOT, commit 62831e6). Copyright (c) 2026 Bram and Marlow. MIT License:
+              META-INF/licenses/MIT-MarlowsCrystalOptimizer.txt
+            - HerosAnchorOptimizer by HerobaneNair, https://github.com/HerobaneNair/herosanchoroptimizer
+              (1.1.3, commit 8e70b8a). Copyright (c) 2024 HerobaneNair. MIT License:
+              META-INF/licenses/MIT-HerosAnchorOptimizer.txt
+        """.trimIndent() + "\n"
+        val text = if (pinned == null) ports else ports + "\n" + """
             This jar contains VulkanMod ${pinned["version"]} (https://github.com/xCollateral/VulkanMod) by Collateral,
             unmodified, as the nested jar META-INF/jars/vulkanmod-${pinned["modrinth"]}.jar (from
             https://modrinth.com/mod/vulkanmod/version/${pinned["modrinth"]}).
@@ -167,7 +176,10 @@ tasks.named<Jar>("jar") {
     from({ bundle.map { zipTree(it) } }) { exclude("META-INF/MANIFEST.MF") }
     from(rootProject.file("LICENSE")) { rename { "LICENSE_mw19" } }
     from(thirdPartyNotice)
-    if (vulkanmod != null) from(rootProject.file("docs/licenses")) { into("META-INF/licenses") }
+    from(rootProject.file("docs/licenses")) {
+        into("META-INF/licenses")
+        if (vulkanmod == null) exclude("LGPL-3.0.txt", "GPL-3.0.txt") // only for the bundled VulkanMod
+    }
 }
 
 // The bundled VulkanMod's source, offered next to the jars (LGPL-3.0 section 4 / GPL-3.0 section 6).

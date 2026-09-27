@@ -63,7 +63,17 @@ else:
               # Fast Chests: the pack source, the skipped block entity renderer, and per-version chest block paths
               ("net.minecraft.server.packs.repository.BuiltInPackSource", "loadPacks", "mw19$packs"),
               ("net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher",
-               "tryExtractRenderState" if V >= (1, 21, 9) else "render", "mw19$baked")]
+               "tryExtractRenderState" if V >= (1, 21, 9) else "render", "mw19$baked"),
+              # Crystal and anchor optimizers (ported, D-028): the smoke's optimizer stage runs every one of these
+              ("net.minecraft.client.multiplayer.MultiPlayerGameMode", "attack", "mw19$crystal"),
+              ("net.minecraft.client.multiplayer.MultiPlayerGameMode", "performUseItemOn", "mw19$anchor"),
+              ("net.minecraft.world.level.Level", "getEntities", "mw19$hideKeptCrystals"),
+              ("net.minecraft.client.multiplayer.ClientLevel", "entitiesForRendering", "mw19$hideKeptCrystals"),
+              ("net.minecraft.client.multiplayer.ClientLevel", "handleBlockChangedAck", "mw19$releaseKeptCrystals"),
+              ("net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl", "handleCustomPayload", "mw19$crystalMessage"),
+              ("net.minecraft.network.protocol.common.custom.DiscardedPayload", "codec", "mw19$crystalChannels"),
+              ("net.minecraft.network.protocol.common.custom.CustomPacketPayload$1", "encode", "mw19$crystalMessage"),
+              ("net.minecraft.world.item.context.BlockPlaceContext", "BlockPlaceContext", "mw19$anchorGhost")]
     if V >= (1, 21, 9):  # Hitboxes without touching the saved debug profile
         checks += [("net.minecraft.client.gui.components.debug.DebugScreenEntryList", "isCurrentlyEnabled", "mw19$hitboxes")]
     if V < (1, 21, 4):

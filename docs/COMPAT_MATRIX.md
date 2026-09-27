@@ -6,32 +6,33 @@ Legend: **pass** / **fail** / **not-run**. Each cell links to or names its evide
 
 | Target | Build (`buildAll`) | Dev smoke ([`scripts/smoke.sh`](../scripts/smoke.sh)) | Production-layout launch | Prism | Dawn/Feather |
 |---|---|---|---|---|---|
-| 1.8.9 (Forge 11.15.1.2318) | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; pause-menu row, presets, packs, LAN, exploit self-test; audit 12/12) | not-run (no production Forge launcher in the test setup) | not-run | not-run |
-| 1.21 | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 30/30) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
-| 1.21.1 | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 30/30) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
-| 1.21.2 | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 30/30) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
-| 1.21.3 | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 30/30) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
-| 1.21.4 | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 29/29) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
-| 1.21.5 | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 29/29) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
-| 1.21.6 | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 29/29) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
-| 1.21.7 | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 29/29) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
-| 1.21.8 | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 29/29) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
-| 1.21.9 | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 30/30) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL; with RENDERER=vulkan on lavapipe also pass, VulkanMod 0.6.6 running) | not-run | not-run |
-| 1.21.10 | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 30/30) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL; with RENDERER=vulkan on lavapipe also pass, VulkanMod 0.6.6 running) | not-run | not-run |
-| 1.21.11 | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 30/30) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL; with RENDERER=vulkan on lavapipe also pass, VulkanMod 0.6.8 running) | not-run | not-run |
-| 26.1 | pass (0.5.0, 2026-09-27) | pass on the 0.5.0 working tree (after the 26.x icon fix) (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 29/29) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
-| 26.1.1 | pass (0.5.0, 2026-09-27) | pass on the 0.5.0 working tree (after the 26.x icon fix) (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 29/29) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
-| 26.1.2 | pass (0.5.0, 2026-09-27) | pass on the 0.5.0 working tree (after the 26.x icon fix) (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 29/29) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
-| 26.2 | pass (0.5.0, 2026-09-27) | pass on the 0.5.0 working tree (after the 26.x icon fix) (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 30/30) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
-| 26.3 | pass (0.5.0, 2026-09-27) | pass on the 0.5.0 working tree (after the 26.x icon fix) (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 30/30) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) | not-run | not-run |
+| 1.8.9 (Forge 11.15.1.2318) | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 12/12) | not-run (no production Forge launcher in the test setup) | not-run | not-run |
+| 1.21 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 39/39) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
+| 1.21.1 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 39/39) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
+| 1.21.2 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 39/39) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
+| 1.21.3 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 39/39) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
+| 1.21.4 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 38/38) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
+| 1.21.5 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 38/38) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
+| 1.21.6 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 38/38) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
+| 1.21.7 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 38/38) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
+| 1.21.8 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 38/38) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
+| 1.21.9 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 39/39) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok; with RENDERER=vulkan on lavapipe also pass, VulkanMod 0.6.6 running) | not-run | not-run |
+| 1.21.10 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 39/39) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok; with RENDERER=vulkan on lavapipe also pass, VulkanMod 0.6.6 running) | not-run | not-run |
+| 1.21.11 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 39/39) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok; with RENDERER=vulkan on lavapipe also pass, VulkanMod 0.6.8+1.21.11 running) | not-run | not-run |
+| 26.1 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 38/38) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
+| 26.1.1 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 38/38) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
+| 26.1.2 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 38/38) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
+| 26.2 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 39/39) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
+| 26.3 | pass (0.6.0, 2026-09-27) | pass on 08e091d (0.6.0; optimizer stage, chest scene fast/vanilla/fast, pause-menu row, About page, presets, packs, LAN, exploit self-test; audit 39/39) | pass (0.6.0 dist jar, `PROD=1 smoke.sh`, OpenGL, optimizer stage ok) | not-run | not-run |
 
-Snapshots: 4cbfe11 = 0.5.0 working-tree snapshot (dev smoke; 26.x rerun on the tree after the icon fix, debug-log
+Snapshots: 08e091d = 0.6.0 working-tree snapshot (dev smoke, 2026-09-27); 4cbfe11 = 0.5.0 working-tree snapshot (dev smoke; 26.x rerun on the tree after the icon fix, debug-log
 2026-09-27); b2fc30b = 0.4.0; 420a474 = 0.3.0 (18/18 pass); 9473849 = 0.2.0 (18/18 pass, 2026-09-26); dbeb9f1 = Phase 4
 commit; 848598d = Phase 3 (26.x) work tree; f82c0d6 = KeyCPS build (the code in the 0.1.0 jars). Every run enables all
 modules, checks the log with the allowlist in `smoke.sh`, and runs the mixin audit. Since 0.3.0 every run also opens
 the Skins, Packs and Host World pages, searches Modrinth, opens the world to LAN and runs the exploit self-test; since
 0.5.0 it also builds the chest scene (Fast Chests on, off, on again, compared by screenshot and self-test) and checks the
-MW19 row on the pause menu. **Production-layout launch** = [`scripts/prodlaunch.py`](../scripts/prodlaunch.py): real Fabric (Knot, intermediary
+MW19 row on the pause menu; since 0.6.0 it runs the optimizer stage (Marlow's Crystal Optimizer and Hero's Anchor
+Optimizer against the integrated server, D-028) and shows the About page. **Production-layout launch** = [`scripts/prodlaunch.py`](../scripts/prodlaunch.py): real Fabric (Knot, intermediary
 game jar), the dist jar in a mods folder, offline name. Evidence lives in `smoke-out/<mc>/` and `smoke-out/prod-<mc>/` (gitignored,
 regenerated by the script). Smoke runs use Xvfb and Mesa llvmpipe, so FPS figures from them are not performance claims.
 
@@ -41,10 +42,12 @@ packs, from Modrinth and Fabric's Maven, never bundled; [debug-log](debug-log.md
 
 | Target | Mods | Result |
 |---|---|---|
-| 1.21.11 | pass (0.5.0, 2026-09-27) | pass on 4cbfe11 (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 30/30) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL; with RENDERER=vulkan on lavapipe also pass, VulkanMod 0.6.8 running) 
-| 26.3 | pass (0.5.0, 2026-09-27) | pass on the 0.5.0 working tree (after the 26.x icon fix) (0.5.0; chest scene fast/vanilla/fast, pause-menu row, presets, packs, LAN, exploit self-test; audit 30/30) | pass (0.5.0 dist jar, `PROD=1 smoke.sh`, OpenGL) 
+| 1.21.11 | Fabric API 0.141.6, Sodium 0.8.14, ImmediatelyFast 1.14.3, Lithium 0.21.4, FerriteCore 8.2.0 | **pass** (0.6.0 working tree, 2026-09-27): all smoke checks including the optimizer stage, audit 39/39 |
+| 1.21.11 | Fabric API 0.141.6 alone | **pass** (0.6.0 working tree, 2026-09-27): optimizer stage ok. MW19's `minecraft:register` is written beside Fabric API's own codec for that channel. Audit 39/39 |
+| 26.3 | Fabric API 0.161.0, Sodium 0.9.2, ImmediatelyFast 1.17.1, Lithium 0.26.1, FerriteCore 9.0.0 | **pass** (0.4.0 working tree, 2026-09-26): all smoke checks, audit 28/28 |
 
 The other 16 targets have not been run with these mods yet, so MW19 Performance packs exist only for 1.21.11 and 26.3.
+The 26.3 row is still the 0.4.0 run.
 
 ### The bundled VulkanMod (0.5.0)
 | Target | Setup | Result |

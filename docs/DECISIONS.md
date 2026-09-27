@@ -281,3 +281,38 @@ the button draws its background and label in one method, so MW19 draws both; fro
 replaced. The pause menu gets a row under Back to Game with **MW19 Menu** and **Packs** (the pack browser in game);
 everything below moves down one row. Themes → "MW19 game menus" turns the restyle off.
 
+
+## D-028 Marlow's Crystal Optimizer and Hero's Anchor Optimizer ported in (owner request, 2026-09-27)
+The owner asked for the two mods built in, one jar in the mods folder, and "you have to implement these optimisers from
+the code, thats the only way itll be allowed. give credits ofcourse". That is an explicit exception to "original work
+only", like KeyCPS (D-018). Both are MIT, so the port keeps their copyright and licence texts (THIRD_PARTY "Ported
+optimizers").
+- **Behaviour is upstream's**, from Marlow's Crystal Optimizer 2.0.0-SNAPSHOT (commit 62831e6) and HerosAnchorOptimizer
+  1.1.3 (commit 8e70b8a). The crystal optimizer's server protocol is kept byte for byte (upstream PROTOCOL.md), because it
+  is what lets servers allow or refuse it. MW19 registers `marlowcrystal:opt_out` and `marlowcrystal:challenge`, sends
+  `marlowcrystal:version` on join (not in singleplayer), and answers challenges. An opt-out switches it off for that
+  connection and shows upstream's chat notice. The version packet names the ported build (2.0.0, snapshot, Fabric, commit
+  62831e6, dirty) with that commit's time.
+- **Changes, all in the file headers:**
+  - No Fabric API. Messages go through vanilla's payload codec (fallback codec for the two incoming channels, the
+    codec's encode for outgoing ones). This works beside Fabric API, whose own codec for `minecraft:register` would reject
+    a foreign payload.
+  - Kept crystals live in a list, not in fields on the entity.
+  - The opt-out belongs to the connection object (weakly held), not a flag reset on disconnect.
+  - The anchor ghost is vanilla purple stained glass, replaceable only where MW19 put it, instead of a registered block.
+    It is set inside the use's block prediction, so the server's answer always replaces it.
+  - Spectators get no ghost (upstream's hook ran before vanilla's spectator check).
+- **Rules:** both are GRAY and default off (client-side prediction of game actions, and the crystal one talks to the
+  server). Each steps aside when the original mod is installed (`marlowcrystal`, `herosanchoroptimizer`).
+- **Declined in the same request:** No Chat Restrictions. It bypasses the chat restrictions set on a Microsoft account
+  (by a parent, or through age or account settings). That is not a client-side optimisation, so it is not built in.
+- **Verified** by the smoke run's optimizer stage in a singleplayer world, on every Fabric target in dev and in production
+  (COMPAT_MATRIX 0.6.0), and beside Fabric API and the Performance pack mods on 1.21.11. Each step is checked right after
+  the client acts, and again after the integrated server answered:
+  - The crystal is hidden at once, then removed by the server.
+  - The anchor ghost is placed and replaceable at once, then replaced by the server's air or fire.
+  - The codec round trip covers both directions.
+  - An opt-out through the packet listener is honoured afterwards, with upstream's chat notice.
+
+  Singleplayer counts as a server only for the anchor step (upstream turns the anchor optimizer off there). No real
+  server with an opt-out plugin was tested.

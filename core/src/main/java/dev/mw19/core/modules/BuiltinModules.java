@@ -57,6 +57,8 @@ public final class BuiltinModules {
         m.add(new DurabilityAlertModule());
         m.add(new ScreenshotModule());
         m.add(new FreelookModule());
+        m.add(new CrystalOptimizerModule());
+        m.add(new AnchorOptimizerModule());
         m.add(new SimpleVisuals.OwnNametag());
         m.add(new SimpleVisuals.OldVisuals());
         return m;

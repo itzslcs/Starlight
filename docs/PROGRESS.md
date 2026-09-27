@@ -96,3 +96,30 @@
 - **Block entity culling** and a lighter, unloaded-when-closed menu (from the 0.4.0 working tree).
 - Dev smoke 18/18, production 17/17 (1.8.9 has no production launcher here), 67 core tests pass (the plugin tests went with the plugins).
 
+
+## 2026-09-27: 0.6.0 (owner request: Marlow's Crystal Optimizer and Hero's Anchor Optimizer, ported with credit)
+- **Ported from their code** (both MIT, D-028) into `fabric/.../port/`:
+  - Crystal optimizer: upstream's hit logic, plus its server protocol byte for byte (channel registration, version
+    packet, challenge answer, opt-out with the original chat notice).
+  - Anchor optimizer: a ghost block (vanilla purple stained glass) inside the use's block prediction.
+
+  Both are GRAY and off by default, 1.21+ only. Credits are in each module's name and description, the file headers,
+  the About page, `THIRD_PARTY_NOTICES.txt`, and the licence texts under `META-INF/licenses`. No Fabric API is needed:
+  the plugin messages go through vanilla's payload codec, and they also work beside Fabric API.
+- **Smoke optimizer stage**, on every Fabric target in dev and production, checked right after each action and again
+  after the integrated server answered:
+  - The crystal is hidden at once, then removed by the server.
+  - The anchor ghost is placed and replaceable, then replaced by the server's air or fire.
+  - The codec round trip works.
+  - A server opt-out is honoured, and its notice is shown.
+
+  The run also screenshots the About page (now scrollable) before and after scrolling.
+- **Results:**
+  - Dev smoke 18/18 on snapshot 08e091d, with the mixin audit fully wired everywhere (38–39 checks on Fabric, 12 on 1.8.9).
+  - Production 17/17, plus the 3 VulkanMod jars on lavapipe.
+  - 1.21.11 beside Fabric API alone, and beside the Performance pack (Sodium, Lithium, ImmediatelyFast, FerriteCore).
+  - 67 core tests.
+- **Found on the way** (debug-log): the anchor check assumed air where the explosion can leave fire, and vanilla's
+  Mojang profile lookup timing out needed a smoke allowlist entry. Also, the 0.5.0 update had mangled the COMPAT_MATRIX
+  "Alongside other mods" table, which is now restored.
+- **Declined:** No Chat Restrictions (it bypasses Microsoft account chat restrictions; D-028).

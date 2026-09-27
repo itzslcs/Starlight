@@ -63,7 +63,7 @@ Prism column of [COMPAT_MATRIX](docs/COMPAT_MATRIX.md).
 ### Modules
 | HUD | Visual | Performance | Utility | Chat |
 |---|---|---|---|---|
-| FPS, **KeyCPS** (keystrokes + CPS), Speed, Ping, Coordinates, Direction, Armor Status, Potion Effects, Item Counter, Clock, Memory/CPU, FPS Graph, Server Address, Combo, Saturation, Session Time, Pack Display, Stopwatch, Day Counter, Reach Display | Custom Crosshair, Brightness, Hit Color, Damage Tilt, Low Fire, Shield Overlay, Particle Multiplier, Show Own Nametag, 1.8 Combat Visuals, Clear Weather, Low Health Warning, Hitboxes, TNT Timer | **Entity Culling** (entities and block entities behind walls, on by default), **Fast Chests** (chests drawn as blocks, 1.21+, on by default; lids do not open visibly), graphics presets with auto-detection, Vulkan renderer | Zoom, Toggle Sprint/Sneak, Freelook, Screenshot Tools, Durability Alert, **Exploit Protection**, Quick Commands | Chat Tools (timestamps, highlights, stacking, search) |
+| FPS, **KeyCPS** (keystrokes + CPS), Speed, Ping, Coordinates, Direction, Armor Status, Potion Effects, Item Counter, Clock, Memory/CPU, FPS Graph, Server Address, Combo, Saturation, Session Time, Pack Display, Stopwatch, Day Counter, Reach Display | Custom Crosshair, Brightness, Hit Color, Damage Tilt, Low Fire, Shield Overlay, Particle Multiplier, Show Own Nametag, 1.8 Combat Visuals, Clear Weather, Low Health Warning, Hitboxes, TNT Timer | **Entity Culling** (entities and block entities behind walls, on by default), **Fast Chests** (chests drawn as blocks, 1.21+, on by default; lids do not open visibly), graphics presets with auto-detection, Vulkan renderer | Zoom, Toggle Sprint/Sneak, Freelook, Screenshot Tools, Durability Alert, **Exploit Protection**, Quick Commands, **Marlow's Crystal Optimizer**, **Hero's Anchor Optimizer** (1.21+) | Chat Tools (timestamps, highlights, stacking, search) |
 
 KeyCPS is the author's own [KeyCPS](https://modrinth.com/mod/keycps) mod, built in ([D-018](docs/DECISIONS.md)).
 **Exploit Protection** closes the client-side probes that [ExploitPreventer](https://modrinth.com/mod/exploitpreventer)
@@ -71,6 +71,10 @@ lists, in MW19's own code ([D-021](docs/DECISIONS.md)): servers cannot read your
 and anvil text, cannot make Minecraft contact your computer or home network through a resource pack address (and, on
 1.8.9, cannot check which files are on your disk through `level://` packs), and server packs are cached per account.
 It is GRAY in the rules matrix (it changes what the client answers a probing server), so switch it on under Mods.
+**Marlow's Crystal Optimizer** (by Bram and Marlow) and **Hero's Anchor Optimizer** (by HerobaneNair) are those two MIT
+mods ported in at the owner's request, with credit ([D-028](docs/DECISIONS.md)). A crystal you break, or an anchor you blow up, clears at once
+instead of after the server's reply. They are GRAY and off by default. The crystal optimizer tells the server it is there,
+using the original mod's protocol, and a server can switch it off for its players.
 Modules that some servers restrict (**GRAY**) are off by default, and a server can switch modules off
 ([`serverrules.json`](core/src/main/resources/mw19/serverrules.json), Server Rules page). The Hypixel suite for 1.8.9 is planned ([PLAN](docs/PLAN.md), Phase 6).
 
@@ -86,6 +90,7 @@ feature that needs them:
 | Copying a player's skin | you press *Copy* on the Skins page | `api.mojang.com`, `sessionserver.mojang.com`, `textures.minecraft.net` |
 | Inviting a player to your world | you press *Invite* on Host World | `api.mojang.com` (name to player id) |
 | Port forwarding (UPnP) | you switch on *Over the internet* on Host World | your router only (local network) |
+| Crystal optimizer channels and version (`marlowcrystal:*`) | Marlow's Crystal Optimizer is on and you join a server | only the server you play on, over the game connection |
 
 The bundled VulkanMod's own update check (which would ask Modrinth for a newer version at every start) is switched off.
 See [THIRD_PARTY](docs/THIRD_PARTY.md) for services and licences.
@@ -123,6 +128,7 @@ The repo root also works as an [Obsidian](https://obsidian.md) vault. Open the f
 see how the docs and code link together.
 
 ## License
-MIT ([LICENSE](LICENSE)). The 1.21.9 – 1.21.11 jars also contain VulkanMod under the GNU LGPL 3.0, with its licence texts
-and a link to its source inside the jar, and its source zip in `dist/sources/`. Third-party notices:
-[THIRD_PARTY](docs/THIRD_PARTY.md).
+MIT ([LICENSE](LICENSE)). The 1.21+ jars contain code ported from Marlow's Crystal Optimizer (© 2026 Bram and Marlow)
+and HerosAnchorOptimizer (© 2024 HerobaneNair), both MIT, with their licence texts in `META-INF/licenses`. The 1.21.9 –
+1.21.11 jars also contain VulkanMod under the GNU LGPL 3.0, with its licence texts and a link to its source inside the
+jar, and its source zip in `dist/sources/`. Third-party notices: [THIRD_PARTY](docs/THIRD_PARTY.md).

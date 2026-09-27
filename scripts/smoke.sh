@@ -153,6 +153,9 @@ allow = [r"Failed to fetch user properties", r"Realms", r"realms", r"Narrator", 
          r"Failed to retrieve profile key pair",
          # vanilla fetching Mojang's service keys at start; a network timeout there is not ours (debug-log 2026-09-26)
          r"Failed to request yggdrasil public key",
+         # vanilla looking up the offline test player's profile at Mojang's session server; a timeout there is not
+         # ours either (debug-log 2026-09-27, production 1.21.5)
+         r"Couldn't look up profile properties",
          # VulkanMod ships shader files with an upper-case letter in their path (terrain_earlyZ), which Fabric's
          # resource loader rejects and logs on every reload; harmless, not ours (debug-log 2026-09-26 "VulkanMod")
          r"Invalid path in mod resource-pack vulkanmod: vulkanmod:shaders/basic/terrain_earlyZ/"]

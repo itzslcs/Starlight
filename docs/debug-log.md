@@ -273,3 +273,26 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
   session) and Fabric API installed, mods that use the Fabric Rendering API would have no renderer.
 - **Fix:** RendererSwitch removes that custom value from VulkanMod's metadata along with its entrypoints and mixin
   configs (Indigo reads it later, from its mixin plugin).
+
+## 2026-09-27 · Optimizer smoke stage: the anchor check failed beside Fabric API
+- **Repro:** `WITH_MODS="fabric-api" scripts/smoke.sh 1.21.11`: `optimizers exploded=FAIL (still Block{minecraft:fire}...
+  where the anchor exploded)`. The same stage without Fabric API had passed with air there.
+- **Hypothesis:** the ghost was replaced as intended. A respawn anchor's explosion lights fires (`createFire`), and a
+  fire can land on the anchor's own spot above the obsidian. The server's state there is then fire, not air, and the
+  check only accepted air. It depends on the explosion's randomness, not on Fabric API.
+- **Evidence:** the block reported is `minecraft:fire` (neither the purple glass ghost nor the anchor). The steps before
+  it passed in that run (codec, hit, removed, anchor).
+- **Fix:** the "gone" step checks that the ghost was replaced by the server's answer: neither the ghost nor the anchor.
+  It names the block it found. The rerun beside Fabric API is below in COMPAT_MATRIX.
+
+## 2026-09-27 · Production 1.21.5 failed on a Mojang profile lookup timeout
+- **Repro:** the 0.6.0 production round: `prod 1.21.5 FAIL: 1 suspicious log record(s)`, with every smoke check
+  (optimizers included) passing. The record: `[Download-1/WARN]: Couldn't look up profile properties for
+  00000000-0000-0000-0000-000000000000`, caused by `SocketTimeoutException: Read timed out` from
+  `sessionserver.mojang.com`.
+- **Hypothesis:** this is vanilla's own profile fetch for the offline test player at start (`Minecraft` constructor,
+  `fetchProfile` on the non-critical IO pool, frame `class_310.method_53464`), and the network timed out. MW19 takes no
+  part in it.
+- **Fix:** smoke.sh allowlists that record head, as it already does for the similar "Failed to fetch user properties"
+  and yggdrasil key timeouts. It was swapped in by rename, because a running smoke.sh keeps reading its old copy.
+  1.21.5 was rerun after the round (COMPAT_MATRIX).

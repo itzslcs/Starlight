@@ -182,6 +182,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 ## core · `dev.mw19.core.modules`
 
+- [AnchorOptimizerModule.java](../core/src/main/java/dev/mw19/core/modules/AnchorOptimizerModule.java): Hero's Anchor Optimizer by HerobaneNair (MIT), built in at the owner's request (DECISIONS D-028).
 - [ArmorModule.java](../core/src/main/java/dev/mw19/core/modules/ArmorModule.java): Armor pieces and durability (listed as allowed by Hypixel: "Armor Status").
 - [BuiltinModules.java](../core/src/main/java/dev/mw19/core/modules/BuiltinModules.java): Every built-in module (order = default order in the Mods page).
 - [ChatModule.java](../core/src/main/java/dev/mw19/core/modules/ChatModule.java): Display-only chat tools: timestamps, stacking duplicates, filters, mention highlights, and search.
@@ -190,6 +191,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [ComboModule.java](../core/src/main/java/dev/mw19/core/modules/ComboModule.java): Consecutive hits you land without taking damage.
 - [CoordsModule.java](../core/src/main/java/dev/mw19/core/modules/CoordsModule.java): XYZ (same as F3).
 - [CrosshairModule.java](../core/src/main/java/dev/mw19/core/modules/CrosshairModule.java): Replaces the vanilla crosshair with a configurable one (same position, same purpose).
+- [CrystalOptimizerModule.java](../core/src/main/java/dev/mw19/core/modules/CrystalOptimizerModule.java): Marlow's Crystal Optimizer by Bram and Marlow (MIT), built in at the owner's request (DECISIONS D-028).
 - [DirectionModule.java](../core/src/main/java/dev/mw19/core/modules/DirectionModule.java): Compass tape: marks slide with your yaw (same information as F3 facing).
 - [DurabilityAlertModule.java](../core/src/main/java/dev/mw19/core/modules/DurabilityAlertModule.java): A notification (and a ping) once when a worn armor piece or the held item drops below the threshold.
 - [EffectsModule.java](../core/src/main/java/dev/mw19/core/modules/EffectsModule.java): Active potion effects outside the inventory (listed as allowed by Hypixel: "Effect Status").
@@ -265,7 +267,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [Mw19.java](../core/src/main/java/dev/mw19/core/Mw19.java): Core entry point.
 - [PerfStats.java](../core/src/main/java/dev/mw19/core/PerfStats.java): Frame-time and own-cost ring buffers for the Performance page and the benchmark harness.
 - [SdlKeys.java](../core/src/main/java/dev/mw19/core/SdlKeys.java): Minecraft 26.3 moved from GLFW to SDL3: key events carry SDL scancodes (USB HID usage ids), modifiers are SDL_Keymod bits and mouse buttons are 1-based with...
-- [Smoke.java](../core/src/main/java/dev/mw19/core/Smoke.java): Self-driving smoke run (-Dmw19.smoke=1): title → GUI → HUD editor → world → GUI → every module on + chat lines → HUD / HUD-editor screenshots → N seconds in...
+- [Smoke.java](../core/src/main/java/dev/mw19/core/Smoke.java): Self-driving smoke run (-Dmw19.smoke=1): title → GUI → HUD editor → world → GUI → game menus → Fast Chests → crystal/anchor optimizers → every module on + ch...
 - [VideoPresets.java](../core/src/main/java/dev/mw19/core/VideoPresets.java): Graphics presets (Performance page).
 
 ## core · build and resources
@@ -277,10 +279,15 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 - [AnvilNameMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/AnvilNameMixin.java): Exploit Protection: the anvil's name field (sent back when renaming) gets the item name as an unmodded client resolves it.
 - [BlockEntityCullingMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/BlockEntityCullingMixin.java): Entity Culling for block entities: hidden ones are not drawn (1.21.9+: no render state is extracted for them).
+- [BlockPlaceContextMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/BlockPlaceContextMixin.java): Anchor Optimizer (port of Hero's Anchor Optimizer): its ghost block takes a placed block like a fern does.
 - [ButtonStyleMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ButtonStyleMixin.java): "MW19 game menus": vanilla buttons (pause menu, server list, options...) get the home screen's button look.
 - [CameraMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/CameraMixin.java): Freelook: the camera takes its angles from Hooks while active (every getView*Rot read).
 - [ChatComponentMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ChatComponentMixin.java): Chat Tools + plugin chat events: filter, timestamp, highlight, stack duplicates.
 - [ChestShapeMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ChestShapeMixin.java): Fast Chests before 1.21.4: chests report RenderShape.ENTITYBLOCK_ANIMATED, which the world mesh skips; with the pack on they report MODEL so their (pack) blo...
+- [CrystalClientLevelMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/CrystalClientLevelMixin.java): Crystal Optimizer (port of Marlow's Crystal Optimizer, upstream ClientLevelMixin).
+- [CrystalLevelMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/CrystalLevelMixin.java): Crystal Optimizer (port of Marlow's Crystal Optimizer, upstream LevelMixin): targeting skips crystals a hit broke.
+- [CrystalPacketListenerMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/CrystalPacketListenerMixin.java): Crystal Optimizer: a server's marlowcrystal message (decoded by DiscardedPayloadMixin), in configuration or play.
+- [DiscardedPayloadMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/DiscardedPayloadMixin.java): Crystal Optimizer: vanilla reads a payload on a channel nobody registered with this codec, which drops the bytes.
 - [EntityCullingMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/EntityCullingMixin.java): Entity Culling: after vanilla's frustum test passes, entities fully hidden behind blocks are skipped.
 - [EntityTurnMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/EntityTurnMixin.java): Freelook: mouse movement turns the camera instead of the player.
 - [FastChestsMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/FastChestsMixin.java): Fast Chests: chests the world mesh already draws get no block entity render (1.21.9+: no render state).
@@ -296,7 +303,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [LivingEntityRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/LivingEntityRendererMixin.java): Show own nametag in third person (vanilla hides the camera entity's name).
 - [MinecraftMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MinecraftMixin.java)
 - [MouseHandlerMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MouseHandlerMixin.java)
-- [MultiPlayerGameModeMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MultiPlayerGameModeMixin.java): Observes (never changes) the player's attacks, for the combo counter.
+- [MultiPlayerGameModeMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MultiPlayerGameModeMixin.java): The player's attacks and block uses: observed for the combo counter; the Crystal Optimizer acts after a hit went to the server, the Anchor Optimizer on a use...
 - [OverlayTextureAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/OverlayTextureAccessor.java)
 - [PackCacheMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackCacheMixin.java): Exploit Protection: server resource packs are cached per account (ExploitGuard.packCache).
 - [PackDownloadMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackDownloadMixin.java): Exploit Protection: server pack downloads (HttpUtil.downloadFile's only caller) fail when the host resolves to a local address.
@@ -304,6 +311,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [PackUrlMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackUrlMixin.java): Exploit Protection: a server resource pack URL naming a local host is treated as invalid (vanilla then refuses it).
 - [ParticleEngineMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ParticleEngineMixin.java): Particle multiplier: extra client-side crit / enchanted-hit bursts on hits.
 - [PauseScreenMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PauseScreenMixin.java)
+- [PayloadCodecMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PayloadCodecMixin.java): Crystal Optimizer: vanilla's custom payload codec writes MW19's outgoing messages as id + bytes before it looks up a codec for the id.
 - [PlayerSkinWidgetAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PlayerSkinWidgetAccessor.java): Lets the home screen and Skins page turn vanilla's player model (rotationX is pitch, rotationY yaw).
 - [ScreenEffectRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ScreenEffectRendererMixin.java): Low fire: the overlay's vertical offset (-0.3) and alpha are plain constants.
 - [SignEditMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SignEditMixin.java): Exploit Protection: the lines a sign editor sends back are resolved as an unmodded client would (ExploitGuard).
@@ -313,6 +321,11 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [TitleSwapMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/TitleSwapMixin.java): Home screen: vanilla's TitleScreen is swapped for MW19's as it is set (Minecraft.setScreen until 26.1, Gui.setScreen from 26.2).
 - [VulkanUpdateMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/VulkanUpdateMixin.java): The bundled VulkanMod asks api.modrinth.com for a newer version at every start (its UpdateChecker).
 - [WeatherMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/WeatherMixin.java): Clear Weather: the client's level reports no rain or thunder (a singleplayer server keeps its real weather).
+
+## fabric · `dev.mw19.fabric.port`
+
+- [AnchorOptimizer.java](../fabric/src/main/java/dev/mw19/fabric/port/AnchorOptimizer.java): Hero's Anchor Optimizer inside MW19 (module anchor_optimizer, GRAY, off by default).
+- [CrystalOptimizer.java](../fabric/src/main/java/dev/mw19/fabric/port/CrystalOptimizer.java): Marlow's Crystal Optimizer inside MW19 (module crystal_optimizer, GRAY, off by default).
 
 ## fabric · `dev.mw19.fabric`
 

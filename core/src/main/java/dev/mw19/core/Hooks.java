@@ -32,6 +32,12 @@ public final class Hooks {
     public static boolean fastChests;
     /** Clear Weather module: the client level reports no rain or thunder. */
     public static boolean clearWeather;
+    /** Marlow's Crystal Optimizer (built in): a crystal a hit breaks is hidden at once. Volatile: the network thread
+     *  reads it when it decodes a server's message. Keep render: still drawn until the server removes it. */
+    public static volatile boolean crystalOptimizer;
+    public static boolean crystalKeepRender;
+    /** Hero's Anchor Optimizer (built in): a charged anchor that will explode becomes a ghost block at once. */
+    public static boolean anchorOptimizer;
 
     /** Exploit Protection: resolve sign/anvil text as an unmodded client would; refuse local resource pack URLs. */
     public static volatile boolean guardText, guardPackUrls;

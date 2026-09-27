@@ -4,8 +4,9 @@ Multi-version Minecraft client mod: 18 jars (1.8.9 Forge; 1.21–1.21.11 and 26.
 (phases), [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) (layering and platform contract), [`docs/DECISIONS.md`](docs/DECISIONS.md) (why), and [`docs/PROGRESS.md`](docs/PROGRESS.md) (where we are).
 
 ## Hard rules (from the owner's spec)
-- Original work only: no copied or decompiled code or assets from other clients or mods (the one exception is KeyCPS, the
-  owner's own mod, ported into [`KeyCpsModule`](core/src/main/java/dev/mw19/core/modules/KeyCpsModule.java) at their request, see DECISIONS D-018). Every dependency gets a license check in [THIRD_PARTY.md](docs/THIRD_PARTY.md).
+- Original work only: no copied or decompiled code or assets from other clients or mods. The exceptions are ports the
+  owner asked for: KeyCPS, the owner's own mod, in [`KeyCpsModule`](core/src/main/java/dev/mw19/core/modules/KeyCpsModule.java) (DECISIONS D-018); Marlow's Crystal Optimizer and
+  Hero's Anchor Optimizer (both MIT, credited, licence texts in the jar) in `fabric/.../port/` (D-028). Every dependency gets a license check in [THIRD_PARTY.md](docs/THIRD_PARTY.md).
 - Legit only: no cheats or automation, no minimap-style features. Every module is mapped in [RULES_MATRIX.md](docs/RULES_MATRIX.md), and GRAY ones ship default-off.
 - No telemetry. Network only on opt-in (listed in [README](README.md)).
 - Client code must never crash the game: guard everything (see ARCHITECTURE "Error isolation").
