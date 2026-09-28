@@ -178,6 +178,10 @@
   - 77 core tests.
 - **Owner's instances:** at the owner's request ("change it to Starlight instead of mw19"), their four Prism test
   instances run Starlight 0.8.0, with the old MW19/Kestrel jars disabled.
-- **Modrinth:** not uploaded yet. The upload renames the project to "Starlight Client" (slug `starlight-client`) and
-  needs a fresh token from the owner.
+- **Modrinth:** uploaded to the draft with a token the owner gave. The project is now "Starlight Client" (slug
+  `starlight-client`) with the new icon, 18 versions `0.8.0+mc<mc>` whose files match dist/ by SHA-512, VulkanMod's
+  embedded dependency and source zip on 1.21.9–1.21.11, and the listing text matching docs/MODRINTH.md. The 0.7.0
+  versions were deleted. Still a draft.
+- **GitHub:** not pushed. The repository has no remote, and this machine has no GitHub credentials (no `gh`, SSH key
+  or credential helper); PUBLISHING has the steps.
 

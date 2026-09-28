@@ -4,7 +4,8 @@ See also: [MODRINTH](MODRINTH.md) (the listing text), [COMPAT_MATRIX](COMPAT_MAT
 [CHANGELOG](../CHANGELOG.md).
 
 ## Modrinth
-The project is a **draft** (id `TVWRTUcc`) until the owner submits it for review. It was MW19 (slug `mw19`) up to 0.7.0.
+The project is a **draft** (id `TVWRTUcc`, now "Starlight Client" at `starlight-client`, with 0.8.0) until the owner
+submits it for review. It was MW19 (slug `mw19`) up to 0.7.0.
 [`scripts/modrinth.py`](../scripts/modrinth.py) names it "Starlight Client" with the slug `starlight-client` (plain `starlight` is taken by
 Spottedleaf's lighting mod, D-033), uploads the description ([MODRINTH](MODRINTH.md)) and icon, deletes versions that
 are not in `dist/`, and uploads every `dist/` jar as an alpha version (a version already on Modrinth is skipped, so a
