@@ -65,7 +65,7 @@ val verifyBundled = tasks.register("verifyBundled") {
     }
 }
 
-// What the jar carries besides MW19: the ported optimizers' credits and, where bundled, VulkanMod with its source and licenses.
+// What the jar carries besides Starlight: the ported optimizers' credits and, where bundled, VulkanMod with its source and licenses.
 val thirdPartyNotice = tasks.register("thirdPartyNotice") {
     val out = layout.buildDirectory.file("generated/notice/THIRD_PARTY_NOTICES.txt")
     val pinned = vulkanmod
@@ -73,7 +73,7 @@ val thirdPartyNotice = tasks.register("thirdPartyNotice") {
     outputs.file(out)
     doLast {
         val ports = """
-            MW19 contains code ported from two MIT-licensed mods (dev/mw19/fabric/port/, changes described there):
+            Starlight contains code ported from two MIT-licensed mods (dev/starlight/fabric/port/, changes described there):
             - Marlow's Crystal Optimizer by Bram and Marlow, https://github.com/Bram1903/MarlowsCrystalOptimizer
               (2.0.0-SNAPSHOT, commit 62831e6). Copyright (c) 2026 Bram and Marlow. MIT License:
               META-INF/licenses/MIT-MarlowsCrystalOptimizer.txt
@@ -87,11 +87,11 @@ val thirdPartyNotice = tasks.register("thirdPartyNotice") {
             https://modrinth.com/mod/vulkanmod/version/${pinned["modrinth"]}).
 
             VulkanMod is free software under the GNU Lesser General Public License, version 3 only (LGPL-3.0-only).
-            Copies of the LGPL and of the GNU GPL it builds on are in META-INF/licenses/ in this jar. MW19 itself is
-            MIT-licensed (LICENSE_mw19) and only chooses at launch whether VulkanMod runs.
+            Copies of the LGPL and of the GNU GPL it builds on are in META-INF/licenses/ in this jar. Starlight itself is
+            MIT-licensed (LICENSE_starlight) and only chooses at launch whether VulkanMod runs.
 
             Source code of this exact VulkanMod version: ${pinned["source"]}
-            (as a zip: ${pinned["sourceZip"]}; also distributed next to MW19's jars as sources/).
+            (as a zip: ${pinned["sourceZip"]}; also distributed next to Starlight's jars as sources/).
             To use a different or modified VulkanMod, put its jar in your mods folder: Fabric then loads the newer
             version instead of this one.
         """.trimIndent() + "\n"
@@ -99,29 +99,29 @@ val thirdPartyNotice = tasks.register("thirdPartyNotice") {
     }
 }
 
-// -Pmw19.withMods=<dir>: every jar in <dir> joins the dev run as a mod, remapped by Loom at build time (smoke.sh
+// -Pstarlight.withMods=<dir>: every jar in <dir> joins the dev run as a mod, remapped by Loom at build time (smoke.sh
 // WITH_MODS compatibility runs). Dropping them into run/<mc>/mods instead left Fabric Loader's runtime remapping to it,
 // and Sodium 0.8.14's own mixins then failed to find their targets (debug-log 2026-09-26).
 // Only for the requested target: Stonecutter also configures its active version, which must not get another version's mods.
-val requested = providers.gradleProperty("mw19.fabricTargets").orNull?.split(",")?.map { it.trim() }
+val requested = providers.gradleProperty("starlight.fabricTargets").orNull?.split(",")?.map { it.trim() }
 val extraMods = requested == null || mc in requested
-val withMods: String? = providers.gradleProperty("mw19.withMods").orNull
+val withMods: String? = providers.gradleProperty("starlight.withMods").orNull
 if (withMods != null && extraMods) dependencies {
     "modLocalRuntime"(fileTree(withMods) { include("*.jar") })
     // plain libraries those mods nest (e.g. VulkanMod's LWJGL Vulkan), unpacked by scripts/testmods.py
     "runtimeOnly"(fileTree(File(withMods).parentFile.resolve("compat-libs")) { include("*.jar") })
 }
-// -Pmw19.fabricApi=<version>: Fabric API from Fabric's Maven (its modules are nested jars that a plain file dependency skips).
-val withFabricApi: String? = providers.gradleProperty("mw19.fabricApi").orNull
+// -Pstarlight.fabricApi=<version>: Fabric API from Fabric's Maven (its modules are nested jars that a plain file dependency skips).
+val withFabricApi: String? = providers.gradleProperty("starlight.fabricApi").orNull
 if (withFabricApi != null && extraMods) dependencies { "modLocalRuntime"("net.fabricmc.fabric-api:fabric-api:$withFabricApi") }
 
-// -Pmw19.smoke=<seconds> makes the dev client drive itself (see core Smoke + scripts/smoke.sh).
-val smokeSeconds: String? = providers.gradleProperty("mw19.smoke").orNull
-// -Pmw19.smokeClicks=1: smoke.sh's xdotool helper will click the menu for real (Smoke.requestClick).
-val smokeClicks = providers.gradleProperty("mw19.smokeClicks").isPresent
-// -Pmw19.bench=1: the dev client runs the benchmark scene and quits (core Bench + scripts/bench.sh).
-val bench = providers.gradleProperty("mw19.bench").isPresent
-val benchScene: String? = providers.gradleProperty("mw19.benchScene").orNull
+// -Pstarlight.smoke=<seconds> makes the dev client drive itself (see core Smoke + scripts/smoke.sh).
+val smokeSeconds: String? = providers.gradleProperty("starlight.smoke").orNull
+// -Pstarlight.smokeClicks=1: smoke.sh's xdotool helper will click the menu for real (Smoke.requestClick).
+val smokeClicks = providers.gradleProperty("starlight.smokeClicks").isPresent
+// -Pstarlight.bench=1: the dev client runs the benchmark scene and quits (core Bench + scripts/bench.sh).
+val bench = providers.gradleProperty("starlight.bench").isPresent
+val benchScene: String? = providers.gradleProperty("starlight.benchScene").orNull
 
 loom {
     // Classes and resources as one mod in dev runs (fabric.classPathGroups): Fabric then exposes the classes before
@@ -133,15 +133,15 @@ loom {
         jvmArguments.add("-Dmixin.debug.export=true")
         // Logs an error for any injector that matched fewer targets than expected, even with require = 0,
         // so a silently skipped optional mixin fails the smoke test. Not with other mods present: their optional
-        // injectors would trip it too (MW19's own wiring is still checked by scripts/mixin-audit.py).
+        // injectors would trip it too (Starlight's own wiring is still checked by scripts/mixin-audit.py).
         if (withMods == null) jvmArguments.add("-Dmixin.debug.countInjections=true")
         if (smokeSeconds != null) {
-            jvmArguments.add("-Dmw19.smoke=1")
-            jvmArguments.add("-Dmw19.smoke.seconds=$smokeSeconds")
-            if (smokeClicks) jvmArguments.add("-Dmw19.smoke.clicks=true")
+            jvmArguments.add("-Dstarlight.smoke=1")
+            jvmArguments.add("-Dstarlight.smoke.seconds=$smokeSeconds")
+            if (smokeClicks) jvmArguments.add("-Dstarlight.smoke.clicks=true")
         }
-        if (bench) jvmArguments.add("-Dmw19.bench=1")
-        if (benchScene != null) jvmArguments.add("-Dmw19.bench.scene=$benchScene")
+        if (bench) jvmArguments.add("-Dstarlight.bench=1")
+        if (benchScene != null) jvmArguments.add("-Dstarlight.bench.scene=$benchScene")
     }
 }
 
@@ -174,7 +174,7 @@ tasks.processResources {
 tasks.named<Jar>("jar") {
     dependsOn(bundle, verifyBundled, thirdPartyNotice)
     from({ bundle.map { zipTree(it) } }) { exclude("META-INF/MANIFEST.MF") }
-    from(rootProject.file("LICENSE")) { rename { "LICENSE_mw19" } }
+    from(rootProject.file("LICENSE")) { rename { "LICENSE_starlight" } }
     from(thirdPartyNotice)
     from(rootProject.file("docs/licenses")) {
         into("META-INF/licenses")
@@ -192,7 +192,7 @@ val vulkanSource = tasks.register("vulkanSource") {
         val f = out.asFile.apply { parentFile.mkdirs() }
         if (!f.exists()) {
             val conn = URI(pinned!!["sourceZip"]!!).toURL().openConnection()
-            conn.setRequestProperty("User-Agent", "itzslcs/mw19-build")
+            conn.setRequestProperty("User-Agent", "itzslcs/starlight-build")
             conn.getInputStream().use { input -> f.outputStream().use { output -> input.copyTo(output) } }
         }
     }

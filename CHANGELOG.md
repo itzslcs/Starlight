@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.8.0
+- **MW19 is now Starlight:** a new name, logo and icon, and a gold-on-night-blue theme as the default. Your settings
+  come along: the `MW19/` folder becomes `Starlight/` on first start, and MW19 profile codes still import. Remove the
+  old MW19 jar from your mods folder: the two cannot run together, and Fabric says so at start.
+- **A scene for every theme:** each theme now has its own animated backdrop behind the menus. Starlight has a night sky
+  with twinkling stars, a shooting star and a crescent moon. Ember keeps 0.7.0's embers and skyline. Aurora has northern
+  lights over pines, Nebula has glowing gas clouds, Glacier and Crystal have snowfall over mountains, Sakura has falling
+  petals, and Daylight and White have blocky clouds and a square sun. Black is the night sky on pure black. The Themes
+  page shows every theme live. Old theme names carry over: Violet is now Nebula, Forest is Aurora, Rose is Sakura.
+- **Tier Tagger is back** (Mods → Utility, off by default): PvP tiers from MCTiers next to player names, on nametags
+  and in the tab list. SubTiers or your own list also work. It looks players up online only while it is on, and it is
+  off on Hypixel.
+- **Bind profiles** (Keybinds page): save your Minecraft key binds as a profile and switch between profiles in one
+  click. Mark one as the default (★) and every new instance starts with it. Profiles are shared by all your instances
+  and versions: one saved on 1.21 works on 1.8.9 too.
+- **Fixed:** on 26.2 and 26.3 the pause menu showed no Starlight backdrop (since 0.7.0), and subtitles disappeared
+  while a Starlight-styled menu was open. Signs, books and command blocks keep 26.2's see-through background. The HUD
+  editor opened from the home screen shows the theme's scene instead of black. Switching Fast Chests off could leave
+  every chest drawn twice until the next restart (seen after upgrading from MW19).
+
 ## 0.7.0
 - **A look of its own:** buttons are now keycaps, with a lit top edge and a side that glows orange on hover. Sliders
   match. Behind the menus there is a dark backdrop with a warm glow and rising embers, and on the home screen a

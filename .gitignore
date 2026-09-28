@@ -26,3 +26,4 @@ bench-out/
 fabric/versions/
 legacy/.gradle/
 .worktrees/
+__pycache__/

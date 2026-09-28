@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Pins the VulkanMod build bundled into each MW19 Fabric jar (fabric/bundled.json, read by fabric/build.gradle.kts):
+"""Pins the VulkanMod build bundled into each Starlight Fabric jar (fabric/bundled.json, read by fabric/build.gradle.kts):
 the newest release with a known source commit for that Minecraft version (see SOURCES), with its Modrinth version id,
 SHA-512 and source links. VulkanMod is LGPL-3.0-only (docs/THIRD_PARTY.md); versions without such a build, or with
 Minecraft's own Vulkan renderer (26.2+), get none. Run it to move to newer VulkanMod builds, then smoke-test those targets:
 `PROD=1 VK_DRIVER_FILES=<lavapipe icd> scripts/smoke.sh <mc>` (docs/PERF.md "Vulkan")."""
 import json, os, urllib.request
 
-UA = {"User-Agent": "itzslcs/mw19-tests/0.1.0"}
+UA = {"User-Agent": "itzslcs/starlight-tests/0.1.0"}
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-VANILLA_VULKAN = ("26.2", "26.3")  # Minecraft's own Vulkan backend (MW19's Performance page switch)
+VANILLA_VULKAN = ("26.2", "26.3")  # Minecraft's own Vulkan backend (Starlight's Performance page switch)
 REPO = "https://github.com/xCollateral/VulkanMod"
 # LGPL-3.0 means shipping a build obliges us to offer its exact source. Only builds whose release commit is public
 # (checked by hand: gradle.properties at the commit carries that mod_version) are bundled; the source zip of that

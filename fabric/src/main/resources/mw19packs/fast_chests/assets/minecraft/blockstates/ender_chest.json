@@ -1,1 +1,0 @@
-{"variants":{"facing=north":{"model":"mw19:block/fast_chest/ender"},"facing=east":{"model":"mw19:block/fast_chest/ender","y":90},"facing=south":{"model":"mw19:block/fast_chest/ender","y":180},"facing=west":{"model":"mw19:block/fast_chest/ender","y":270}}}

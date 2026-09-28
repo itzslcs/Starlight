@@ -25,9 +25,9 @@ Targets: 18 jars (see [`versions.json`](../versions.json)). Extra user requests 
 ## Verification tooling
 - `./gradlew buildAll`: all jars, bundled sources, Prism zips, SHA256SUMS.
 - `./gradlew :core:test`: unit tests.
-- `scripts/smoke.sh <mc>`: dev client under `xvfb-run` (Mesa llvmpipe). With `-Dmw19.smoke=1` the mod itself drives
+- `scripts/smoke.sh <mc>`: dev client under `xvfb-run` (Mesa llvmpipe). With `-Dstarlight.smoke=1` the mod itself drives
   title → our GUI → world (quick-play or integrated server) → GUI → screenshots → 60 s → quit. The script then fails on
-  `Exception`, `Mixin apply failed`, `InvalidInjectionException`, `[MW19] module ... failed`, or a missing smoke marker.
+  `Exception`, `Mixin apply failed`, `InvalidInjectionException`, `[Starlight] module ... failed`, or a missing smoke marker.
 - `scripts/prodtest.sh <mc>` (Phase 7): launches the **built jar** in a production layout (real Fabric Loader +
   intermediary, or Forge universal + LaunchWrapper), downloaded from Mojang/Fabric/Forge metadata. This catches
   refmap/remap problems that dev runs cannot.

@@ -8,7 +8,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RUN="$ROOT/run/$MC"
 OUT="$ROOT/bench-out/$MC"
 rm -rf "$OUT" && mkdir -p "$OUT" "$RUN"
-rm -rf "$RUN/saves/mw19-bench" "$RUN/logs/latest.log" "$RUN/MW19"
+rm -rf "$RUN/saves/starlight-bench" "$RUN/logs/latest.log" "$RUN/Starlight"
 # WITH_MODS="sodium ..." adds those mods from Modrinth to the dev run (compatibility/perf checks); cleared otherwise.
 rm -rf "$RUN/mods" && mkdir -p "$RUN/mods"
 if [ -n "${WITH_MODS:-}" ] && [ "$MC" != "1.8.9" ]; then python3 "$ROOT/scripts/testmods.py" "$MC" "$RUN/mods" $WITH_MODS || exit 1; fi
@@ -31,15 +31,15 @@ soundCategory_master:0.0
 OPT
 if [ "$MC" = "1.8.9" ]; then
   (cd "$ROOT" && ./gradlew :api:jar :core:jar -q) || { echo "FAIL build core"; exit 1; }
-  CMD=(bash -c "cd '$ROOT/legacy' && ./gradlew runClient --console=plain -Pmw19.bench=1")
+  CMD=(bash -c "cd '$ROOT/legacy' && ./gradlew runClient --console=plain -Pstarlight.bench=1")
 else
-  CMD=("$ROOT/gradlew" -p "$ROOT" ":fabric:$MC:runClient" --console=plain "-Pmw19.bench=1" "-Pmw19.fabricTargets=$MC"
-       ${BENCH_SCENE:+"-Pmw19.benchScene=$BENCH_SCENE"})
+  CMD=("$ROOT/gradlew" -p "$ROOT" ":fabric:$MC:runClient" --console=plain "-Pstarlight.bench=1" "-Pstarlight.fabricTargets=$MC"
+       ${BENCH_SCENE:+"-Pstarlight.benchScene=$BENCH_SCENE"})
 fi
 echo "bench $MC: running (log: $OUT/gradle.log)"
 xvfb-run -a -s "-screen 0 1280x720x24" env LIBGL_ALWAYS_SOFTWARE=1 timeout 900 "${CMD[@]}" > "$OUT/gradle.log" 2>&1
 echo "exit=$?" > "$OUT/bench.txt"
 cp "$RUN/logs/latest.log" "$OUT/latest.log" 2>/dev/null || true
 # in run order (latest.log only; gradle.log duplicates it)
-grep -h -o 'MW19 BENCH .*\|BENCH: scene has .*' "$OUT/latest.log" 2>/dev/null >> "$OUT/bench.txt"
+grep -h -o 'Starlight BENCH .*\|BENCH: scene has .*' "$OUT/latest.log" 2>/dev/null >> "$OUT/bench.txt"
 cat "$OUT/bench.txt"

@@ -4,10 +4,11 @@ See also: [PLAN](PLAN.md), [ARCHITECTURE](ARCHITECTURE.md), [debug-log](debug-lo
 
 Newest last. Each entry states the decision, why, and what would change it.
 
-## D-001 Name: MW19 (was the placeholder "Kestrel")
-- CLIENT_NAME = **MW19** ("MW19 Client" in full), MOD_ID = **mw19**, BASE_PACKAGE = **dev.mw19**, LICENSE = **MIT**.
-  The owner picked the name on 2026-09-26 (D-019). "Kestrel" was a placeholder until then.
-- Config/plugin dir: `<gameDir>/MW19/` (spec: `<gameDir>/[CLIENT_NAME]/plugins/`).
+## D-001 Name: Starlight (was MW19, and before that the placeholder "Kestrel")
+- CLIENT_NAME = **Starlight** ("Starlight Client" in full), MOD_ID = **starlight_client**, BASE_PACKAGE = **dev.starlight**,
+  LICENSE = **MIT**. The owner renamed the placeholder "Kestrel" to MW19 on 2026-09-26 (D-019), and MW19 to Starlight on
+  2026-09-27 (D-033). The mod id is not plain `starlight`: that is Spottedleaf's lighting mod.
+- Config/plugin dir: `<gameDir>/Starlight/` (spec: `<gameDir>/[CLIENT_NAME]/plugins/`).
 - The display name, mod id and version live in [`gradle.properties`](../gradle.properties).
 
 ## D-002 1.8.9 loader = Forge 1.8.9-11.15.1.2318
@@ -34,9 +35,9 @@ Side effect: mod assets are not loaded without Fabric API's resource loader, so 
 This follows the spec: names then line up with unobfuscated 26.x, which minimises Stonecutter conditionals.
 
 ## D-006 Mixin failure policy (to be verified empirically in Phase 1)
-- [`mw19.mixins.json`](../fabric/src/main/resources/mw19.mixins.json) holds core hooks with `"required": false` and `defaultRequire: 1`. A failed hook is logged loudly,
+- [`starlight.mixins.json`](../fabric/src/main/resources/starlight.mixins.json) holds core hooks with `"required": false` and `defaultRequire: 1`. A failed hook is logged loudly,
   which the smoke test catches, but does not stop the game.
-- [`mw19.optional.mixins.json`](../fabric/src/main/resources/mw19.optional.mixins.json) holds feature mixins with `"required": false` and `defaultRequire: 0`, gated by an
+- [`starlight.optional.mixins.json`](../fabric/src/main/resources/starlight.optional.mixins.json) holds feature mixins with `"required": false` and `defaultRequire: 0`, gated by an
   `IMixinConfigPlugin` that checks loaded mods (e.g. skips our culling when Sodium/EntityCulling is present).
 - A runtime **hook watchdog** records which hooks have fired. If a core hook has not fired after the first world load,
   a toast and the About/Compat page report it.
@@ -64,7 +65,7 @@ applies to any publicly available mod, regardless of it being allowed on the Hyp
 1. The default stats provider uses **only data the client already receives**: tab-list/nametag prefixes (e.g. Bedwars
    stars), scoreboard, and chat (session final kills/beds). It needs no key and no network.
 2. An **API-key provider** exists for a developer's *own* registered Hypixel application in a *private* build. It is compiled in
-   only with `-Pmw19.privateHypixelApi=true`, so release jars from `buildAll` do not contain it. When present it shows
+   only with `-Pstarlight.privateHypixelApi=true`, so release jars from `buildAll` do not contain it. When present it shows
    the policy text before accepting a key, and it caches for hours (policy: "caching that expires either hours, or even
    days later") and honours `RateLimit-*` headers and 429s.
 If the owner registers a Hypixel production application for this client, flip the flag and document the approval.
@@ -106,67 +107,68 @@ nameplate decorations apply to it too.
 
 ## D-017 Prism Launcher (user request)
 Standard jars work in Prism (Fabric Loader component, or the Forge 11.15.1.2318 component for 1.8.9). `buildAll` also
-emits importable Prism instance zips (`dist/prism/MW19-<mc>.zip`) and [`docs/PRISM.md`](PRISM.md). Verification uses a
+emits importable Prism instance zips (`dist/prism/Starlight-<mc>.zip`) and [`docs/PRISM.md`](PRISM.md). Verification uses a
 production-layout launch (remapped jar, real Fabric Loader/Forge, no Gradle dev runtime) because driving the user's
 Prism install would use their Microsoft accounts.
 
 ## D-018 KeyCPS replaces the CPS counter (user request, 2026-09-25)
-The owner asked for MW19's CPS counter to be replaced by **KeyCPS** (modrinth.com/mod/keycps), their own
-keystrokes + CPS mod, and for it to appear in MW19's Mods GUI in place of KeyCPS's own settings screen. Authorship
+The owner asked for Starlight's CPS counter to be replaced by **KeyCPS** (modrinth.com/mod/keycps), their own
+keystrokes + CPS mod, and for it to appear in Starlight's Mods GUI in place of KeyCPS's own settings screen. Authorship
 was checked: the local KeyCPS repository (`~/Desktop/KeyCPS`, 1.6.1) is committed by the owner's address. Its
 fabric.mod.json declares MIT while the Modrinth page lists All-Rights-Reserved. Either way, the copyright holder asked
-for this integration. If the standalone mod (id `keycps`) is also installed, MW19 shows a startup notice to remove it,
+for this integration. If the standalone mod (id `keycps`) is also installed, Starlight shows a startup notice to remove it,
 because two overlays would draw.
-- **Ported, not bundled.** [`KeyCpsModule`](../core/src/main/java/dev/mw19/core/modules/KeyCpsModule.java) (core, Java 8) re-implements KeyCPS 1.6.1's HUD (layout, fade, space-bar line,
-  CPS inside the mouse keys, CPS warning, rainbow, always-LMB/RMB, per-key rates) and its counting ([`InputRates`](../core/src/main/java/dev/mw19/core/modules/InputRates.java): per
-  binding, from input events, key repeat included) on MW19's platform API. Nesting the KeyCPS jar was rejected: it
-  needs Fabric API (MW19 is Fabric-API-free), it has its own Right Shift settings screen and move screen (a second GUI
+- **Ported, not bundled.** [`KeyCpsModule`](../core/src/main/java/dev/starlight/core/modules/KeyCpsModule.java) (core, Java 8) re-implements KeyCPS 1.6.1's HUD (layout, fade, space-bar line,
+  CPS inside the mouse keys, CPS warning, rainbow, always-LMB/RMB, per-key rates) and its counting ([`InputRates`](../core/src/main/java/dev/starlight/core/modules/InputRates.java): per
+  binding, from input events, key repeat included) on Starlight's platform API. Nesting the KeyCPS jar was rejected: it
+  needs Fabric API (Starlight is Fabric-API-free), it has its own Right Shift settings screen and move screen (a second GUI
   and a key clash), it would sit outside profiles, server rules and the HUD editor, and it does not exist for 1.8.9.
 - **Mapping of KeyCPS's UI:** module settings (Mods page) replace the settings screen; the HUD editor replaces "Move HUD"
-  and the scale slider and supplies text colour and shadow; the module toggle and MW19's keybinds replace "Toggle HUD".
-  Not ported: the first-join chat tip and the 14 translations (MW19's UI is English-only for now).
+  and the scale slider and supplies text colour and shadow; the module toggle and Starlight's keybinds replace "Toggle HUD".
+  Not ported: the first-join chat tip and the 14 translations (Starlight's UI is English-only for now).
 - The old `cps` and `keystrokes` modules and `ClickTracker` were removed. KeyCPS draws keystrokes and CPS in one element,
   and the first all-modules smoke run showed the old keystrokes element drawn on top of it.
-- The ported code is part of MW19 and so falls under MW19's MIT licence. The standalone KeyCPS mod keeps its own
+- The ported code is part of Starlight and so falls under Starlight's MIT licence. The standalone KeyCPS mod keeps its own
   licence.
 - 1.8.9 limitation: LWJGL 2 sends no key-repeat events in game, so held keyboard keys count once there.
 
 ## D-019 Rename to MW19 (owner request, 2026-09-26)
+*Superseded by D-033: the client is now Starlight.*
 Everything was renamed from the placeholder: packages `dev.kestrel` → `dev.mw19` (including the plugin API; no third-party
 plugins existed yet), mod id `mw19`, mixin configs `mw19.*.json`, jars `MW19-<version>+mc<mc>.jar`, config folder
 `MW19/`, smoke markers `MW19 SMOKE PASS`. Compatibility for the owner's existing setup: a `Kestrel/` folder is moved to
-`MW19/` on first launch, and old `KESTREL-P1:` profile codes still import ([`RenameCompatTest`](../core/src/test/java/dev/mw19/core/RenameCompatTest.java)). "MW19" is also the
+`MW19/` on first launch, and old `KESTREL-P1:` profile codes still import ([`RenameCompatTest`](../core/src/test/java/dev/starlight/core/RenameCompatTest.java)). "MW19" is also the
 common nickname for Call of Duty: Modern Warfare (2019). That is fine as a name, but the Modrinth page should not
 use Call of Duty branding.
 
 ## D-020 "Max FPS client": performance packs by reference, native Vulkan, no bundling (owner request, 2026-09-26)
-*The "no bundling" part is revised by D-024 (VulkanMod ships inside MW19 where its source is public).*
+*The "no bundling" part is revised by D-024 (VulkanMod ships inside Starlight where its source is public).*
 The owner pointed at Frost Client (frostclient.eu) as the bar. From its public site: Minecraft 1.21+, **Sodium and
 VulkanMod bundled**, "Vulkan by default", 50+ bundled mods, capes and badges, a paid tier, and a claim of 85 → 810 FPS
 (RTX 3060 Ti, 4K, 20 chunks). That gain comes from Sodium and VulkanMod, not from client code. Frost's launcher and files
 were not unpacked, run or copied. Its config folder holds account logins and was not opened.
-- **MW19's own work:** Entity Culling, FPS Boost, the Vulkan switch on 26.2+ (Minecraft's own RenderPearl Vulkan backend,
+- **Starlight's own work:** Entity Culling, FPS Boost, the Vulkan switch on 26.2+ (Minecraft's own RenderPearl Vulkan backend,
   which falls back to OpenGL), and an allocation-free HUD. Measured in [PERF](PERF.md).
-- **Other people's performance mods ship by reference:** [`scripts/mrpack.py`](../scripts/mrpack.py) writes `MW19 Performance` Modrinth packs
+- **Other people's performance mods ship by reference:** [`scripts/mrpack.py`](../scripts/mrpack.py) writes `Starlight Performance` Modrinth packs
   (`.mrpack`) per version. Their index lists Modrinth CDN URLs and hashes for Sodium, ImmediatelyFast, FerriteCore and
-  Lithium, and the launcher downloads them from Modrinth, so no third-party jar is redistributed. Only mods tested with MW19
+  Lithium, and the launcher downloads them from Modrinth, so no third-party jar is redistributed. Only mods tested with Starlight
   ([COMPAT_MATRIX](COMPAT_MATRIX.md)) go in.
 - **VulkanMod** (LGPL-3.0) exists for 1.21–1.21.5, 1.21.9–1.21.11 and 26.1.x. It replaces the renderer and conflicts with
   Sodium, so it is not in the default pack. On 26.2+ Minecraft's own Vulkan backend makes it unnecessary.
 
-## D-021 Exploit Protection: ExploitPreventer's list, MW19's own code, GRAY (owner request, 2026-09-26)
+## D-021 Exploit Protection: ExploitPreventer's list, Starlight's own code, GRAY (owner request, 2026-09-26)
 The owner asked to build [ExploitPreventer](https://modrinth.com/mod/exploitpreventer) (NikOverflow, MIT, Fabric
-1.21.9+) into MW19. Only its public Modrinth description was read, for the list of exploits; its source was not read
-or copied (hard rule: original work only). MW19's version is written from the behaviour of vanilla's own code (javap):
+1.21.9+) into Starlight. Only its public Modrinth description was read, for the list of exploits; its source was not read
+or copied (hard rule: original work only). Starlight's version is written from the behaviour of vanilla's own code (javap):
 - **Sign and anvil text.** The sign editor's constructor turns each line into a string with `Component.getString()`,
   which resolves translation keys and keybinds with the client's language and bindings, and sends those strings back.
-  A server can therefore open an editor with a mod's key and read whether it translated. MW19 re-resolves the lines
-  after the constructor ([`SignEditMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/SignEditMixin.java)) and the anvil's name field ([`AnvilNameMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/AnvilNameMixin.java)) as an unmodded client
+  A server can therefore open an editor with a mod's key and read whether it translated. Starlight re-resolves the lines
+  after the constructor ([`SignEditMixin`](../fabric/src/main/java/dev/starlight/fabric/mixin/SignEditMixin.java)) and the anvil's name field ([`AnvilNameMixin`](../fabric/src/main/java/dev/starlight/fabric/mixin/AnvilNameMixin.java)) as an unmodded client
   with default bindings would: keys from vanilla's own `en_us.json` translate, other keys stay as written, vanilla
   keybinds show their default key. 1.8.9 needs nothing here: it sends unedited sign lines back as components, and anvil
   names are plain strings.
 - **Resource pack addresses.** A pack URL may not name a local host or a loopback, private, link-local or unique-local
-  address ([`LocalAddress`](../core/src/main/java/dev/mw19/core/net/LocalAddress.java)): checked without DNS when the request arrives and again with DNS
+  address ([`LocalAddress`](../core/src/main/java/dev/starlight/core/net/LocalAddress.java)): checked without DNS when the request arrives and again with DNS
   on the download thread (Fabric), or before the download on a helper thread (1.8.9). 1.8.9 also refuses `level://`
   paths that leave the world folder, and `level://` outside singleplayer: vanilla 1.8.9 answers whether any file exists.
 - **Pack cache per account (1.21+).** Server packs are cached under `downloads/account-<hash>`, so the cache cannot
@@ -187,24 +189,24 @@ more modules.
   sanitised file name inside `resourcepacks/`. Icons load only when they are PNG (the game cannot decode WebP), else a
   letter is shown.
 - **Host World** is vanilla's Open to LAN plus two things: UPnP port forwarding on the player's router
-  ([`Upnp`](../core/src/main/java/dev/mw19/core/net/Upnp.java), SSDP + SOAP; XML with DTDs off; answers only from the device that responded; a 1-hour lease
+  ([`Upnp`](../core/src/main/java/dev/starlight/core/net/Upnp.java), SSDP + SOAP; XML with DTDs off; answers only from the device that responded; a 1-hour lease
   renewed while hosting, removed on stop, world close or exit) and an invite-only whitelist whenever the world is open
   to the internet. There is no relay server: behind carrier-grade NAT or with UPnP off, the page says so and names the
   port to forward by hand. Opening a port is a real exposure, so the internet switch is separate and the whitelist
   cannot be skipped.
-- **Home screen:** vanilla's panorama (1.21+: `Screen.renderPanorama`; 1.8.9: MW19's own cube renderer, because
+- **Home screen:** vanilla's panorama (1.21+: `Screen.renderPanorama`; 1.8.9: Starlight's own cube renderer, because
   vanilla's is private), a logo drawn from pixel blocks, the player model with a Skins button, and flat buttons.
   The particles and tip card were removed.
 - **Not built: account switching.** An in-game switcher that reads the launcher's saved accounts would handle other
-  programs' stored login tokens, which MW19's rules forbid (never read launcher account files). Launchers switch
+  programs' stored login tokens, which Starlight's rules forbid (never read launcher account files). Launchers switch
   accounts themselves.
 
 ## D-023 Graphics presets with auto-detection, and the community suggestion list (owner request, 2026-09-26)
 The owner passed on a list of player suggestions for Frost Client ("frost = mw19") and asked for low/mid/high video
-configs with automatic detection on first start, since MW19's focus is maximum FPS, plus smooth animations.
-- **Presets** ([`VideoPreset`](../core/src/main/java/dev/mw19/core/perf/VideoPreset.java)): values are platform-neutral ids; every version applies the ones it has. Values stay
+configs with automatic detection on first start, since Starlight's focus is maximum FPS, plus smooth animations.
+- **Presets** ([`VideoPreset`](../core/src/main/java/dev/starlight/core/perf/VideoPreset.java)): values are platform-neutral ids; every version applies the ones it has. Values stay
   inside vanilla's option ranges (read with javap), because vanilla replaces an out-of-range value with its default.
-- **Detection** ([`HardwareTier`](../core/src/main/java/dev/mw19/core/perf/HardwareTier.java)) is a heuristic from the renderer string (26.2+ also reports integrated/discrete/CPU):
+- **Detection** ([`HardwareTier`](../core/src/main/java/dev/starlight/core/perf/HardwareTier.java)) is a heuristic from the renderer string (26.2+ also reports integrated/discrete/CPU):
   software renderers and older Intel/mobile GPUs get Potato, Iris Xe and AMD APUs Low, GTX 10/16, RX 400-5000 and
   strong APUs Medium, RTX, RX 6000+ and Arc B-series High; 4 or fewer CPU threads, or under 2 GB of heap, each step down.
   It runs once, on the first start of a fresh install (no saved profile), never raises view distance, and says what it
@@ -213,15 +215,15 @@ configs with automatic detection on first start, since MW19's focus is maximum F
   since 0.2.0), vanity themes (Black, White, Crystal), finer crosshair, Hitboxes, TNT Timer, Reach Display (DISALLOWED
   on Hypixel), Quick Commands (GRAY), saturation and day counter (0.3.0), world hosting with a shareable address (0.3.0).
 - **Not built, and why:** a launcher, installers, update systems, RAM settings and instance/mod management are launcher
-  features (Prism and the Modrinth app do them; MW19 is a mod). Cracked/offline or alternative authentication and an
-  account switcher conflict with MW19's rules (legit only; never touch stored logins). Capes, emotes, friends, badges
-  and cloud-synced cosmetics need servers MW19 does not have (and no telemetry). Free cam gives an unfair view on
+  features (Prism and the Modrinth app do them; Starlight is a mod). Cracked/offline or alternative authentication and an
+  account switcher conflict with Starlight's rules (legit only; never touch stored logins). Capes, emotes, friends, badges
+  and cloud-synced cosmetics need servers Starlight does not have (and no telemetry). Free cam gives an unfair view on
   servers. Bedrock and 1.8(.0) are other games/targets. Discord Rich Presence needs a Discord application id that only
   the owner can create. Motion blur, colour saturation and connected glass need shader or resource-pack work per
   version and are open for later. Monetisation was set aside by the owner.
 
-## D-024 VulkanMod inside the MW19 jar, not Sodium (owner request, 2026-09-26)
-The owner asked for Sodium or VulkanMod inside MW19 so the mods folder holds one jar.
+## D-024 VulkanMod inside the Starlight jar, not Sodium (owner request, 2026-09-26)
+The owner asked for Sodium or VulkanMod inside Starlight so the mods folder holds one jar.
 - **Not Sodium.** Its licence (PolyForm Shield 1.0.0) forbids using it to provide a product that competes with it, and
   says a product marketed as a practical substitute "definitely competes". A max-FPS client that ships Sodium inside is
   that substitute, so it is not bundled (the `.mrpack` packs still reference it, D-020).
@@ -235,12 +237,12 @@ The owner asked for Sodium or VulkanMod inside MW19 so the mods folder holds one
   26.1.x ports, and shipping a build without its source would break the licence, so those jars bundle nothing. 26.2+
   have Minecraft's own Vulkan backend (D-020); 1.21.6–1.21.8 have no VulkanMod.
 - **Never a crash on PCs without Vulkan.** VulkanMod has no fallback: without a Vulkan 1.2 driver it stops the game
-  ("Failed to create instance"). [`RendererSwitch`](../fabric/src/main/java/dev/mw19/fabric/RendererSwitch.java) is a Fabric language adapter, which Fabric creates after choosing the
+  ("Failed to create instance"). [`RendererSwitch`](../fabric/src/main/java/dev/starlight/fabric/RendererSwitch.java) is a Fabric language adapter, which Fabric creates after choosing the
   mods and before reading their entrypoints and mixin configs; when this session should be OpenGL it removes VulkanMod's
   entrypoints and mixin configs from its metadata, so the jar stays loaded but none of it runs. It also removes VulkanMod's
   "contains a Fabric renderer" flag, which would otherwise make Fabric API's own renderer (Indigo) stand down. A fresh install starts on
-  OpenGL, [`VulkanProbe`](../fabric/src/main/java/dev/mw19/fabric/VulkanProbe.java) asks the driver in the background for a real (non-CPU) Vulkan 1.2 device, and "ok" switches the next
-  start to Vulkan. A start that never reaches the menu leaves `MW19/vulkan-starting` behind and the following start stays
+  OpenGL, [`VulkanProbe`](../fabric/src/main/java/dev/starlight/fabric/VulkanProbe.java) asks the driver in the background for a real (non-CPU) Vulkan 1.2 device, and "ok" switches the next
+  start to Vulkan. A start that never reaches the menu leaves `Starlight/vulkan-starting` behind and the following start stays
   on OpenGL (and says why) until the player picks Vulkan again on the Performance page. Sodium, Iris or another renderer
   mod also keeps it off. A VulkanMod the player installed separately is left alone.
 - Verified in a real Fabric production launch ([`scripts/prodlaunch.py`](../scripts/prodlaunch.py), `PROD=1 scripts/smoke.sh`) on Mesa's software Vulkan
@@ -253,7 +255,7 @@ drawn as a block it is baked into the world mesh once.
 - The models are generated by [`scripts/fast-chests.py`](../scripts/fast-chests.py) from the vanilla texture layout (a standard box unwrap), not copied:
   base, lid and latch per chest type, single and both halves, with each face's region rotated as the texture stores it.
   The chest textures join the block atlas through an atlas source file (atlas definitions from every pack are merged).
-- The pack is offered by MW19's own entry in the client pack scan ([`PackSourceMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/PackSourceMixin.java)) only while the module is on, and
+- The pack is offered by Starlight's own entry in the client pack scan ([`PackSourceMixin`](../fabric/src/main/java/dev/starlight/fabric/mixin/PackSourceMixin.java)) only while the module is on, and
   is "required" then, so the module is the only switch; toggling reloads resources once. `Pack`, `PackLocationInfo`,
   `Pack.Metadata` and `PathPackResources` have the same shape from 1.21 to 26.3, so one code path serves every version.
 - The block entity renderer skips chests whose model the pack provides. Before 1.21.4 chests report the
@@ -273,13 +275,13 @@ Session Stats addons, the name-decoration hooks that only plugins used (four mix
 are gone. The `api/` module keeps the module, setting, event and render types core itself is built from. Old configs
 keep working: their `pluginConsent`/`pluginDisabled` keys are simply unused.
 
-## D-027 Minecraft's own menus in the MW19 style (owner request, 2026-09-26)
+## D-027 Minecraft's own menus in the Starlight style (owner request, 2026-09-26)
 "Make [the pause menu and server list] MW19-like, for all versions." Vanilla screens are kept (their per-version
 behaviour, e.g. disconnecting, and buttons other mods add) and only their buttons are redrawn like the home screen's: dark
-glass, a thin edge that lights up on hover ([`ButtonStyleMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/ButtonStyleMixin.java); 1.8.9 [`GuiButtonMixin`](../legacy/src/main/java/dev/mw19/forge/mixin/GuiButtonMixin.java)). Up to 1.21.10
-the button draws its background and label in one method, so MW19 draws both; from 1.21.11 only the background sprite is
-replaced. The pause menu gets a row under Back to Game with **MW19 Menu** and **Packs** (the pack browser in game);
-everything below moves down one row. Themes → "MW19 game menus" turns the restyle off.
+glass, a thin edge that lights up on hover ([`ButtonStyleMixin`](../fabric/src/main/java/dev/starlight/fabric/mixin/ButtonStyleMixin.java); 1.8.9 [`GuiButtonMixin`](../legacy/src/main/java/dev/starlight/forge/mixin/GuiButtonMixin.java)). Up to 1.21.10
+the button draws its background and label in one method, so Starlight draws both; from 1.21.11 only the background sprite is
+replaced. The pause menu gets a row under Back to Game with **Starlight Menu** and **Packs** (the pack browser in game);
+everything below moves down one row. Themes → "Starlight game menus" turns the restyle off.
 
 
 ## D-028 Marlow's Crystal Optimizer and Hero's Anchor Optimizer ported in (owner request, 2026-09-27)
@@ -289,7 +291,7 @@ only", like KeyCPS (D-018). Both are MIT, so the port keeps their copyright and 
 optimizers").
 - **Behaviour is upstream's**, from Marlow's Crystal Optimizer 2.0.0-SNAPSHOT (commit 62831e6) and HerosAnchorOptimizer
   1.1.3 (commit 8e70b8a). The crystal optimizer's server protocol is kept byte for byte (upstream PROTOCOL.md), because it
-  is what lets servers allow or refuse it. MW19 registers `marlowcrystal:opt_out` and `marlowcrystal:challenge`, sends
+  is what lets servers allow or refuse it. Starlight registers `marlowcrystal:opt_out` and `marlowcrystal:challenge`, sends
   `marlowcrystal:version` on join (not in singleplayer), and answers challenges. An opt-out switches it off for that
   connection and shows upstream's chat notice. The version packet names the ported build (2.0.0, snapshot, Fabric, commit
   62831e6, dirty) with that commit's time.
@@ -299,7 +301,7 @@ optimizers").
     a foreign payload.
   - Kept crystals live in a list, not in fields on the entity.
   - The opt-out belongs to the connection object (weakly held), not a flag reset on disconnect.
-  - The anchor ghost is vanilla purple stained glass, replaceable only where MW19 put it, instead of a registered block.
+  - The anchor ghost is vanilla purple stained glass, replaceable only where Starlight put it, instead of a registered block.
     It is set inside the use's block prediction, so the server's answer always replaces it.
   - Spectators get no ghost (upstream's hook ran before vanilla's spectator check).
 - **Rules:** both are GRAY and default off (client-side prediction of game actions, and the crystal one talks to the
@@ -318,14 +320,15 @@ optimizers").
   server with an opt-out plugin was tested.
 
 ## D-029 MW19's own look: keycaps, embers, a blocky skyline (owner feedback, 2026-09-27)
+*The keycaps stay; the ember backdrop became the Ember theme's scene in 0.8.0 (D-031).*
 "instead of just making the cubes black in the menus make it like actual buttons that look nice, and instead of the
 normal backdrop make it something like mw19, the buttons are just bland and everything looks AI, make it unique."
-The look comes from what is already MW19's own: the logo's letters made of blocks, with depth, and the orange "19".
-- **Keycaps** ([`MenuStyle`](../core/src/main/java/dev/mw19/core/gui/MenuStyle.java)):
+The look came from what was already MW19's own: the logo's letters made of blocks, with depth, and the orange "19".
+- **Keycaps** ([`MenuStyle`](../core/src/main/java/dev/starlight/core/gui/MenuStyle.java)):
   - Each button has a dark outline with notched corners, in whole GUI pixels.
   - The face has a lit top edge, and below it a 2 px side shows the key's depth.
   - On hover the side glows in the accent, like a backlit key (and KeyCPS, the owner's mod, draws keys too).
-  - The same keycap is used for Minecraft's buttons (all versions), the home screen, and MW19's own menu buttons (in
+  - The same keycap is used for Minecraft's buttons (all versions), the home screen, and Starlight's own menu buttons (in
     theme colours: primary is an accent key).
   - Sliders (1.21+) get a keycap track whose side is lit up to the value, with a small keycap handle.
   - The label stays vanilla's, so its position and scrolling are unchanged.
@@ -337,8 +340,71 @@ The look comes from what is already MW19's own: the logo's letters made of block
   - Without a world, a skyline of stepped block columns in two rows stands in front of the glow, catching it on their
     top edges.
   - Over a world the backdrop is see-through and has no skyline.
-  - Inventories, chat and the death screen keep vanilla's background, because there the world is the point.
+  - Inventories, chat and the death screen keep vanilla's background, because there the world is the point. So do the
+    screens 26.2 made see-through over the world (`isInGameUi`: signs, books, command and structure blocks).
+  - From 26.2 the pause menu draws its own background, so it has its own hook (debug-log 2026-09-27).
   - It is about 100 quads with no allocation per frame. Vanilla's blur is not used.
-- All of it follows Themes → "MW19 game menus" (on by default). Off gives vanilla's buttons and backdrop, and the
+- All of it follows Themes → "Starlight game menus" (on by default). Off gives vanilla's buttons and backdrop, and the
   panorama on the home screen.
-- MW19's menu over the home screen now draws the backdrop too. It used to be flat black when menu blur was off.
+- Starlight's menu over the home screen now draws the backdrop too. It used to be flat black when menu blur was off.
+
+## D-030 Tier Tagger back, as a built-in module (owner request, 2026-09-27)
+"wheres my tiertagger module using mctiers api." It went with the plugins in 0.5.0 (the Tier Tags addon, D-026), and
+is now a module ([`TierTaggerModule`](../core/src/main/java/dev/starlight/core/modules/TierTaggerModule.java), formatting in [`TierFormat`](../core/src/main/java/dev/starlight/core/modules/TierFormat.java)).
+- It shows a player's tier (e.g. `[HT1]`, `[RHT1]` for a retired player's peak) after their name on the nametag and in
+  the tab list, from MCTiers, SubTiers or any list serving the MCTiers v2 API. The gamemode is the best tier by default,
+  or one chosen mode.
+- **Network:** only while the module is on (it is off by default): one HTTPS GET of `<list>/profile/<uuid>` per visible
+  player with a real account (UUID v4; offline-mode UUIDs are never looked up), each answer (ranked or not) cached 4 hours. Nothing is sent but the UUID.
+- **Rules:** extra information about other players, so DISALLOWED on Hypixel ([`serverrules.json`](../core/src/main/resources/starlight/serverrules.json)) and off by default.
+- The name hooks D-026 removed are back (nametag and tab list, all versions), and are one-line calls to
+  `Starlight.nameSuffix`, which returns nothing while the module is off.
+
+## D-031 A scene per theme (owner request, 2026-09-27)
+"make it like star themed ... add multible themes, like the current one." Each theme now has an animated scene behind
+Starlight's menus and Minecraft's own ([`Scenes`](../core/src/main/java/dev/starlight/core/gui/Scenes.java)), with its own sky and keycap colours ([`Theme`](../core/src/main/java/dev/starlight/core/gui/Theme.java)):
+
+| Theme | Scene |
+|---|---|
+| Starlight (default) | Night sky: twinkling stars, a Milky Way band, a crescent moon, a shooting star, dark hills |
+| Ember | The 0.7.0 look: rising embers and the blocky skyline |
+| Aurora | Aurora curtains over pines |
+| Nebula | Violet gas clouds and stars |
+| Glacier, Crystal | Snowfall over snow-capped mountains |
+| Sakura | Falling petals at dusk |
+| Daylight, White | Blocky clouds, a square sun, green hills |
+| Black | The Starlight night sky on pure black |
+
+- Everything is rects and gradients in whole GUI pixels, and each particle is a function of its index and the time, so
+  nothing is allocated per frame. Particle counts follow the area. Scenes are still when animations are off.
+- Over a world the sky is see-through and the landscape is left out.
+- The Themes page previews each theme as a live card.
+- Old theme names are migrated (config schema 2): MW19 → Starlight, Violet → Nebula, Forest → Aurora, Rose → Sakura.
+
+## D-032 Bind profiles (owner request, 2026-09-27)
+"if i make a new instance or make a bind profile it changes my minecraft keybinds." A bind profile is a named set of
+Minecraft's own key bindings ([`BindProfiles`](../core/src/main/java/dev/starlight/core/binds/BindProfiles.java)), saved and applied on the Keybinds page.
+- **Shared by every instance:** stored outside the game folder, in `$XDG_DATA_HOME/starlight/bind-profiles.json` when
+  that variable is set, else in `~/.starlight/bind-profiles.json`. Flatpak launchers (the owner's Prism and Dawn) run
+  the game with a temporary home folder that is emptied when the game closes, and set XDG_DATA_HOME to the launcher's
+  own lasting data folder: there, profiles are shared by that launcher's instances (debug-log 2026-09-27). If neither
+  folder can be written, the file stays in the instance's `Starlight/` folder. Smoke and benchmark runs always use the
+  instance folder, so tests never touch the player's real profiles.
+- **Portable:** bindings are stored by id (`key.hotbar.1`) with Starlight's canonical key codes, so a profile saved on
+  1.21 applies on 26.x (SDL key codes) and 1.8.9 (LWJGL 2 codes) too. Bindings a version does not have are skipped.
+- **New instances:** one profile can be the default (★). A fresh install applies it once on first start, with a toast.
+  Existing instances are never changed without the player pressing Apply.
+- Applying goes through Minecraft's own `KeyMapping.setKey` and saves `options.txt`, like the Controls screen.
+
+## D-033 Rename to Starlight (owner request, 2026-09-27)
+"change name to Starlight and make it like star themed." Everything was renamed from MW19: packages `dev.mw19` →
+`dev.starlight`, the core class `Mw19` → [`Starlight`](../core/src/main/java/dev/starlight/core/Starlight.java), jars `Starlight-<version>+mc<mc>.jar`, config folder `Starlight/`,
+mixin configs `starlight.*.json`, smoke markers `Starlight SMOKE PASS`, Gradle properties `starlight.*`, the logo, the
+icon ([`scripts/icon.py`](../scripts/icon.py)) and the default theme (D-031).
+- **Mod id `starlight_client`, not `starlight`:** `starlight` is Spottedleaf's lighting engine mod (Fabric and
+  NeoForge), and two mods with one id refuse to load together. For the same reason the Modrinth slug is
+  `starlight-client` and the title "Starlight Client".
+- **Upgrading from MW19:** the `MW19/` folder (or an older `Kestrel/`) is moved to `Starlight/` once ([`ConfigFolder`](../core/src/main/java/dev/starlight/core/ConfigFolder.java)),
+  theme names migrate (D-031), and `MW19-P1:`/`KESTREL-P1:` profile codes still import ([`RenameCompatTest`](../core/src/test/java/dev/starlight/core/RenameCompatTest.java)). The
+  old jar must go: the Fabric build declares `breaks: mw19`, so Fabric names the conflict instead of loading both, and the
+  1.8.9 build shows a warning.

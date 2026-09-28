@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Writes MW19's Fast Chests resource pack (fabric/src/main/resources/mw19packs/fast_chests): block models that draw
+"""Writes Starlight's Fast Chests resource pack (fabric/src/main/resources/starlightpacks/fast_chests): block models that draw
 chests as ordinary blocks, so the chunk mesh carries them instead of a block entity renderer every frame.
 
 The geometry and UVs are read off the vanilla chest textures (entity/chest/*.png, 64x64), which use the standard box
@@ -18,7 +18,7 @@ Run after changing it: scripts/fast-chests.py (the output is committed).
 import json, os, shutil
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fabric", "src", "main", "resources",
-                    "mw19packs", "fast_chests")
+                    "starlightpacks", "fast_chests")
 PX = 16 / 64  # 64 px textures in a 16-unit UV space
 
 
@@ -105,11 +105,11 @@ def main():
     write("assets/minecraft/atlases/blocks.json",
           {"sources": [{"type": "directory", "source": "entity/chest", "prefix": "entity/chest/"}]})
     for kind in ("single", "left", "right"):
-        write(f"assets/mw19/models/block/fast_chest/{kind}.json", {"elements": chest(kind)})
+        write(f"assets/starlight/models/block/fast_chest/{kind}.json", {"elements": chest(kind)})
 
     def model(name, texture, particle, kind):
-        write(f"assets/mw19/models/block/fast_chest/{name}.json", {
-            "parent": f"mw19:block/fast_chest/{kind}",
+        write(f"assets/starlight/models/block/fast_chest/{name}.json", {
+            "parent": f"starlight:block/fast_chest/{kind}",
             "textures": {"chest": f"minecraft:entity/chest/{texture}", "particle": particle}})
 
     for tex, (particle, blocks) in CHESTS.items():
@@ -119,7 +119,7 @@ def main():
         variants = {}
         for facing, y in FACING_Y.items():
             for kind in ("single", "left", "right"):
-                v = {"model": f"mw19:block/fast_chest/{tex}_{kind}"}
+                v = {"model": f"starlight:block/fast_chest/{tex}_{kind}"}
                 if y:
                     v["y"] = y
                 variants[f"facing={facing},type={kind}"] = v
@@ -128,7 +128,7 @@ def main():
     model("ender", "ender", "minecraft:block/obsidian", "single")
     variants = {}
     for facing, y in FACING_Y.items():
-        v = {"model": "mw19:block/fast_chest/ender"}
+        v = {"model": "starlight:block/fast_chest/ender"}
         if y:
             v["y"] = y
         variants[f"facing={facing}"] = v

@@ -2,12 +2,12 @@
   {
     "modid": "${id}",
     "name": "${name}",
-    "description": "Client-side HUD, GUI, modules and plugins. Legit features only.",
+    "description": "Starlight Client: a performance-first HUD and menu client with animated themes. Legit features only.",
     "version": "${version}",
     "mcversion": "1.8.9",
-    "authorList": ["MW19 contributors"],
+    "authorList": ["Starlight contributors"],
     "credits": "",
-    "logoFile": "assets/mw19/icon.png",
+    "logoFile": "assets/starlight/icon.png",
     "screenshots": [],
     "dependencies": []
   }

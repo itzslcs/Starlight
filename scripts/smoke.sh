@@ -11,11 +11,11 @@ PROD="${PROD:-}"
 RUN="$ROOT/run/${PROD:+prod-}$MC"
 OUT="$ROOT/smoke-out/${PROD:+prod-}$MC"
 rm -rf "$OUT" && mkdir -p "$OUT" "$RUN"
-rm -rf "$RUN/saves/mw19-smoke" "$RUN"/screenshots/mw19-smoke-* "$RUN/logs/latest.log"
+rm -rf "$RUN/saves/starlight-smoke" "$RUN"/screenshots/starlight-smoke-* "$RUN/logs/latest.log"
 rm -f "$RUN/debug-profile.json"  # vanilla's saved F3 entries (hitboxes) must not carry over between runs
-# KEEP_STATE=1 keeps MW19/ from the last run (renderer markers: vulkan-starting, vulkan-probe.txt...);
-# RENDERER=auto|vulkan|opengl writes MW19/renderer.txt; VK_SOFT=1 lets the Vulkan check accept a CPU driver (lavapipe).
-[ -z "${KEEP_STATE:-}" ] && rm -rf "$RUN/MW19"
+# KEEP_STATE=1 keeps Starlight/ from the last run (renderer markers: vulkan-starting, vulkan-probe.txt...);
+# RENDERER=auto|vulkan|opengl writes Starlight/renderer.txt; VK_SOFT=1 lets the Vulkan check accept a CPU driver (lavapipe).
+[ -z "${KEEP_STATE:-}" ] && rm -rf "$RUN/Starlight"
 # WITH_MODS="sodium ..." adds those mods from Modrinth to the dev run (compatibility/perf checks); cleared otherwise.
 rm -rf "$RUN/mods" && mkdir -p "$RUN/mods"
 rm -rf "$RUN/compat-mods" "$RUN/compat-libs"
@@ -23,19 +23,19 @@ if [ -n "${WITH_MODS:-}" ] && [ "$MC" != "1.8.9" ]; then
   MODS_LIST=""
   for m in $WITH_MODS; do
     if [ "$m" = "fabric-api" ]; then  # from Fabric's Maven: its modules are nested jars (fabric/build.gradle.kts)
-      FAPI=$(python3 -c "import json,sys,urllib.request,urllib.parse;q=urllib.parse.urlencode({'loaders':'["fabric"]','game_versions':json.dumps([sys.argv[1]])});v=json.load(urllib.request.urlopen(urllib.request.Request('https://api.modrinth.com/v2/project/fabric-api/version?'+q,headers={'User-Agent':'itzslcs/mw19-smoke'})));print([x for x in v if x['version_type']=='release'][0]['version_number'])" "$MC") || exit 1
-      WITH_MODS_ARG="${WITH_MODS_ARG:-} -Pmw19.fabricApi=$FAPI"
+      FAPI=$(python3 -c "import json,sys,urllib.request,urllib.parse;q=urllib.parse.urlencode({'loaders':'["fabric"]','game_versions':json.dumps([sys.argv[1]])});v=json.load(urllib.request.urlopen(urllib.request.Request('https://api.modrinth.com/v2/project/fabric-api/version?'+q,headers={'User-Agent':'itzslcs/starlight-smoke'})));print([x for x in v if x['version_type']=='release'][0]['version_number'])" "$MC") || exit 1
+      WITH_MODS_ARG="${WITH_MODS_ARG:-} -Pstarlight.fabricApi=$FAPI"
     else
       MODS_LIST="$MODS_LIST $m"
     fi
   done
   mkdir -p "$RUN/compat-mods"
   if [ -n "$MODS_LIST" ]; then python3 "$ROOT/scripts/testmods.py" ${PROD:+--no-unnest} "$MC" "$RUN/compat-mods" $MODS_LIST || exit 1; fi
-  WITH_MODS_ARG="${WITH_MODS_ARG:-} -Pmw19.withMods=$RUN/compat-mods"  # Loom remaps them at build time
+  WITH_MODS_ARG="${WITH_MODS_ARG:-} -Pstarlight.withMods=$RUN/compat-mods"  # Loom remaps them at build time
 fi
 
-mkdir -p "$RUN/MW19"
-[ -n "${RENDERER:-}" ] && printf '%s' "$RENDERER" > "$RUN/MW19/renderer.txt"
+mkdir -p "$RUN/Starlight"
+[ -n "${RENDERER:-}" ] && printf '%s' "$RENDERER" > "$RUN/Starlight/renderer.txt"
 
 # Skip first-run screens and keep software rendering responsive. Written fresh every run.
 cat > "$RUN/options.txt" <<OPT
@@ -57,19 +57,19 @@ cp "$RUN/options.txt" "$RUN/optionsof.txt" 2>/dev/null || true
 
 # With xdotool, the run also clicks the menu through real X11 input (Smoke.requestClick logs where).
 CLICKS=""
-command -v xdotool >/dev/null && CLICKS="-Pmw19.smokeClicks=1"
+command -v xdotool >/dev/null && CLICKS="-Pstarlight.smokeClicks=1"
 if [ -n "$PROD" ]; then
-  (cd "$ROOT" && ./gradlew -q ":fabric:$MC:collectJar" "-Pmw19.fabricTargets=$MC") || { echo "FAIL build jar" | tee "$OUT/result.txt"; exit 1; }
-  JAR=$(ls -t "$ROOT"/dist/MW19-*+mc"$MC".jar | head -1)
+  (cd "$ROOT" && ./gradlew -q ":fabric:$MC:collectJar" "-Pstarlight.fabricTargets=$MC") || { echo "FAIL build jar" | tee "$OUT/result.txt"; exit 1; }
+  JAR=$(ls -t "$ROOT"/dist/Starlight-*+mc"$MC".jar | head -1)
   PROD_MODS=("$JAR")
   [ -d "$RUN/compat-mods" ] && PROD_MODS+=("$RUN"/compat-mods/*.jar)
-  CMD=(python3 "$ROOT/scripts/prodlaunch.py" "$MC" "$RUN" "${PROD_MODS[@]}" -- -Dmw19.smoke=1 "-Dmw19.smoke.seconds=$SECS"
-       ${CLICKS:+-Dmw19.smoke.clicks=true} ${VK_SOFT:+-Dmw19.vulkan.allowSoftware=true})
+  CMD=(python3 "$ROOT/scripts/prodlaunch.py" "$MC" "$RUN" "${PROD_MODS[@]}" -- -Dstarlight.smoke=1 "-Dstarlight.smoke.seconds=$SECS"
+       ${CLICKS:+-Dstarlight.smoke.clicks=true} ${VK_SOFT:+-Dstarlight.vulkan.allowSoftware=true})
 elif [ "$MC" = "1.8.9" ]; then
   (cd "$ROOT" && ./gradlew :api:jar :core:jar -q) || { echo "FAIL build core" | tee "$OUT/result.txt"; exit 1; }
-  CMD=(bash -c "cd '$ROOT/legacy' && ./gradlew runClient --console=plain -Pmw19.smoke=$SECS $CLICKS")
+  CMD=(bash -c "cd '$ROOT/legacy' && ./gradlew runClient --console=plain -Pstarlight.smoke=$SECS $CLICKS")
 else
-  CMD=("$ROOT/gradlew" -p "$ROOT" ":fabric:$MC:runClient" --console=plain "-Pmw19.smoke=$SECS" "-Pmw19.fabricTargets=$MC" $CLICKS ${WITH_MODS_ARG:-})
+  CMD=("$ROOT/gradlew" -p "$ROOT" ":fabric:$MC:runClient" --console=plain "-Pstarlight.smoke=$SECS" "-Pstarlight.fabricTargets=$MC" $CLICKS ${WITH_MODS_ARG:-})
 fi
 
 # Click helper: waits for "SMOKE CLICK <display> <pid> <x> <y>" (window pixels) in the run output and clicks there.
@@ -118,7 +118,7 @@ CODE=$?
 echo "exit=$CODE after $(( $(date +%s) - START ))s" > "$OUT/result.txt"
 
 cp "$RUN/logs/latest.log" "$OUT/latest.log" 2>/dev/null || true
-cp "$RUN"/screenshots/mw19-smoke-*.png "$OUT/" 2>/dev/null || true
+cp "$RUN"/screenshots/starlight-smoke-*.png "$OUT/" 2>/dev/null || true
 LOG="$OUT/latest.log"
 [ -s "$LOG" ] || LOG="$OUT/gradle.log"
 
@@ -141,8 +141,8 @@ for i, l in enumerate(text.splitlines()):
         records.append(cur)
     else:
         cur[2].append(l)
-bad = [r"MW19 SMOKE FAIL", r"Mixin apply .*failed", r"InvalidInjectionException", r"MixinApplyError",
-       r"InjectionError", r"\(MW19\).*(failed|ERROR)", r"/ERROR\]", r"Exception", r"^\s+at "]
+bad = [r"Starlight SMOKE FAIL", r"Mixin apply .*failed", r"InvalidInjectionException", r"MixinApplyError",
+       r"InjectionError", r"\(Starlight\).*(failed|ERROR)", r"/ERROR\]", r"Exception", r"^\s+at "]
 # Dev-environment noise that is not ours: the fake dev account (authlib 401, Realms JWT) and missing
 # text-to-speech natives under Xvfb. Matched against the record HEAD only.
 allow = [r"Failed to fetch user properties", r"Realms", r"realms", r"Narrator", r"narrator", r"text2speech",
@@ -166,6 +166,13 @@ for i, (ln, head, cont) in enumerate(records):
     if "X11: Standard cursor shape unavailable" in head and i >= 2 \
             and "GL ERROR" in records[i - 2][1] and "@ " in records[i - 1][1]:
         env.update((i - 2, i - 1, i))
+# Quitting while in the test world (Minecraft.stop, as closing the window does) can close the connection while the
+# integrated server is still sending; it then logs the disconnect with the exception as its reason. Only that
+# message, and only after "Stopping!" (debug-log 2026-09-28).
+stop = next((i for i, r in enumerate(records) if "Render thread/INFO" in r[1] and r[1].rstrip().endswith("Stopping!")), None)
+if stop is not None:
+    env.update(i for i in range(stop + 1, len(records)) if re.search(
+        r"Server thread/INFO.*lost connection: Internal Exception: java\.nio\.channels\.ClosedChannelException$", records[i][1].rstrip()))
 hits = []
 for i, (ln, head, cont) in enumerate(records):
     body = "\n".join([head] + cont)
@@ -173,7 +180,7 @@ for i, (ln, head, cont) in enumerate(records):
     if any(re.search(p, body, re.M) for p in bad) and not any(re.search(a, head) for a in allow):
         hits.append(f"{ln}: {head[:200]}" + (f"  [+{len(cont)} lines]" if cont else ""))
 fail = []
-if "MW19 SMOKE PASS" not in text: fail.append("no PASS marker")
+if "Starlight SMOKE PASS" not in text: fail.append("no PASS marker")
 # A clean PASS must also exit cleanly: a crash or hang after the marker (see the shutdown watchdog) is a failure.
 code = re.search(r"exit=(\d+)", open(res).read())
 if code and code.group(1) != "0": fail.append("process exit code " + code.group(1))
@@ -183,7 +190,7 @@ if audit != "0": fail.append("mixin audit: " + (audit_lines[-1] if audit_lines e
 with open(res, "a") as f:
     f.write(("PASS" if not fail else "FAIL: " + "; ".join(fail)) + "\n")
     for h in hits[:40]: f.write("  " + h + "\n")
-    m = re.search(r"MW19 SMOKE PASS.*", text)
+    m = re.search(r"Starlight SMOKE PASS.*", text)
     if m: f.write(m.group(0)[:900] + "\n")
     if audit_lines: f.write(audit_lines[-1] + "\n")
 print(open(res).read())

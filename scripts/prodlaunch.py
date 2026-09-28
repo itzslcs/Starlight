@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""Test-only production launch: starts real Fabric (Knot, intermediary-mapped game) with the distributed MW19 jar in a
+"""Test-only production launch: starts real Fabric (Knot, intermediary-mapped game) with the distributed Starlight jar in a
 mods folder, the way a launcher does, in offline mode. A dev run cannot show what only the shipped jar does: nested
 jar-in-jar mods (the bundled VulkanMod), remapping, the early renderer switch. Used by `PROD=1 scripts/smoke.sh`.
 
 Libraries come from Mojang's version JSON (Loom's copy) and Fabric Meta's launch profile, downloaded once into
-~/.cache/mw19-prod with their SHA-1 checked. Assets are Loom's. No account is used or read: the name is a fixed
+~/.cache/starlight-prod with their SHA-1 checked. Assets are Loom's. No account is used or read: the name is a fixed
 offline one. usage: prodlaunch.py <mc> <game-dir> <mods-jar>... [-- <extra jvm args>]
 """
 import hashlib, json, os, subprocess, sys, urllib.request
 
-UA = {"User-Agent": "itzslcs/mw19-tests/0.1.0"}
+UA = {"User-Agent": "itzslcs/starlight-tests/0.1.0"}
 LOOM = os.path.expanduser("~/.gradle/caches/fabric-loom")
-CACHE = os.path.expanduser("~/.cache/mw19-prod")
+CACHE = os.path.expanduser("~/.cache/starlight-prod")
 LOADER = "0.19.5"
 
 

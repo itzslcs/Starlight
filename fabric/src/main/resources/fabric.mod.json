@@ -3,22 +3,25 @@
   "id": "${id}",
   "version": "${version}",
   "name": "${name}",
-  "description": "Client-side HUD, GUI, modules and plugins. Legit features only.",
-  "authors": ["MW19 contributors"],
+  "description": "Starlight Client: a performance-first HUD and menu client with animated themes. Legit features only.",
+  "authors": ["Starlight contributors"],
   "license": "MIT",
-  "icon": "assets/mw19/icon.png",
+  "icon": "assets/starlight/icon.png",
   "environment": "client",
   "entrypoints": {
-    "client": ["dev.mw19.fabric.Mw19Fabric"]
+    "client": ["dev.starlight.fabric.StarlightFabric"]
   },
   "languageAdapters": {
-    "mw19_renderer_switch": "dev.mw19.fabric.RendererSwitch"
+    "starlight_renderer_switch": "dev.starlight.fabric.RendererSwitch"
   },
-  "mixins": ["mw19.mixins.json", "mw19.optional.mixins.json"],
+  "mixins": ["starlight.mixins.json", "starlight.optional.mixins.json"],
   "depends": {
     "fabricloader": "${loader}",
     "minecraft": "${minecraft}",
     "java": ">=${java}"
+  },
+  "breaks": {
+    "mw19": "*"
   },
   "suggests": {
     "modmenu": "*",

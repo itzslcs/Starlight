@@ -11,343 +11,355 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [settings.gradle.kts](../settings.gradle.kts)
 - [versions.json](../versions.json)
 
-## api · `dev.mw19.api.event`
+## api · `dev.starlight.api.event`
 
-- [ChatReceivedEvent.java](../api/src/main/java/dev/mw19/api/event/ChatReceivedEvent.java): A chat/system line about to be shown.
-- [ClientTickEvent.java](../api/src/main/java/dev/mw19/api/event/ClientTickEvent.java): Fired at the start and end of every client tick (20/s).
-- [Events.java](../api/src/main/java/dev/mw19/api/event/Events.java)
-- [KeyPressEvent.java](../api/src/main/java/dev/mw19/api/event/KeyPressEvent.java): A key or mouse button went down while no screen was open.
-- [ServerEvent.java](../api/src/main/java/dev/mw19/api/event/ServerEvent.java): Joined or left a server/world.
+- [ChatReceivedEvent.java](../api/src/main/java/dev/starlight/api/event/ChatReceivedEvent.java): A chat/system line about to be shown.
+- [ClientTickEvent.java](../api/src/main/java/dev/starlight/api/event/ClientTickEvent.java): Fired at the start and end of every client tick (20/s).
+- [Events.java](../api/src/main/java/dev/starlight/api/event/Events.java)
+- [KeyPressEvent.java](../api/src/main/java/dev/starlight/api/event/KeyPressEvent.java): A key or mouse button went down while no screen was open.
+- [ServerEvent.java](../api/src/main/java/dev/starlight/api/event/ServerEvent.java): Joined or left a server/world.
 
-## api · `dev.mw19.api.game`
+## api · `dev.starlight.api.game`
 
-- [Game.java](../api/src/main/java/dev/mw19/api/game/Game.java): Read-only view of the running game.
+- [Game.java](../api/src/main/java/dev/starlight/api/game/Game.java): Read-only view of the running game.
 
-## api · `dev.mw19.api.hud`
+## api · `dev.starlight.api.hud`
 
-- [Anchor.java](../api/src/main/java/dev/mw19/api/hud/Anchor.java): Nine anchor points; offsets are measured from the anchor inwards.
-- [HudStyle.java](../api/src/main/java/dev/mw19/api/hud/HudStyle.java): Per-element colours chosen by the user in the HUD editor.
+- [Anchor.java](../api/src/main/java/dev/starlight/api/hud/Anchor.java): Nine anchor points; offsets are measured from the anchor inwards.
+- [HudStyle.java](../api/src/main/java/dev/starlight/api/hud/HudStyle.java): Per-element colours chosen by the user in the HUD editor.
 
-## api · `dev.mw19.api.module`
+## api · `dev.starlight.api.module`
 
-- [Category.java](../api/src/main/java/dev/mw19/api/module/Category.java)
-- [HudModule.java](../api/src/main/java/dev/mw19/api/module/HudModule.java): A module that draws a HUD element.
-- [Module.java](../api/src/main/java/dev/mw19/api/module/Module.java): A toggleable feature.
-- [Rule.java](../api/src/main/java/dev/mw19/api/module/Rule.java): Verdict against the Hypixel Allowed Modifications policy (docs/RULES_MATRIX.md).
+- [Category.java](../api/src/main/java/dev/starlight/api/module/Category.java)
+- [HudModule.java](../api/src/main/java/dev/starlight/api/module/HudModule.java): A module that draws a HUD element.
+- [Module.java](../api/src/main/java/dev/starlight/api/module/Module.java): A toggleable feature.
+- [Rule.java](../api/src/main/java/dev/starlight/api/module/Rule.java): Verdict against the Hypixel Allowed Modifications policy (docs/RULES_MATRIX.md).
 
-## api · `dev.mw19.api.net`
+## api · `dev.starlight.api.net`
 
-- [Http.java](../api/src/main/java/dev/mw19/api/net/Http.java): Background HTTP GET for JSON with an in-memory LRU+TTL cache and per-host rate limiting.
+- [Http.java](../api/src/main/java/dev/starlight/api/net/Http.java): Background HTTP GET for JSON with an in-memory LRU+TTL cache and per-host rate limiting.
 
-## api · `dev.mw19.api.render`
+## api · `dev.starlight.api.render`
 
-- [ItemRef.java](../api/src/main/java/dev/mw19/api/render/ItemRef.java): Read-only view of an item stack; only valid during the call that returned it.
-- [Renderer.java](../api/src/main/java/dev/mw19/api/render/Renderer.java): 2D drawing in GUI units (vanilla scaled pixels, floats allowed).
+- [ItemRef.java](../api/src/main/java/dev/starlight/api/render/ItemRef.java): Read-only view of an item stack; only valid during the call that returned it.
+- [Renderer.java](../api/src/main/java/dev/starlight/api/render/Renderer.java): 2D drawing in GUI units (vanilla scaled pixels, floats allowed).
 
-## api · `dev.mw19.api.setting`
+## api · `dev.starlight.api.setting`
 
-- [BoolSetting.java](../api/src/main/java/dev/mw19/api/setting/BoolSetting.java)
-- [ChoiceSetting.java](../api/src/main/java/dev/mw19/api/setting/ChoiceSetting.java): One of a fixed list of options (dropdown).
-- [ColorSetting.java](../api/src/main/java/dev/mw19/api/setting/ColorSetting.java): ARGB colour with optional chroma (hue cycling).
-- [KeySetting.java](../api/src/main/java/dev/mw19/api/setting/KeySetting.java): A key binding.
-- [ListSetting.java](../api/src/main/java/dev/mw19/api/setting/ListSetting.java): Free-form list of strings (list editor), e.g.
-- [MultiChoiceSetting.java](../api/src/main/java/dev/mw19/api/setting/MultiChoiceSetting.java): Any subset of a fixed list of options (multi-select).
-- [NumberSetting.java](../api/src/main/java/dev/mw19/api/setting/NumberSetting.java)
-- [Setting.java](../api/src/main/java/dev/mw19/api/setting/Setting.java): A persisted, user-editable value.
-- [TextSetting.java](../api/src/main/java/dev/mw19/api/setting/TextSetting.java)
+- [BoolSetting.java](../api/src/main/java/dev/starlight/api/setting/BoolSetting.java)
+- [ChoiceSetting.java](../api/src/main/java/dev/starlight/api/setting/ChoiceSetting.java): One of a fixed list of options (dropdown).
+- [ColorSetting.java](../api/src/main/java/dev/starlight/api/setting/ColorSetting.java): ARGB colour with optional chroma (hue cycling).
+- [KeySetting.java](../api/src/main/java/dev/starlight/api/setting/KeySetting.java): A key binding.
+- [ListSetting.java](../api/src/main/java/dev/starlight/api/setting/ListSetting.java): Free-form list of strings (list editor), e.g.
+- [MultiChoiceSetting.java](../api/src/main/java/dev/starlight/api/setting/MultiChoiceSetting.java): Any subset of a fixed list of options (multi-select).
+- [NumberSetting.java](../api/src/main/java/dev/starlight/api/setting/NumberSetting.java)
+- [Setting.java](../api/src/main/java/dev/starlight/api/setting/Setting.java): A persisted, user-editable value.
+- [TextSetting.java](../api/src/main/java/dev/starlight/api/setting/TextSetting.java)
 
-## api · `dev.mw19.api.util`
+## api · `dev.starlight.api.util`
 
-- [Colors.java](../api/src/main/java/dev/mw19/api/util/Colors.java): ARGB helpers.
-- [Json.java](../api/src/main/java/dev/mw19/api/util/Json.java): Minimal JSON codec shared by every target (DECISIONS D-007).
+- [Colors.java](../api/src/main/java/dev/starlight/api/util/Colors.java): ARGB helpers.
+- [Json.java](../api/src/main/java/dev/starlight/api/util/Json.java): Minimal JSON codec shared by every target (DECISIONS D-007).
 
-## api · `dev.mw19.api`
+## api · `dev.starlight.api`
 
-- [Logger.java](../api/src/main/java/dev/mw19/api/Logger.java)
-- [Scheduler.java](../api/src/main/java/dev/mw19/api/Scheduler.java)
-- [Subscription.java](../api/src/main/java/dev/mw19/api/Subscription.java)
+- [Logger.java](../api/src/main/java/dev/starlight/api/Logger.java)
+- [Scheduler.java](../api/src/main/java/dev/starlight/api/Scheduler.java)
+- [Subscription.java](../api/src/main/java/dev/starlight/api/Subscription.java)
 
 ## api · build and resources
 
 - [build.gradle.kts](../api/build.gradle.kts)
 
-## core tests · `dev.mw19.core.modules`
+## core tests · `dev.starlight.core.modules`
 
-- [QuickCommandsTest.java](../core/src/test/java/dev/mw19/core/modules/QuickCommandsTest.java): Quick Commands sends only single-line slash commands.
+- [QuickCommandsTest.java](../core/src/test/java/dev/starlight/core/modules/QuickCommandsTest.java): Quick Commands sends only single-line slash commands.
 
-## core tests · `dev.mw19.core.net`
+## core tests · `dev.starlight.core.net`
 
-- [NetTest.java](../core/src/test/java/dev/mw19/core/net/NetTest.java): UPnP, skin upload and local-address checks against a local fake server (no real network).
+- [NetTest.java](../core/src/test/java/dev/starlight/core/net/NetTest.java): UPnP, skin upload and local-address checks against a local fake server (no real network).
 
-## core tests · `dev.mw19.core.skin`
+## core tests · `dev.starlight.core.skin`
 
-- [SkinServiceAccess.java](../core/src/test/java/dev/mw19/core/skin/SkinServiceAccess.java): Test access to SkinService's endpoint-taking upload (the real one only talks to Mojang).
+- [SkinServiceAccess.java](../core/src/test/java/dev/starlight/core/skin/SkinServiceAccess.java): Test access to SkinService's endpoint-taking upload (the real one only talks to Mojang).
 
-## core tests · `dev.mw19.core`
+## core tests · `dev.starlight.core`
 
-- [ColorChromaTest.java](../core/src/test/java/dev/mw19/core/ColorChromaTest.java): debug-log 2026-09-26: chroma hue was computed in float from epoch millis and only moved every ~2 minutes.
-- [ConfigManagerTest.java](../core/src/test/java/dev/mw19/core/ConfigManagerTest.java)
-- [ConfigRaceTest.java](../core/src/test/java/dev/mw19/core/ConfigRaceTest.java): debug-log 2026-09-26: saves from two threads shared config.json.tmp and one failed (seen at exit on 1.8.9).
-- [GfxMeasureTest.java](../core/src/test/java/dev/mw19/core/GfxMeasureTest.java): debug-log 2026-09-26: GUI clicks measure text between render passes; that must work (it threw before).
-- [HudLayoutTest.java](../core/src/test/java/dev/mw19/core/HudLayoutTest.java)
-- [InputRatesTest.java](../core/src/test/java/dev/mw19/core/InputRatesTest.java): KeyCPS counting: per binding (TestPlatform binds attack to LMB and use to RMB), one-second window.
-- [JsonTest.java](../core/src/test/java/dev/mw19/core/JsonTest.java)
-- [ModuleManagerTest.java](../core/src/test/java/dev/mw19/core/ModuleManagerTest.java)
-- [OcclusionTest.java](../core/src/test/java/dev/mw19/core/OcclusionTest.java): Entity culling must hide only what is fully behind solid blocks, and always fail open.
-- [PacksAndSkinsTest.java](../core/src/test/java/dev/mw19/core/PacksAndSkinsTest.java)
-- [ProfileCodecTest.java](../core/src/test/java/dev/mw19/core/ProfileCodecTest.java)
-- [RenameCompatTest.java](../core/src/test/java/dev/mw19/core/RenameCompatTest.java): The client was renamed Kestrel -> MW19 (2026-09-26); existing settings and shared codes keep working.
-- [RulesMatrixTest.java](../core/src/test/java/dev/mw19/core/RulesMatrixTest.java): docs/RULES_MATRIX.md is the human source of truth; code must agree with it.
-- [SdlKeysTest.java](../core/src/test/java/dev/mw19/core/SdlKeysTest.java)
-- [ServerRulesTest.java](../core/src/test/java/dev/mw19/core/ServerRulesTest.java)
-- [TestModules.java](../core/src/test/java/dev/mw19/core/TestModules.java)
-- [TestPlatform.java](../core/src/test/java/dev/mw19/core/TestPlatform.java): Headless Platform for tests: no world, no screen, everything inert.
-- [VideoPresetsTest.java](../core/src/test/java/dev/mw19/core/VideoPresetsTest.java): Presets keep the player's original options (first snapshot wins), Undo puts them back, and auto never raises distances.
+- [BindProfilesTest.java](../core/src/test/java/dev/starlight/core/BindProfilesTest.java): Bind profiles: kept across restarts (the file other instances read), with the default for new instances.
+- [ColorChromaTest.java](../core/src/test/java/dev/starlight/core/ColorChromaTest.java): debug-log 2026-09-26: chroma hue was computed in float from epoch millis and only moved every ~2 minutes.
+- [ConfigManagerTest.java](../core/src/test/java/dev/starlight/core/ConfigManagerTest.java)
+- [ConfigRaceTest.java](../core/src/test/java/dev/starlight/core/ConfigRaceTest.java): debug-log 2026-09-26: saves from two threads shared config.json.tmp and one failed (seen at exit on 1.8.9).
+- [GfxMeasureTest.java](../core/src/test/java/dev/starlight/core/GfxMeasureTest.java): debug-log 2026-09-26: GUI clicks measure text between render passes; that must work (it threw before).
+- [HudLayoutTest.java](../core/src/test/java/dev/starlight/core/HudLayoutTest.java)
+- [InputRatesTest.java](../core/src/test/java/dev/starlight/core/InputRatesTest.java): KeyCPS counting: per binding (TestPlatform binds attack to LMB and use to RMB), one-second window.
+- [JsonTest.java](../core/src/test/java/dev/starlight/core/JsonTest.java)
+- [ModuleManagerTest.java](../core/src/test/java/dev/starlight/core/ModuleManagerTest.java)
+- [OcclusionTest.java](../core/src/test/java/dev/starlight/core/OcclusionTest.java): Entity culling must hide only what is fully behind solid blocks, and always fail open.
+- [PacksAndSkinsTest.java](../core/src/test/java/dev/starlight/core/PacksAndSkinsTest.java)
+- [ProfileCodecTest.java](../core/src/test/java/dev/starlight/core/ProfileCodecTest.java)
+- [RenameCompatTest.java](../core/src/test/java/dev/starlight/core/RenameCompatTest.java): The client was renamed twice: Kestrel -> MW19 (2026-09-26), then MW19 -> Starlight (2026-09-27).
+- [RulesMatrixTest.java](../core/src/test/java/dev/starlight/core/RulesMatrixTest.java): docs/RULES_MATRIX.md is the human source of truth; code must agree with it.
+- [SdlKeysTest.java](../core/src/test/java/dev/starlight/core/SdlKeysTest.java)
+- [ServerRulesTest.java](../core/src/test/java/dev/starlight/core/ServerRulesTest.java)
+- [TestModules.java](../core/src/test/java/dev/starlight/core/TestModules.java)
+- [TestPlatform.java](../core/src/test/java/dev/starlight/core/TestPlatform.java): Headless Platform for tests: no world, no screen, everything inert.
+- [TierFormatTest.java](../core/src/test/java/dev/starlight/core/TierFormatTest.java): The Tier Tagger's reading of the MCTiers v2 profile schema (fixture captured from the live API).
+- [VideoPresetsTest.java](../core/src/test/java/dev/starlight/core/VideoPresetsTest.java): Presets keep the player's original options (first snapshot wins), Undo puts them back, and auto never raises distances.
 
-## core · `dev.mw19.core.chat`
+## core · `dev.starlight.core.binds`
 
-- [ChatLine.java](../core/src/main/java/dev/mw19/core/chat/ChatLine.java): One incoming chat line and what MW19 wants done with it.
+- [BindProfiles.java](../core/src/main/java/dev/starlight/core/binds/BindProfiles.java): Bind profiles: named sets of Minecraft's own key bindings, by binding id ("key.hotbar.1") with canonical key codes, so a profile saved on 1.21 applies on 26....
 
-## core · `dev.mw19.core.config`
+## core · `dev.starlight.core.chat`
 
-- [AtomicFiles.java](../core/src/main/java/dev/mw19/core/config/AtomicFiles.java): Crash-safe file writes and rolling backups.
-- [ClientSettings.java](../core/src/main/java/dev/mw19/core/config/ClientSettings.java): Client-wide options (not per profile).
-- [ConfigManager.java](../core/src/main/java/dev/mw19/core/config/ConfigManager.java): config.json (global) + profiles/<name>.json.
-- [Migrations.java](../core/src/main/java/dev/mw19/core/config/Migrations.java): Ordered, pure schema migrations over the JSON tree.
-- [ProfileCodec.java](../core/src/main/java/dev/mw19/core/config/ProfileCodec.java): Shareable one-line profile strings: MW19-P1:<base64url(deflate(json))>:<crc32 hex>.
+- [ChatLine.java](../core/src/main/java/dev/starlight/core/chat/ChatLine.java): One incoming chat line and what Starlight wants done with it.
 
-## core · `dev.mw19.core.event`
+## core · `dev.starlight.core.config`
 
-- [AttackEvent.java](../core/src/main/java/dev/mw19/core/event/AttackEvent.java): The local player attacked an entity (from the platform's attack hook).
-- [EventBus.java](../core/src/main/java/dev/mw19/core/event/EventBus.java): Exact-class dispatch over copy-on-write arrays: posting is a map lookup plus an indexed loop, no allocation.
-- [SchedulerImpl.java](../core/src/main/java/dev/mw19/core/event/SchedulerImpl.java)
-- [ScrollEvent.java](../core/src/main/java/dev/mw19/core/event/ScrollEvent.java): Mouse wheel while no screen is open.
+- [AtomicFiles.java](../core/src/main/java/dev/starlight/core/config/AtomicFiles.java): Crash-safe file writes and rolling backups.
+- [ClientSettings.java](../core/src/main/java/dev/starlight/core/config/ClientSettings.java): Client-wide options (not per profile).
+- [ConfigManager.java](../core/src/main/java/dev/starlight/core/config/ConfigManager.java): config.json (global) + profiles/<name>.json.
+- [Migrations.java](../core/src/main/java/dev/starlight/core/config/Migrations.java): Ordered, pure schema migrations over the JSON tree.
+- [ProfileCodec.java](../core/src/main/java/dev/starlight/core/config/ProfileCodec.java): Shareable one-line profile strings: STARLIGHT-P1:<base64url(deflate(json))>:<crc32 hex>.
 
-## core · `dev.mw19.core.gui.page`
+## core · `dev.starlight.core.event`
 
-- [AboutPage.java](../core/src/main/java/dev/mw19/core/gui/page/AboutPage.java): Version, target, compatibility flags, hook health and the privacy statement.
-- [ChatSearchPage.java](../core/src/main/java/dev/mw19/core/gui/page/ChatSearchPage.java): Searches the in-memory chat history kept by Chat Tools (newest first).
-- [HostPage.java](../core/src/main/java/dev/mw19/core/gui/page/HostPage.java): Host World: open the singleplayer world to friends on the local network and, through the router, the internet.
-- [HudEditor.java](../core/src/main/java/dev/mw19/core/gui/page/HudEditor.java): Full-screen HUD layout editor.
-- [KeybindsPage.java](../core/src/main/java/dev/mw19/core/gui/page/KeybindsPage.java): Every MW19 key binding in one list; conflicts (with ours or vanilla) are outlined.
-- [ModsPage.java](../core/src/main/java/dev/mw19/core/gui/page/ModsPage.java): Module browser: search, category chips (a highlight slides between them), then either tiles (default: item icon, name and an ENABLED/DISABLED bar that toggle...
-- [PacksPage.java](../core/src/main/java/dev/mw19/core/gui/page/PacksPage.java): Resource pack browser: searches Modrinth, downloads the chosen pack into the resource pack folder (size-capped and checked against Modrinth's SHA-512) and en...
-- [Page.java](../core/src/main/java/dev/mw19/core/gui/page/Page.java)
-- [PerfPage.java](../core/src/main/java/dev/mw19/core/gui/page/PerfPage.java): Frame-time graph plus our own cost (total and per module).
-- [ProfilesPage.java](../core/src/main/java/dev/mw19/core/gui/page/ProfilesPage.java): Unlimited profiles: switch, create, duplicate, rename, delete, export/import strings, per-server auto-switch.
-- [RulesPage.java](../core/src/main/java/dev/mw19/core/gui/page/RulesPage.java): Current server, competitive-safe, and the data-driven serverrules.json.
-- [SkinsPage.java](../core/src/main/java/dev/mw19/core/gui/page/SkinsPage.java): Skins: a 3D preview (drag to turn it), the skin folder as a list, copying a player's skin by name, and applying the selected skin to the account through Moja...
-- [ThemesPage.java](../core/src/main/java/dev/mw19/core/gui/page/ThemesPage.java): Theme presets, accent colour and menu behaviour.
+- [AttackEvent.java](../core/src/main/java/dev/starlight/core/event/AttackEvent.java): The local player attacked an entity (from the platform's attack hook).
+- [EventBus.java](../core/src/main/java/dev/starlight/core/event/EventBus.java): Exact-class dispatch over copy-on-write arrays: posting is a map lookup plus an indexed loop, no allocation.
+- [SchedulerImpl.java](../core/src/main/java/dev/starlight/core/event/SchedulerImpl.java)
+- [ScrollEvent.java](../core/src/main/java/dev/starlight/core/event/ScrollEvent.java): Mouse wheel while no screen is open.
 
-## core · `dev.mw19.core.gui.widget`
+## core · `dev.starlight.core.gui.page`
 
-- [Button.java](../core/src/main/java/dev/mw19/core/gui/widget/Button.java)
-- [ColorSwatch.java](../core/src/main/java/dev/mw19/core/gui/widget/ColorSwatch.java): Colour preview that opens an HSB + alpha + chroma picker.
-- [Dropdown.java](../core/src/main/java/dev/mw19/core/gui/widget/Dropdown.java): Single choice (ChoiceSetting) or, with multi, any subset (MultiChoiceSetting).
-- [KeybindButton.java](../core/src/main/java/dev/mw19/core/gui/widget/KeybindButton.java): Click, then press a key or mouse button.
-- [ListEditor.java](../core/src/main/java/dev/mw19/core/gui/widget/ListEditor.java): Edits a ListSetting: rows with remove buttons plus an add field.
-- [ScrollList.java](../core/src/main/java/dev/mw19/core/gui/widget/ScrollList.java): Vertical stack of children with clipping, wheel scrolling (eased) and a scrollbar.
-- [SettingRow.java](../core/src/main/java/dev/mw19/core/gui/widget/SettingRow.java): Label + the right control for a Setting type.
-- [Slider.java](../core/src/main/java/dev/mw19/core/gui/widget/Slider.java)
-- [TextField.java](../core/src/main/java/dev/mw19/core/gui/widget/TextField.java): Single-line text input with cursor, select-all, clipboard and horizontal scrolling.
-- [Toggle.java](../core/src/main/java/dev/mw19/core/gui/widget/Toggle.java): Animated switch bound to a getter/setter.
+- [AboutPage.java](../core/src/main/java/dev/starlight/core/gui/page/AboutPage.java): Version, target, compatibility flags, hook health and the privacy statement.
+- [ChatSearchPage.java](../core/src/main/java/dev/starlight/core/gui/page/ChatSearchPage.java): Searches the in-memory chat history kept by Chat Tools (newest first).
+- [HostPage.java](../core/src/main/java/dev/starlight/core/gui/page/HostPage.java): Host World: open the singleplayer world to friends on the local network and, through the router, the internet.
+- [HudEditor.java](../core/src/main/java/dev/starlight/core/gui/page/HudEditor.java): Full-screen HUD layout editor.
+- [KeybindsPage.java](../core/src/main/java/dev/starlight/core/gui/page/KeybindsPage.java): Bind profiles (saved sets of Minecraft's own key bindings, shared by every instance), then every Starlight key binding in one list; conflicts (with ours or v...
+- [ModsPage.java](../core/src/main/java/dev/starlight/core/gui/page/ModsPage.java): Module browser: search, category chips (a highlight slides between them), then either tiles (default: item icon, name and an ENABLED/DISABLED bar that toggle...
+- [PacksPage.java](../core/src/main/java/dev/starlight/core/gui/page/PacksPage.java): Resource pack browser: searches Modrinth, downloads the chosen pack into the resource pack folder (size-capped and checked against Modrinth's SHA-512) and en...
+- [Page.java](../core/src/main/java/dev/starlight/core/gui/page/Page.java)
+- [PerfPage.java](../core/src/main/java/dev/starlight/core/gui/page/PerfPage.java): Frame-time graph plus our own cost (total and per module).
+- [ProfilesPage.java](../core/src/main/java/dev/starlight/core/gui/page/ProfilesPage.java): Unlimited profiles: switch, create, duplicate, rename, delete, export/import strings, per-server auto-switch.
+- [RulesPage.java](../core/src/main/java/dev/starlight/core/gui/page/RulesPage.java): Current server, competitive-safe, and the data-driven serverrules.json.
+- [SkinsPage.java](../core/src/main/java/dev/starlight/core/gui/page/SkinsPage.java): Skins: a 3D preview (drag to turn it), the skin folder as a list, copying a player's skin by name, and applying the selected skin to the account through Moja...
+- [ThemesPage.java](../core/src/main/java/dev/starlight/core/gui/page/ThemesPage.java): Theme presets, accent colour and menu behaviour.
 
-## core · `dev.mw19.core.gui`
+## core · `dev.starlight.core.gui.widget`
 
-- [Anim.java](../core/src/main/java/dev/mw19/core/gui/Anim.java): Eased value (ease-out cubic) that animates toward a target over a fixed duration.
-- [GuiRoot.java](../core/src/main/java/dev/mw19/core/gui/GuiRoot.java): The whole menu: sidebar + pages + popup layer + tooltips, or the full-screen HUD editor.
-- [Icons.java](../core/src/main/java/dev/mw19/core/gui/Icons.java): Original pixel icons drawn from rects in a 10x10 box (no bundled assets; DECISIONS D-009).
-- [MenuStyle.java](../core/src/main/java/dev/mw19/core/gui/MenuStyle.java): MW19's own look, taken from its logo: letters built from blocks, with depth, and the "19" in the accent colour.
-- [ModIcons.java](../core/src/main/java/dev/mw19/core/gui/ModIcons.java): The item shown on each module's tile in the Mods page.
-- [Surface.java](../core/src/main/java/dev/mw19/core/gui/Surface.java): A full-screen UI the platform's screen class hosts: the MW19 menu (GuiRoot) or the home screen (TitleUi).
-- [Theme.java](../core/src/main/java/dev/mw19/core/gui/Theme.java): Colour tokens.
-- [TitleUi.java](../core/src/main/java/dev/mw19/core/gui/TitleUi.java): The MW19 home screen that replaces Minecraft's title screen (Themes → Custom home screen): the MW19 backdrop (vanilla's panorama with "MW19 game menus" off),...
-- [Toasts.java](../core/src/main/java/dev/mw19/core/gui/Toasts.java): Corner notifications.
-- [Ui.java](../core/src/main/java/dev/mw19/core/gui/Ui.java): Per-frame GUI context handed to every widget.
-- [Widget.java](../core/src/main/java/dev/mw19/core/gui/Widget.java): Base of all GUI widgets.
+- [Button.java](../core/src/main/java/dev/starlight/core/gui/widget/Button.java)
+- [ColorSwatch.java](../core/src/main/java/dev/starlight/core/gui/widget/ColorSwatch.java): Colour preview that opens an HSB + alpha + chroma picker.
+- [Dropdown.java](../core/src/main/java/dev/starlight/core/gui/widget/Dropdown.java): Single choice (ChoiceSetting) or, with multi, any subset (MultiChoiceSetting).
+- [KeybindButton.java](../core/src/main/java/dev/starlight/core/gui/widget/KeybindButton.java): Click, then press a key or mouse button.
+- [ListEditor.java](../core/src/main/java/dev/starlight/core/gui/widget/ListEditor.java): Edits a ListSetting: rows with remove buttons plus an add field.
+- [ScrollList.java](../core/src/main/java/dev/starlight/core/gui/widget/ScrollList.java): Vertical stack of children with clipping, wheel scrolling (eased) and a scrollbar.
+- [SettingRow.java](../core/src/main/java/dev/starlight/core/gui/widget/SettingRow.java): Label + the right control for a Setting type.
+- [Slider.java](../core/src/main/java/dev/starlight/core/gui/widget/Slider.java)
+- [TextField.java](../core/src/main/java/dev/starlight/core/gui/widget/TextField.java): Single-line text input with cursor, select-all, clipboard and horizontal scrolling.
+- [Toggle.java](../core/src/main/java/dev/starlight/core/gui/widget/Toggle.java): Animated switch bound to a getter/setter.
 
-## core · `dev.mw19.core.host`
+## core · `dev.starlight.core.gui`
 
-- [WorldHost.java](../core/src/main/java/dev/mw19/core/host/WorldHost.java): Hosting the open singleplayer world: opens it to the local network (vanilla "Open to LAN"), and on request also to the internet by asking the router (UPnP) t...
+- [Anim.java](../core/src/main/java/dev/starlight/core/gui/Anim.java): Eased value (ease-out cubic) that animates toward a target over a fixed duration.
+- [GuiRoot.java](../core/src/main/java/dev/starlight/core/gui/GuiRoot.java): The whole menu: sidebar + pages + popup layer + tooltips, or the full-screen HUD editor.
+- [Icons.java](../core/src/main/java/dev/starlight/core/gui/Icons.java): Original pixel icons drawn from rects in a 10x10 box (no bundled assets; DECISIONS D-009).
+- [MenuStyle.java](../core/src/main/java/dev/starlight/core/gui/MenuStyle.java): Starlight's own look, taken from its logo: letters built from blocks, with depth, and the "19" in the accent colour.
+- [ModIcons.java](../core/src/main/java/dev/starlight/core/gui/ModIcons.java): The item shown on each module's tile in the Mods page.
+- [Scenes.java](../core/src/main/java/dev/starlight/core/gui/Scenes.java): The animated backdrops behind menus, one per theme (Theme#scene).
+- [Surface.java](../core/src/main/java/dev/starlight/core/gui/Surface.java): A full-screen UI the platform's screen class hosts: the Starlight menu (GuiRoot) or the home screen (TitleUi).
+- [Theme.java](../core/src/main/java/dev/starlight/core/gui/Theme.java): A theme: colour tokens for the menu, and a scene (the animated backdrop, Scenes) with its sky and the keycap colours of Minecraft's own menus.
+- [TitleUi.java](../core/src/main/java/dev/starlight/core/gui/TitleUi.java): The Starlight home screen that replaces Minecraft's title screen (Themes → Custom home screen): the Starlight backdrop (vanilla's panorama with "Starlight ga...
+- [Toasts.java](../core/src/main/java/dev/starlight/core/gui/Toasts.java): Corner notifications.
+- [Ui.java](../core/src/main/java/dev/starlight/core/gui/Ui.java): Per-frame GUI context handed to every widget.
+- [Widget.java](../core/src/main/java/dev/starlight/core/gui/Widget.java): Base of all GUI widgets.
 
-## core · `dev.mw19.core.hud`
+## core · `dev.starlight.core.host`
 
-- [HudElement.java](../core/src/main/java/dev/mw19/core/hud/HudElement.java): Persisted placement + look of one HUD element.
-- [HudLayout.java](../core/src/main/java/dev/mw19/core/hud/HudLayout.java): Pure layout math for HUD elements (unit-tested; no Minecraft, no state).
-- [HudManager.java](../core/src/main/java/dev/mw19/core/hud/HudManager.java): Draws active HUD modules every frame.
+- [WorldHost.java](../core/src/main/java/dev/starlight/core/host/WorldHost.java): Hosting the open singleplayer world: opens it to the local network (vanilla "Open to LAN"), and on request also to the internet by asking the router (UPnP) t...
 
-## core · `dev.mw19.core.module`
+## core · `dev.starlight.core.hud`
 
-- [ModuleManager.java](../core/src/main/java/dev/mw19/core/module/ModuleManager.java): Owns every module's runtime state.
-- [Overlay.java](../core/src/main/java/dev/mw19/core/module/Overlay.java): A module that draws directly on the HUD layer (not a positionable element), e.g.
+- [HudElement.java](../core/src/main/java/dev/starlight/core/hud/HudElement.java): Persisted placement + look of one HUD element.
+- [HudLayout.java](../core/src/main/java/dev/starlight/core/hud/HudLayout.java): Pure layout math for HUD elements (unit-tested; no Minecraft, no state).
+- [HudManager.java](../core/src/main/java/dev/starlight/core/hud/HudManager.java): Draws active HUD modules every frame.
 
-## core · `dev.mw19.core.modules`
+## core · `dev.starlight.core.module`
 
-- [AnchorOptimizerModule.java](../core/src/main/java/dev/mw19/core/modules/AnchorOptimizerModule.java): Hero's Anchor Optimizer by HerobaneNair (MIT), built in at the owner's request (DECISIONS D-028).
-- [ArmorModule.java](../core/src/main/java/dev/mw19/core/modules/ArmorModule.java): Armor pieces and durability (listed as allowed by Hypixel: "Armor Status").
-- [BuiltinModules.java](../core/src/main/java/dev/mw19/core/modules/BuiltinModules.java): Every built-in module (order = default order in the Mods page).
-- [ChatModule.java](../core/src/main/java/dev/mw19/core/modules/ChatModule.java): Display-only chat tools: timestamps, stacking duplicates, filters, mention highlights, and search.
-- [ClearWeatherModule.java](../core/src/main/java/dev/mw19/core/modules/ClearWeatherModule.java): Client-side clear skies: no rain or thunder rendering or sounds.
-- [ClockModule.java](../core/src/main/java/dev/mw19/core/modules/ClockModule.java): Real-world or in-game time.
-- [ComboModule.java](../core/src/main/java/dev/mw19/core/modules/ComboModule.java): Consecutive hits you land without taking damage.
-- [CoordsModule.java](../core/src/main/java/dev/mw19/core/modules/CoordsModule.java): XYZ (same as F3).
-- [CrosshairModule.java](../core/src/main/java/dev/mw19/core/modules/CrosshairModule.java): Replaces the vanilla crosshair with a configurable one (same position, same purpose).
-- [CrystalOptimizerModule.java](../core/src/main/java/dev/mw19/core/modules/CrystalOptimizerModule.java): Marlow's Crystal Optimizer by Bram and Marlow (MIT), built in at the owner's request (DECISIONS D-028).
-- [DirectionModule.java](../core/src/main/java/dev/mw19/core/modules/DirectionModule.java): Compass tape: marks slide with your yaw (same information as F3 facing).
-- [DurabilityAlertModule.java](../core/src/main/java/dev/mw19/core/modules/DurabilityAlertModule.java): A notification (and a ping) once when a worn armor piece or the held item drops below the threshold.
-- [EffectsModule.java](../core/src/main/java/dev/mw19/core/modules/EffectsModule.java): Active potion effects outside the inventory (listed as allowed by Hypixel: "Effect Status").
-- [EntityCullingModule.java](../core/src/main/java/dev/mw19/core/modules/EntityCullingModule.java): Skips drawing mobs, items and other entities that are fully hidden behind solid blocks (Occlusion).
-- [ExploitProtectionModule.java](../core/src/main/java/dev/mw19/core/modules/ExploitProtectionModule.java): Closes known ways for servers to probe the client (original implementation of the fixes ExploitPreventer lists, DECISIONS D-021): sign and anvil text is reso...
-- [FastChestsModule.java](../core/src/main/java/dev/mw19/core/modules/FastChestsModule.java): Chests, trapped chests, ender chests and copper chests are drawn as ordinary blocks (baked into the world mesh once) instead of by a block entity renderer ev...
-- [FpsGraphModule.java](../core/src/main/java/dev/mw19/core/modules/FpsGraphModule.java): Live frame-time graph: one bar per recent frame, green under 16.7 ms, yellow under 33 ms, red above.
-- [FpsModule.java](../core/src/main/java/dev/mw19/core/modules/FpsModule.java)
-- [FreelookModule.java](../core/src/main/java/dev/mw19/core/modules/FreelookModule.java): Look around without turning your player.
-- [InputRates.java](../core/src/main/java/dev/mw19/core/modules/InputRates.java): Presses per second for each vanilla binding, counted from input events (KeyCPS semantics): a mouse press, a key press and every OS key-repeat of a held key c...
-- [ItemCounterModule.java](../core/src/main/java/dev/mw19/core/modules/ItemCounterModule.java): Counts of chosen items in your inventory (arrows, pearls…).
-- [KeyCpsModule.java](../core/src/main/java/dev/mw19/core/modules/KeyCpsModule.java): KeyCPS: the owner's own keystrokes + CPS mod (KeyCPS 1.6.1), ported into MW19 with the author's permission (DECISIONS D-018).
-- [MoreHud.java](../core/src/main/java/dev/mw19/core/modules/MoreHud.java): Small HUD elements added in 0.3.0 (each is its own module; grouped here like SimpleVisuals).
-- [PingModule.java](../core/src/main/java/dev/mw19/core/modules/PingModule.java): Your own latency to the server (the tab list shows the same as bars).
-- [ScreenshotModule.java](../core/src/main/java/dev/mw19/core/modules/ScreenshotModule.java): After you take a screenshot: a toast plus keys to open the folder or copy the file path.
-- [ServerAddressModule.java](../core/src/main/java/dev/mw19/core/modules/ServerAddressModule.java): The server you are on (as typed in the server list), or "Singleplayer".
-- [SimpleVisuals.java](../core/src/main/java/dev/mw19/core/modules/SimpleVisuals.java): Small visual tweaks whose whole effect is one Hooks value read by the platform mixins.
-- [SpeedModule.java](../core/src/main/java/dev/mw19/core/modules/SpeedModule.java): Horizontal speed in blocks per second, averaged over half a second.
-- [SystemModule.java](../core/src/main/java/dev/mw19/core/modules/SystemModule.java): Memory use of the game JVM and process CPU load.
-- [TextHud.java](../core/src/main/java/dev/mw19/core/modules/TextHud.java): Single-line text HUD.
-- [ToggleModule.java](../core/src/main/java/dev/mw19/core/modules/ToggleModule.java): Toggle Sprint / Toggle Sneak with a status line.
-- [ZoomModule.java](../core/src/main/java/dev/mw19/core/modules/ZoomModule.java): OptiFine-style zoom (OptiFine is on Hypixel's allowed list): lower FOV while the key is held.
+- [ModuleManager.java](../core/src/main/java/dev/starlight/core/module/ModuleManager.java): Owns every module's runtime state.
+- [Overlay.java](../core/src/main/java/dev/starlight/core/module/Overlay.java): A module that draws directly on the HUD layer (not a positionable element), e.g.
 
-## core · `dev.mw19.core.net`
+## core · `dev.starlight.core.modules`
 
-- [HttpClient.java](../core/src/main/java/dev/mw19/core/net/HttpClient.java): Background JSON GETs with an LRU+TTL cache, request coalescing, per-host spacing and Retry-After backoff.
-- [LocalAddress.java](../core/src/main/java/dev/mw19/core/net/LocalAddress.java): Exploit Protection: whether a server-supplied URL points at this computer or the local network.
-- [Upnp.java](../core/src/main/java/dev/mw19/core/net/Upnp.java): Minimal UPnP Internet Gateway client: finds the home router on the local network and asks it to forward one TCP port to this computer (and to stop again).
+- [AnchorOptimizerModule.java](../core/src/main/java/dev/starlight/core/modules/AnchorOptimizerModule.java): Hero's Anchor Optimizer by HerobaneNair (MIT), built in at the owner's request (DECISIONS D-028).
+- [ArmorModule.java](../core/src/main/java/dev/starlight/core/modules/ArmorModule.java): Armor pieces and durability (listed as allowed by Hypixel: "Armor Status").
+- [BuiltinModules.java](../core/src/main/java/dev/starlight/core/modules/BuiltinModules.java): Every built-in module (order = default order in the Mods page).
+- [ChatModule.java](../core/src/main/java/dev/starlight/core/modules/ChatModule.java): Display-only chat tools: timestamps, stacking duplicates, filters, mention highlights, and search.
+- [ClearWeatherModule.java](../core/src/main/java/dev/starlight/core/modules/ClearWeatherModule.java): Client-side clear skies: no rain or thunder rendering or sounds.
+- [ClockModule.java](../core/src/main/java/dev/starlight/core/modules/ClockModule.java): Real-world or in-game time.
+- [ComboModule.java](../core/src/main/java/dev/starlight/core/modules/ComboModule.java): Consecutive hits you land without taking damage.
+- [CoordsModule.java](../core/src/main/java/dev/starlight/core/modules/CoordsModule.java): XYZ (same as F3).
+- [CrosshairModule.java](../core/src/main/java/dev/starlight/core/modules/CrosshairModule.java): Replaces the vanilla crosshair with a configurable one (same position, same purpose).
+- [CrystalOptimizerModule.java](../core/src/main/java/dev/starlight/core/modules/CrystalOptimizerModule.java): Marlow's Crystal Optimizer by Bram and Marlow (MIT), built in at the owner's request (DECISIONS D-028).
+- [DirectionModule.java](../core/src/main/java/dev/starlight/core/modules/DirectionModule.java): Compass tape: marks slide with your yaw (same information as F3 facing).
+- [DurabilityAlertModule.java](../core/src/main/java/dev/starlight/core/modules/DurabilityAlertModule.java): A notification (and a ping) once when a worn armor piece or the held item drops below the threshold.
+- [EffectsModule.java](../core/src/main/java/dev/starlight/core/modules/EffectsModule.java): Active potion effects outside the inventory (listed as allowed by Hypixel: "Effect Status").
+- [EntityCullingModule.java](../core/src/main/java/dev/starlight/core/modules/EntityCullingModule.java): Skips drawing mobs, items and other entities that are fully hidden behind solid blocks (Occlusion).
+- [ExploitProtectionModule.java](../core/src/main/java/dev/starlight/core/modules/ExploitProtectionModule.java): Closes known ways for servers to probe the client (original implementation of the fixes ExploitPreventer lists, DECISIONS D-021): sign and anvil text is reso...
+- [FastChestsModule.java](../core/src/main/java/dev/starlight/core/modules/FastChestsModule.java): Chests, trapped chests, ender chests and copper chests are drawn as ordinary blocks (baked into the world mesh once) instead of by a block entity renderer ev...
+- [FpsGraphModule.java](../core/src/main/java/dev/starlight/core/modules/FpsGraphModule.java): Live frame-time graph: one bar per recent frame, green under 16.7 ms, yellow under 33 ms, red above.
+- [FpsModule.java](../core/src/main/java/dev/starlight/core/modules/FpsModule.java)
+- [FreelookModule.java](../core/src/main/java/dev/starlight/core/modules/FreelookModule.java): Look around without turning your player.
+- [InputRates.java](../core/src/main/java/dev/starlight/core/modules/InputRates.java): Presses per second for each vanilla binding, counted from input events (KeyCPS semantics): a mouse press, a key press and every OS key-repeat of a held key c...
+- [ItemCounterModule.java](../core/src/main/java/dev/starlight/core/modules/ItemCounterModule.java): Counts of chosen items in your inventory (arrows, pearls…).
+- [KeyCpsModule.java](../core/src/main/java/dev/starlight/core/modules/KeyCpsModule.java): KeyCPS: the owner's own keystrokes + CPS mod (KeyCPS 1.6.1), ported into Starlight with the author's permission (DECISIONS D-018).
+- [MoreHud.java](../core/src/main/java/dev/starlight/core/modules/MoreHud.java): Small HUD elements added in 0.3.0 (each is its own module; grouped here like SimpleVisuals).
+- [PingModule.java](../core/src/main/java/dev/starlight/core/modules/PingModule.java): Your own latency to the server (the tab list shows the same as bars).
+- [ScreenshotModule.java](../core/src/main/java/dev/starlight/core/modules/ScreenshotModule.java): After you take a screenshot: a toast plus keys to open the folder or copy the file path.
+- [ServerAddressModule.java](../core/src/main/java/dev/starlight/core/modules/ServerAddressModule.java): The server you are on (as typed in the server list), or "Singleplayer".
+- [SimpleVisuals.java](../core/src/main/java/dev/starlight/core/modules/SimpleVisuals.java): Small visual tweaks whose whole effect is one Hooks value read by the platform mixins.
+- [SpeedModule.java](../core/src/main/java/dev/starlight/core/modules/SpeedModule.java): Horizontal speed in blocks per second, averaged over half a second.
+- [SystemModule.java](../core/src/main/java/dev/starlight/core/modules/SystemModule.java): Memory use of the game JVM and process CPU load.
+- [TextHud.java](../core/src/main/java/dev/starlight/core/modules/TextHud.java): Single-line text HUD.
+- [TierFormat.java](../core/src/main/java/dev/starlight/core/modules/TierFormat.java): Picks and formats one ranking out of a tier-list profile (MCTiers API v2 schema), for the Tier Tagger.
+- [TierTaggerModule.java](../core/src/main/java/dev/starlight/core/modules/TierTaggerModule.java): PvP tier-list ranks next to player names, on nametags and in the tab list (MCTiers by default, SubTiers, or any list that serves the MCTiers v2 API).
+- [ToggleModule.java](../core/src/main/java/dev/starlight/core/modules/ToggleModule.java): Toggle Sprint / Toggle Sneak with a status line.
+- [ZoomModule.java](../core/src/main/java/dev/starlight/core/modules/ZoomModule.java): OptiFine-style zoom (OptiFine is on Hypixel's allowed list): lower FOV while the key is held.
 
-## core · `dev.mw19.core.packs`
+## core · `dev.starlight.core.net`
 
-- [Modrinth.java](../core/src/main/java/dev/mw19/core/packs/Modrinth.java): Modrinth's public API (v2) for resource packs: search URLs and the parts of the responses the pack browser needs.
+- [HttpClient.java](../core/src/main/java/dev/starlight/core/net/HttpClient.java): Background JSON GETs with an LRU+TTL cache, request coalescing, per-host spacing and Retry-After backoff.
+- [LocalAddress.java](../core/src/main/java/dev/starlight/core/net/LocalAddress.java): Exploit Protection: whether a server-supplied URL points at this computer or the local network.
+- [Upnp.java](../core/src/main/java/dev/starlight/core/net/Upnp.java): Minimal UPnP Internet Gateway client: finds the home router on the local network and asks it to forward one TCP port to this computer (and to stop again).
 
-## core · `dev.mw19.core.perf`
+## core · `dev.starlight.core.packs`
 
-- [HardwareTier.java](../core/src/main/java/dev/mw19/core/perf/HardwareTier.java): Picks a starting VideoPreset from the graphics device the game reports, the CPU thread count and the memory Minecraft may use.
-- [Occlusion.java](../core/src/main/java/dev/mw19/core/perf/Occlusion.java): Entity culling: an entity is hidden only when every ray from the camera to its box (centre + 8 corners) hits a solid opaque block first.
-- [VideoPreset.java](../core/src/main/java/dev/mw19/core/perf/VideoPreset.java): Graphics presets for the vanilla video options, fastest first.
+- [Modrinth.java](../core/src/main/java/dev/starlight/core/packs/Modrinth.java): Modrinth's public API (v2) for resource packs: search URLs and the parts of the responses the pack browser needs.
 
-## core · `dev.mw19.core.platform`
+## core · `dev.starlight.core.perf`
 
-- [ChatAccess.java](../core/src/main/java/dev/mw19/core/platform/ChatAccess.java)
-- [Host.java](../core/src/main/java/dev/mw19/core/platform/Host.java): Hosting the open singleplayer world for other players (game thread).
-- [ModList.java](../core/src/main/java/dev/mw19/core/platform/ModList.java)
-- [Packs.java](../core/src/main/java/dev/mw19/core/platform/Packs.java): The game's resource packs (game thread).
-- [Platform.java](../core/src/main/java/dev/mw19/core/platform/Platform.java): Everything core needs from a Minecraft version.
-- [ScreenHost.java](../core/src/main/java/dev/mw19/core/platform/ScreenHost.java)
-- [Skins.java](../core/src/main/java/dev/mw19/core/platform/Skins.java): Textures from PNG bytes and the signed-in account's skin (game thread).
+- [HardwareTier.java](../core/src/main/java/dev/starlight/core/perf/HardwareTier.java): Picks a starting VideoPreset from the graphics device the game reports, the CPU thread count and the memory Minecraft may use.
+- [Occlusion.java](../core/src/main/java/dev/starlight/core/perf/Occlusion.java): Entity culling: an entity is hidden only when every ray from the camera to its box (centre + 8 corners) hits a solid opaque block first.
+- [VideoPreset.java](../core/src/main/java/dev/starlight/core/perf/VideoPreset.java): Graphics presets for the vanilla video options, fastest first.
 
-## core · `dev.mw19.core.render`
+## core · `dev.starlight.core.platform`
 
-- [Gfx.java](../core/src/main/java/dev/mw19/core/render/Gfx.java): Renderer used by the GUI, HUD and plugins.
-- [RenderBackend.java](../core/src/main/java/dev/mw19/core/render/RenderBackend.java): Per-version drawing primitives.
+- [ChatAccess.java](../core/src/main/java/dev/starlight/core/platform/ChatAccess.java)
+- [Host.java](../core/src/main/java/dev/starlight/core/platform/Host.java): Hosting the open singleplayer world for other players (game thread).
+- [ModList.java](../core/src/main/java/dev/starlight/core/platform/ModList.java)
+- [Packs.java](../core/src/main/java/dev/starlight/core/platform/Packs.java): The game's resource packs (game thread).
+- [Platform.java](../core/src/main/java/dev/starlight/core/platform/Platform.java): Everything core needs from a Minecraft version.
+- [ScreenHost.java](../core/src/main/java/dev/starlight/core/platform/ScreenHost.java)
+- [Skins.java](../core/src/main/java/dev/starlight/core/platform/Skins.java): Textures from PNG bytes and the signed-in account's skin (game thread).
 
-## core · `dev.mw19.core.rules`
+## core · `dev.starlight.core.render`
 
-- [ServerRules.java](../core/src/main/java/dev/mw19/core/rules/ServerRules.java): Data-driven server → disallowed-module rules (serverrules.json).
+- [Gfx.java](../core/src/main/java/dev/starlight/core/render/Gfx.java): Renderer used by the GUI, HUD and plugins.
+- [RenderBackend.java](../core/src/main/java/dev/starlight/core/render/RenderBackend.java): Per-version drawing primitives.
 
-## core · `dev.mw19.core.skin`
+## core · `dev.starlight.core.rules`
 
-- [SkinLibrary.java](../core/src/main/java/dev/mw19/core/skin/SkinLibrary.java): The skin folder (<game>/MW19/skins): PNG skins the player can preview and apply.
-- [SkinService.java](../core/src/main/java/dev/mw19/core/skin/SkinService.java): Mojang's official skin endpoints: changing the signed-in account's skin, and copying another player's current skin into the library.
+- [ServerRules.java](../core/src/main/java/dev/starlight/core/rules/ServerRules.java): Data-driven server → disallowed-module rules (serverrules.json).
 
-## core · `dev.mw19.core`
+## core · `dev.starlight.core.skin`
 
-- [Bench.java](../core/src/main/java/dev/mw19/core/Bench.java): Benchmark (scripts/bench.sh, -Dmw19.bench=1): one fixed scene measured in phases, so every optimisation gets before/after numbers (docs/PERF.md).
-- [Compat.java](../core/src/main/java/dev/mw19/core/Compat.java): Runtime compat.* flags from the loaded mod list.
-- [Guard.java](../core/src/main/java/dev/mw19/core/Guard.java): Wraps every call that crosses from Minecraft into our code so an exception can never take the game down.
-- [HookWatchdog.java](../core/src/main/java/dev/mw19/core/HookWatchdog.java): Records which platform hooks have fired, so a silently failed mixin shows up in the UI and the smoke log.
-- [Hooks.java](../core/src/main/java/dev/mw19/core/Hooks.java): Values written by modules on the game thread and read by platform mixins every frame.
-- [Keys.java](../core/src/main/java/dev/mw19/core/Keys.java): GLFW key constants (canonical codes on every target) and display names.
-- [Log.java](../core/src/main/java/dev/mw19/core/Log.java): Core logging; routed to the game's logger once the platform is up, stderr before that.
-- [Mw19.java](../core/src/main/java/dev/mw19/core/Mw19.java): Core entry point.
-- [PerfStats.java](../core/src/main/java/dev/mw19/core/PerfStats.java): Frame-time and own-cost ring buffers for the Performance page and the benchmark harness.
-- [SdlKeys.java](../core/src/main/java/dev/mw19/core/SdlKeys.java): Minecraft 26.3 moved from GLFW to SDL3: key events carry SDL scancodes (USB HID usage ids), modifiers are SDL_Keymod bits and mouse buttons are 1-based with...
-- [Smoke.java](../core/src/main/java/dev/mw19/core/Smoke.java): Self-driving smoke run (-Dmw19.smoke=1): title → GUI → HUD editor → world → GUI → game menus → Fast Chests → crystal/anchor optimizers → every module on + ch...
-- [VideoPresets.java](../core/src/main/java/dev/mw19/core/VideoPresets.java): Graphics presets (Performance page).
+- [SkinLibrary.java](../core/src/main/java/dev/starlight/core/skin/SkinLibrary.java): The skin folder (<game>/Starlight/skins): PNG skins the player can preview and apply.
+- [SkinService.java](../core/src/main/java/dev/starlight/core/skin/SkinService.java): Mojang's official skin endpoints: changing the signed-in account's skin, and copying another player's current skin into the library.
+
+## core · `dev.starlight.core`
+
+- [Bench.java](../core/src/main/java/dev/starlight/core/Bench.java): Benchmark (scripts/bench.sh, -Dstarlight.bench=1): one fixed scene measured in phases, so every optimisation gets before/after numbers (docs/PERF.md).
+- [Compat.java](../core/src/main/java/dev/starlight/core/Compat.java): Runtime compat.* flags from the loaded mod list.
+- [ConfigFolder.java](../core/src/main/java/dev/starlight/core/ConfigFolder.java): The client's folder in the game directory, Starlight/.
+- [Guard.java](../core/src/main/java/dev/starlight/core/Guard.java): Wraps every call that crosses from Minecraft into our code so an exception can never take the game down.
+- [HookWatchdog.java](../core/src/main/java/dev/starlight/core/HookWatchdog.java): Records which platform hooks have fired, so a silently failed mixin shows up in the UI and the smoke log.
+- [Hooks.java](../core/src/main/java/dev/starlight/core/Hooks.java): Values written by modules on the game thread and read by platform mixins every frame.
+- [Keys.java](../core/src/main/java/dev/starlight/core/Keys.java): GLFW key constants (canonical codes on every target) and display names.
+- [Log.java](../core/src/main/java/dev/starlight/core/Log.java): Core logging; routed to the game's logger once the platform is up, stderr before that.
+- [PerfStats.java](../core/src/main/java/dev/starlight/core/PerfStats.java): Frame-time and own-cost ring buffers for the Performance page and the benchmark harness.
+- [SdlKeys.java](../core/src/main/java/dev/starlight/core/SdlKeys.java): Minecraft 26.3 moved from GLFW to SDL3: key events carry SDL scancodes (USB HID usage ids), modifiers are SDL_Keymod bits and mouse buttons are 1-based with...
+- [Smoke.java](../core/src/main/java/dev/starlight/core/Smoke.java): Self-driving smoke run (-Dstarlight.smoke=1): title → GUI → HUD editor → world → GUI → game menus → Fast Chests → crystal/anchor optimizers → every module on...
+- [Starlight.java](../core/src/main/java/dev/starlight/core/Starlight.java): Core entry point.
+- [VideoPresets.java](../core/src/main/java/dev/starlight/core/VideoPresets.java): Graphics presets (Performance page).
 
 ## core · build and resources
 
 - [build.gradle.kts](../core/build.gradle.kts)
-- [serverrules.json](../core/src/main/resources/mw19/serverrules.json)
+- [serverrules.json](../core/src/main/resources/starlight/serverrules.json)
 
-## fabric · `dev.mw19.fabric.mixin`
+## fabric · `dev.starlight.fabric.mixin`
 
-- [AnvilNameMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/AnvilNameMixin.java): Exploit Protection: the anvil's name field (sent back when renaming) gets the item name as an unmodded client resolves it.
-- [BlockEntityCullingMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/BlockEntityCullingMixin.java): Entity Culling for block entities: hidden ones are not drawn (1.21.9+: no render state is extracted for them).
-- [BlockPlaceContextMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/BlockPlaceContextMixin.java): Anchor Optimizer (port of Hero's Anchor Optimizer): its ghost block takes a placed block like a fern does.
-- [ButtonStyleMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ButtonStyleMixin.java): "MW19 game menus": vanilla buttons (pause menu, server list, options...) become MW19 keycaps (MenuStyle).
-- [CameraMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/CameraMixin.java): Freelook: the camera takes its angles from Hooks while active (every getView*Rot read).
-- [ChatComponentMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ChatComponentMixin.java): Chat Tools + plugin chat events: filter, timestamp, highlight, stack duplicates.
-- [ChestShapeMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ChestShapeMixin.java): Fast Chests before 1.21.4: chests report RenderShape.ENTITYBLOCK_ANIMATED, which the world mesh skips; with the pack on they report MODEL so their (pack) blo...
-- [CrystalClientLevelMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/CrystalClientLevelMixin.java): Crystal Optimizer (port of Marlow's Crystal Optimizer, upstream ClientLevelMixin).
-- [CrystalLevelMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/CrystalLevelMixin.java): Crystal Optimizer (port of Marlow's Crystal Optimizer, upstream LevelMixin): targeting skips crystals a hit broke.
-- [CrystalPacketListenerMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/CrystalPacketListenerMixin.java): Crystal Optimizer: a server's marlowcrystal message (decoded by DiscardedPayloadMixin), in configuration or play.
-- [DiscardedPayloadMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/DiscardedPayloadMixin.java): Crystal Optimizer: vanilla reads a payload on a channel nobody registered with this codec, which drops the bytes.
-- [EntityCullingMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/EntityCullingMixin.java): Entity Culling: after vanilla's frustum test passes, entities fully hidden behind blocks are skipped.
-- [EntityTurnMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/EntityTurnMixin.java): Freelook: mouse movement turns the camera instead of the player.
-- [FastChestsMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/FastChestsMixin.java): Fast Chests: chests the world mesh already draws get no block entity render (1.21.9+: no render state).
-- [FovMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/FovMixin.java): Zoom: scales the final field of view.
-- [GameRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/GameRendererMixin.java): Damage tilt strength (zoom lives in FovMixin).
-- [GuiMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/GuiMixin.java): HUD pass (after vanilla) and crosshair replacement.
-- [HitboxesMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/HitboxesMixin.java): Hitboxes module, 1.21.9+: while it is on, vanilla's debug entry list reports entity hitboxes as enabled.
-- [ItemInHandRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ItemInHandRendererMixin.java): Shield overlay: lower a raised shield in first person.
-- [ItemSwapMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ItemSwapMixin.java): 1.8-style "no cooldown dip": the held item ignores the swap/attack-strength scale.
-- [KeyMappingAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/KeyMappingAccessor.java)
-- [KeyboardHandlerMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/KeyboardHandlerMixin.java)
-- [LightTextureMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/LightTextureMixin.java): Brightness: substitute the gamma read (the saved option is untouched).
-- [LivingEntityRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/LivingEntityRendererMixin.java): Show own nametag in third person (vanilla hides the camera entity's name).
-- [MinecraftMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MinecraftMixin.java)
-- [MinecraftProfileAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MinecraftProfileAccessor.java): Skin changes: the profile the game fetched once at start (FabricMedia.refreshOwnSkin puts the new one in).
-- [MouseHandlerMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MouseHandlerMixin.java)
-- [MultiPlayerGameModeMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/MultiPlayerGameModeMixin.java): The player's attacks and block uses: observed for the combo counter; the Crystal Optimizer acts after a hit went to the server, the Anchor Optimizer on a use...
-- [OverlayTextureAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/OverlayTextureAccessor.java)
-- [PackCacheMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackCacheMixin.java): Exploit Protection: server resource packs are cached per account (ExploitGuard.packCache).
-- [PackDownloadMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackDownloadMixin.java): Exploit Protection: server pack downloads (HttpUtil.downloadFile's only caller) fail when the host resolves to a local address.
-- [PackSourceMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackSourceMixin.java): The client's built-in pack scan also offers MW19's own packs (Fast Chests).
-- [PackUrlMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PackUrlMixin.java): Exploit Protection: a server resource pack URL naming a local host is treated as invalid (vanilla then refuses it).
-- [ParticleEngineMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ParticleEngineMixin.java): Particle multiplier: extra client-side crit / enchanted-hit bursts on hits.
-- [PauseScreenMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PauseScreenMixin.java)
-- [PayloadCodecMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PayloadCodecMixin.java): Crystal Optimizer: vanilla's custom payload codec writes MW19's outgoing messages as id + bytes before it looks up a codec for the id.
-- [PlayerInfoAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PlayerInfoAccessor.java): Skin changes: the player's list entry draws the new skin (vanilla's own lookup for the refreshed profile).
-- [PlayerSkinWidgetAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/PlayerSkinWidgetAccessor.java): Lets the home screen and Skins page turn vanilla's player model (rotationX is pitch, rotationY yaw).
-- [ScreenBackdropMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ScreenBackdropMixin.java): "MW19 game menus": a vanilla screen's background (panorama, blur, dark overlay) becomes the MW19 backdrop.
-- [ScreenEffectRendererMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/ScreenEffectRendererMixin.java): Low fire: the overlay's vertical offset (-0.3) and alpha are plain constants.
-- [SignEditMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SignEditMixin.java): Exploit Protection: the lines a sign editor sends back are resolved as an unmodded client would (ExploitGuard).
-- [SignEditScreenAccessor.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SignEditScreenAccessor.java): Smoke self-test: reads the lines a sign editor would send back.
-- [SliderStyleMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SliderStyleMixin.java): "MW19 game menus": vanilla sliders (options, volume, FOV) match the keycap buttons.
-- [SpecialChestMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/SpecialChestMixin.java): Fast Chests, 1.21.4 - 1.21.11: a chest shown as a block outside the world mesh (chest minecart, block display) is drawn from its block model plus this specia...
-- [TitleScreenMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/TitleScreenMixin.java)
-- [TitleSwapMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/TitleSwapMixin.java): Home screen: vanilla's TitleScreen is swapped for MW19's as it is set (Minecraft.setScreen until 26.1, Gui.setScreen from 26.2).
-- [VulkanUpdateMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/VulkanUpdateMixin.java): The bundled VulkanMod asks api.modrinth.com for a newer version at every start (its UpdateChecker).
-- [WeatherMixin.java](../fabric/src/main/java/dev/mw19/fabric/mixin/WeatherMixin.java): Clear Weather: the client's level reports no rain or thunder (a singleplayer server keeps its real weather).
+- [AnvilNameMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/AnvilNameMixin.java): Exploit Protection: the anvil's name field (sent back when renaming) gets the item name as an unmodded client resolves it.
+- [BlockEntityCullingMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/BlockEntityCullingMixin.java): Entity Culling for block entities: hidden ones are not drawn (1.21.9+: no render state is extracted for them).
+- [BlockPlaceContextMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/BlockPlaceContextMixin.java): Anchor Optimizer (port of Hero's Anchor Optimizer): its ghost block takes a placed block like a fern does.
+- [ButtonStyleMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/ButtonStyleMixin.java): "Starlight game menus": vanilla buttons (pause menu, server list, options...) become Starlight keycaps (MenuStyle).
+- [CameraMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/CameraMixin.java): Freelook: the camera takes its angles from Hooks while active (every getView*Rot read).
+- [ChatComponentMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/ChatComponentMixin.java): Chat Tools + plugin chat events: filter, timestamp, highlight, stack duplicates.
+- [ChestShapeMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/ChestShapeMixin.java): Fast Chests before 1.21.4: chests report RenderShape.ENTITYBLOCK_ANIMATED, which the world mesh skips; with the pack on they report MODEL so their (pack) blo...
+- [CrystalClientLevelMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/CrystalClientLevelMixin.java): Crystal Optimizer (port of Marlow's Crystal Optimizer, upstream ClientLevelMixin).
+- [CrystalLevelMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/CrystalLevelMixin.java): Crystal Optimizer (port of Marlow's Crystal Optimizer, upstream LevelMixin): targeting skips crystals a hit broke.
+- [CrystalPacketListenerMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/CrystalPacketListenerMixin.java): Crystal Optimizer: a server's marlowcrystal message (decoded by DiscardedPayloadMixin), in configuration or play.
+- [DiscardedPayloadMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/DiscardedPayloadMixin.java): Crystal Optimizer: vanilla reads a payload on a channel nobody registered with this codec, which drops the bytes.
+- [EntityCullingMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/EntityCullingMixin.java): Entity Culling: after vanilla's frustum test passes, entities fully hidden behind blocks are skipped.
+- [EntityTurnMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/EntityTurnMixin.java): Freelook: mouse movement turns the camera instead of the player.
+- [FastChestsMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/FastChestsMixin.java): Fast Chests: chests the world mesh already draws get no block entity render (1.21.9+: no render state).
+- [FovMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/FovMixin.java): Zoom: scales the final field of view.
+- [GameRendererMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/GameRendererMixin.java): Damage tilt strength (zoom lives in FovMixin).
+- [GuiMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/GuiMixin.java): HUD pass (after vanilla) and crosshair replacement.
+- [HitboxesMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/HitboxesMixin.java): Hitboxes module, 1.21.9+: while it is on, vanilla's debug entry list reports entity hitboxes as enabled.
+- [ItemInHandRendererMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/ItemInHandRendererMixin.java): Shield overlay: lower a raised shield in first person.
+- [ItemSwapMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/ItemSwapMixin.java): 1.8-style "no cooldown dip": the held item ignores the swap/attack-strength scale.
+- [KeyMappingAccessor.java](../fabric/src/main/java/dev/starlight/fabric/mixin/KeyMappingAccessor.java)
+- [KeyboardHandlerMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/KeyboardHandlerMixin.java)
+- [LightTextureMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/LightTextureMixin.java): Brightness: substitute the gamma read (the saved option is untouched).
+- [LivingEntityRendererMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/LivingEntityRendererMixin.java): Show own nametag in third person (vanilla hides the camera entity's name).
+- [MinecraftMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/MinecraftMixin.java)
+- [MinecraftProfileAccessor.java](../fabric/src/main/java/dev/starlight/fabric/mixin/MinecraftProfileAccessor.java): Skin changes: the profile the game fetched once at start (FabricMedia.refreshOwnSkin puts the new one in).
+- [MouseHandlerMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/MouseHandlerMixin.java)
+- [MultiPlayerGameModeMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/MultiPlayerGameModeMixin.java): The player's attacks and block uses: observed for the combo counter; the Crystal Optimizer acts after a hit went to the server, the Anchor Optimizer on a use...
+- [NameTagMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/NameTagMixin.java): Tier Tagger: the tier after a player's name on nametags (Starlight.nameSuffix).
+- [OverlayTextureAccessor.java](../fabric/src/main/java/dev/starlight/fabric/mixin/OverlayTextureAccessor.java)
+- [PackCacheMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/PackCacheMixin.java): Exploit Protection: server resource packs are cached per account (ExploitGuard.packCache).
+- [PackDownloadMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/PackDownloadMixin.java): Exploit Protection: server pack downloads (HttpUtil.downloadFile's only caller) fail when the host resolves to a local address.
+- [PackSourceMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/PackSourceMixin.java): The client's built-in pack scan also offers Starlight's own packs (Fast Chests).
+- [PackUrlMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/PackUrlMixin.java): Exploit Protection: a server resource pack URL naming a local host is treated as invalid (vanilla then refuses it).
+- [ParticleEngineMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/ParticleEngineMixin.java): Particle multiplier: extra client-side crit / enchanted-hit bursts on hits.
+- [PauseScreenMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/PauseScreenMixin.java)
+- [PayloadCodecMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/PayloadCodecMixin.java): Crystal Optimizer: vanilla's custom payload codec writes Starlight's outgoing messages as id + bytes before it looks up a codec for the id.
+- [PlayerInfoAccessor.java](../fabric/src/main/java/dev/starlight/fabric/mixin/PlayerInfoAccessor.java): Skin changes: the player's list entry draws the new skin (vanilla's own lookup for the refreshed profile).
+- [PlayerSkinWidgetAccessor.java](../fabric/src/main/java/dev/starlight/fabric/mixin/PlayerSkinWidgetAccessor.java): Lets the home screen and Skins page turn vanilla's player model (rotationX is pitch, rotationY yaw).
+- [PlayerTabOverlayMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/PlayerTabOverlayMixin.java): Tier Tagger: the tier after a player's name in the tab list.
+- [ScreenBackdropMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/ScreenBackdropMixin.java): "Starlight game menus": a vanilla screen's background (panorama, blur, dark overlay) becomes the Starlight backdrop.
+- [ScreenEffectRendererMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/ScreenEffectRendererMixin.java): Low fire: the overlay's vertical offset (-0.3) and alpha are plain constants.
+- [SignEditMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/SignEditMixin.java): Exploit Protection: the lines a sign editor sends back are resolved as an unmodded client would (ExploitGuard).
+- [SignEditScreenAccessor.java](../fabric/src/main/java/dev/starlight/fabric/mixin/SignEditScreenAccessor.java): Smoke self-test: reads the lines a sign editor would send back.
+- [SliderStyleMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/SliderStyleMixin.java): "Starlight game menus": vanilla sliders (options, volume, FOV) match the keycap buttons.
+- [SpecialChestMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/SpecialChestMixin.java): Fast Chests, 1.21.4 - 1.21.11: a chest shown as a block outside the world mesh (chest minecart, block display) is drawn from its block model plus this specia...
+- [TitleScreenMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/TitleScreenMixin.java)
+- [TitleSwapMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/TitleSwapMixin.java): Home screen: vanilla's TitleScreen is swapped for Starlight's as it is set (Minecraft.setScreen until 26.1, Gui.setScreen from 26.2).
+- [VulkanUpdateMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/VulkanUpdateMixin.java): The bundled VulkanMod asks api.modrinth.com for a newer version at every start (its UpdateChecker).
+- [WeatherMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/WeatherMixin.java): Clear Weather: the client's level reports no rain or thunder (a singleplayer server keeps its real weather).
 
-## fabric · `dev.mw19.fabric.port`
+## fabric · `dev.starlight.fabric.port`
 
-- [AnchorOptimizer.java](../fabric/src/main/java/dev/mw19/fabric/port/AnchorOptimizer.java): Hero's Anchor Optimizer inside MW19 (module anchor_optimizer, GRAY, off by default).
-- [CrystalOptimizer.java](../fabric/src/main/java/dev/mw19/fabric/port/CrystalOptimizer.java): Marlow's Crystal Optimizer inside MW19 (module crystal_optimizer, GRAY, off by default).
+- [AnchorOptimizer.java](../fabric/src/main/java/dev/starlight/fabric/port/AnchorOptimizer.java): Hero's Anchor Optimizer inside Starlight (module anchor_optimizer, GRAY, off by default).
+- [CrystalOptimizer.java](../fabric/src/main/java/dev/starlight/fabric/port/CrystalOptimizer.java): Marlow's Crystal Optimizer inside Starlight (module crystal_optimizer, GRAY, off by default).
 
-## fabric · `dev.mw19.fabric`
+## fabric · `dev.starlight.fabric`
 
-- [ExploitGuard.java](../fabric/src/main/java/dev/mw19/fabric/ExploitGuard.java): Exploit Protection, Fabric side (original implementation; DECISIONS D-021).
-- [FabricBackend.java](../fabric/src/main/java/dev/mw19/fabric/FabricBackend.java): RenderBackend over GuiGraphics.
-- [FabricChat.java](../fabric/src/main/java/dev/mw19/fabric/FabricChat.java): Component <-> ChatLine glue for the chat mixin.
-- [FabricCompat.java](../fabric/src/main/java/dev/mw19/fabric/FabricCompat.java): The version seams of Minecraft's client object in one place (verified with javap per version): 26.2 moved the current screen to gui.screen()/gui.setScreen, t...
-- [FabricHost.java](../fabric/src/main/java/dev/mw19/fabric/FabricHost.java): Opens the singleplayer world to other players and edits its whitelist (changes run on the server thread).
-- [FabricItem.java](../fabric/src/main/java/dev/mw19/fabric/FabricItem.java): Reusable ItemRef view (one per slot, re-pointed each call; no allocation per frame).
-- [FabricMedia.java](../fabric/src/main/java/dev/mw19/fabric/FabricMedia.java): Textures from PNG bytes, the player model (vanilla's PlayerSkinWidget, as on the skin report screen) and resource packs, for core.
-- [FabricPlatform.java](../fabric/src/main/java/dev/mw19/fabric/FabricPlatform.java): Platform for Fabric targets.
-- [FastChests.java](../fabric/src/main/java/dev/mw19/fabric/FastChests.java): Fast Chests (core FastChestsModule).
-- [Mw19Fabric.java](../fabric/src/main/java/dev/mw19/fabric/Mw19Fabric.java): Entrypoint + the static bridge the mixins call (keeps mixin bodies one line).
-- [Mw19MixinPlugin.java](../fabric/src/main/java/dev/mw19/fabric/Mw19MixinPlugin.java): Gate for mw19.optional.mixins.json: skips a feature mixin when a mod that does the same job is loaded, or when the user lists it in -Dmw19.mixins.disable=Nam...
-- [Mw19Screen.java](../fabric/src/main/java/dev/mw19/fabric/Mw19Screen.java): Vanilla Screen hosting a core Surface: the MW19 menu (GuiRoot) or the home screen (TitleUi).
-- [RendererSwitch.java](../fabric/src/main/java/dev/mw19/fabric/RendererSwitch.java): Decides, before any mod code or mixin runs, whether the bundled VulkanMod renders this session (DECISIONS D-024).
-- [VulkanProbe.java](../fabric/src/main/java/dev/mw19/fabric/VulkanProbe.java): The GPU check behind "auto" (RendererSwitch): in an OpenGL session with the bundled VulkanMod kept off, a background thread asks the Vulkan driver once wheth...
+- [ExploitGuard.java](../fabric/src/main/java/dev/starlight/fabric/ExploitGuard.java): Exploit Protection, Fabric side (original implementation; DECISIONS D-021).
+- [FabricBackend.java](../fabric/src/main/java/dev/starlight/fabric/FabricBackend.java): RenderBackend over GuiGraphics.
+- [FabricChat.java](../fabric/src/main/java/dev/starlight/fabric/FabricChat.java): Component <-> ChatLine glue for the chat mixin.
+- [FabricCompat.java](../fabric/src/main/java/dev/starlight/fabric/FabricCompat.java): The version seams of Minecraft's client object in one place (verified with javap per version): 26.2 moved the current screen to gui.screen()/gui.setScreen, t...
+- [FabricHost.java](../fabric/src/main/java/dev/starlight/fabric/FabricHost.java): Opens the singleplayer world to other players and edits its whitelist (changes run on the server thread).
+- [FabricItem.java](../fabric/src/main/java/dev/starlight/fabric/FabricItem.java): Reusable ItemRef view (one per slot, re-pointed each call; no allocation per frame).
+- [FabricMedia.java](../fabric/src/main/java/dev/starlight/fabric/FabricMedia.java): Textures from PNG bytes, the player model (vanilla's PlayerSkinWidget, as on the skin report screen) and resource packs, for core.
+- [FabricPlatform.java](../fabric/src/main/java/dev/starlight/fabric/FabricPlatform.java): Platform for Fabric targets.
+- [FastChests.java](../fabric/src/main/java/dev/starlight/fabric/FastChests.java): Fast Chests (core FastChestsModule).
+- [RendererSwitch.java](../fabric/src/main/java/dev/starlight/fabric/RendererSwitch.java): Decides, before any mod code or mixin runs, whether the bundled VulkanMod renders this session (DECISIONS D-024).
+- [StarlightFabric.java](../fabric/src/main/java/dev/starlight/fabric/StarlightFabric.java): Entrypoint + the static bridge the mixins call (keeps mixin bodies one line).
+- [StarlightMixinPlugin.java](../fabric/src/main/java/dev/starlight/fabric/StarlightMixinPlugin.java): Gate for starlight.optional.mixins.json: skips a feature mixin when a mod that does the same job is loaded, or when the user lists it in -Dstarlight.mixins.d...
+- [StarlightScreen.java](../fabric/src/main/java/dev/starlight/fabric/StarlightScreen.java): Vanilla Screen hosting a core Surface: the Starlight menu (GuiRoot) or the home screen (TitleUi).
+- [VulkanProbe.java](../fabric/src/main/java/dev/starlight/fabric/VulkanProbe.java): The GPU check behind "auto" (RendererSwitch): in an OpenGL session with the bundled VulkanMod kept off, a background thread asks the Vulkan driver once wheth...
 
 ## fabric · build and resources
 
@@ -355,73 +367,75 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [bundled.json](../fabric/bundled.json)
 - [gradle.properties](../fabric/gradle.properties)
 - [fabric.mod.json](../fabric/src/main/resources/fabric.mod.json)
-- [mw19.mixins.json](../fabric/src/main/resources/mw19.mixins.json)
-- [mw19.optional.mixins.json](../fabric/src/main/resources/mw19.optional.mixins.json)
-- [blocks.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/atlases/blocks.json)
-- [chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/chest.json)
-- [copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/copper_chest.json)
-- [ender_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/ender_chest.json)
-- [exposed_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/exposed_copper_chest.json)
-- [oxidized_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/oxidized_copper_chest.json)
-- [trapped_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/trapped_chest.json)
-- [waxed_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/waxed_copper_chest.json)
-- [waxed_exposed_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/waxed_exposed_copper_chest.json)
-- [waxed_oxidized_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/waxed_oxidized_copper_chest.json)
-- [waxed_weathered_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/waxed_weathered_copper_chest.json)
-- [weathered_copper_chest.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/minecraft/blockstates/weathered_copper_chest.json)
-- [copper_exposed_left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_exposed_left.json)
-- [copper_exposed_right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_exposed_right.json)
-- [copper_exposed_single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_exposed_single.json)
-- [copper_left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_left.json)
-- [copper_oxidized_left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_oxidized_left.json)
-- [copper_oxidized_right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_oxidized_right.json)
-- [copper_oxidized_single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_oxidized_single.json)
-- [copper_right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_right.json)
-- [copper_single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_single.json)
-- [copper_weathered_left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_weathered_left.json)
-- [copper_weathered_right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_weathered_right.json)
-- [copper_weathered_single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/copper_weathered_single.json)
-- [ender.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/ender.json)
-- [left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/left.json)
-- [normal_left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/normal_left.json)
-- [normal_right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/normal_right.json)
-- [normal_single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/normal_single.json)
-- [right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/right.json)
-- [single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/single.json)
-- [trapped_left.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/trapped_left.json)
-- [trapped_right.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/trapped_right.json)
-- [trapped_single.json](../fabric/src/main/resources/mw19packs/fast_chests/assets/mw19/models/block/fast_chest/trapped_single.json)
+- [starlight.mixins.json](../fabric/src/main/resources/starlight.mixins.json)
+- [starlight.optional.mixins.json](../fabric/src/main/resources/starlight.optional.mixins.json)
+- [blocks.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/minecraft/atlases/blocks.json)
+- [chest.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/minecraft/blockstates/chest.json)
+- [copper_chest.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/minecraft/blockstates/copper_chest.json)
+- [ender_chest.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/minecraft/blockstates/ender_chest.json)
+- [exposed_copper_chest.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/minecraft/blockstates/exposed_copper_chest.json)
+- [oxidized_copper_chest.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/minecraft/blockstates/oxidized_copper_chest.json)
+- [trapped_chest.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/minecraft/blockstates/trapped_chest.json)
+- [waxed_copper_chest.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/minecraft/blockstates/waxed_copper_chest.json)
+- [waxed_exposed_copper_chest.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/minecraft/blockstates/waxed_exposed_copper_chest.json)
+- [waxed_oxidized_copper_chest.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/minecraft/blockstates/waxed_oxidized_copper_chest.json)
+- [waxed_weathered_copper_chest.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/minecraft/blockstates/waxed_weathered_copper_chest.json)
+- [weathered_copper_chest.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/minecraft/blockstates/weathered_copper_chest.json)
+- [copper_exposed_left.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/copper_exposed_left.json)
+- [copper_exposed_right.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/copper_exposed_right.json)
+- [copper_exposed_single.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/copper_exposed_single.json)
+- [copper_left.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/copper_left.json)
+- [copper_oxidized_left.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/copper_oxidized_left.json)
+- [copper_oxidized_right.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/copper_oxidized_right.json)
+- [copper_oxidized_single.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/copper_oxidized_single.json)
+- [copper_right.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/copper_right.json)
+- [copper_single.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/copper_single.json)
+- [copper_weathered_left.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/copper_weathered_left.json)
+- [copper_weathered_right.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/copper_weathered_right.json)
+- [copper_weathered_single.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/copper_weathered_single.json)
+- [ender.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/ender.json)
+- [left.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/left.json)
+- [normal_left.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/normal_left.json)
+- [normal_right.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/normal_right.json)
+- [normal_single.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/normal_single.json)
+- [right.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/right.json)
+- [single.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/single.json)
+- [trapped_left.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/trapped_left.json)
+- [trapped_right.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/trapped_right.json)
+- [trapped_single.json](../fabric/src/main/resources/starlightpacks/fast_chests/assets/starlight/models/block/fast_chest/trapped_single.json)
 - [stonecutter.gradle.kts](../fabric/stonecutter.gradle.kts)
 
-## legacy · `dev.mw19.forge.mixin`
+## legacy · `dev.starlight.forge.mixin`
 
-- [EffectRendererMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/EffectRendererMixin.java): Particle multiplier: extra client-side crit / sharpness bursts on hits.
-- [EntityMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/EntityMixin.java): Freelook: mouse movement turns the camera instead of the player (setAngles subtracts pitch on 1.8.9).
-- [EntityRendererMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/EntityRendererMixin.java): Damage tilt (the 14° hurt-cam constant) and freelook camera angles (orientCamera's rotation reads).
-- [GuiButtonMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/GuiButtonMixin.java): "MW19 game menus" on 1.8.9: vanilla buttons become MW19 keycaps (MenuStyle).
-- [GuiScreenMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/GuiScreenMixin.java): "MW19 game menus" on 1.8.9: a vanilla screen's background (dirt, or the dimmed world) becomes the MW19 backdrop.
-- [IntegratedServerAccessor.java](../legacy/src/main/java/dev/mw19/forge/mixin/IntegratedServerAccessor.java): Host World: the LAN announcer holds the port the world was opened on.
-- [ItemRendererMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/ItemRendererMixin.java): Low fire: renderFireInFirstPerson's vertical offset (-0.3) and alpha (0.9).
-- [MinecraftMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/MinecraftMixin.java)
-- [NetHandlerPlayClientMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/NetHandlerPlayClientMixin.java): Exploit Protection: server resource pack requests are checked first (ForgeExploitGuard).
-- [RenderManagerMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/RenderManagerMixin.java): Entity Culling on 1.8.9: after the frustum test passes, entities fully hidden behind blocks are skipped.
-- [RendererLivingEntityMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/RendererLivingEntityMixin.java): Hit colour (the four puts of the hurt tint: 1, 0, 0, 0.3) and show-own-nametag.
-- [ThreadLanServerPingAccessor.java](../legacy/src/main/java/dev/mw19/forge/mixin/ThreadLanServerPingAccessor.java)
-- [TileEntityRendererDispatcherMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/TileEntityRendererDispatcherMixin.java): Entity Culling for tile entities on 1.8.9: hidden chests, signs, banners and skulls are not drawn.
-- [WorldMixin.java](../legacy/src/main/java/dev/mw19/forge/mixin/WorldMixin.java): Clear Weather on 1.8.9: the client world reports no rain or thunder.
+- [EffectRendererMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/EffectRendererMixin.java): Particle multiplier: extra client-side crit / sharpness bursts on hits.
+- [EntityMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/EntityMixin.java): Freelook: mouse movement turns the camera instead of the player (setAngles subtracts pitch on 1.8.9).
+- [EntityRendererMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/EntityRendererMixin.java): Damage tilt (the 14° hurt-cam constant) and freelook camera angles (orientCamera's rotation reads).
+- [GuiButtonMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/GuiButtonMixin.java): "Starlight game menus" on 1.8.9: vanilla buttons become Starlight keycaps (MenuStyle).
+- [GuiPlayerTabOverlayMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/GuiPlayerTabOverlayMixin.java): Tier Tagger in the 1.8.9 tab list.
+- [GuiScreenMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/GuiScreenMixin.java): "Starlight game menus" on 1.8.9: a vanilla screen's background (dirt, or the dimmed world) becomes the Starlight backdrop.
+- [IntegratedServerAccessor.java](../legacy/src/main/java/dev/starlight/forge/mixin/IntegratedServerAccessor.java): Host World: the LAN announcer holds the port the world was opened on.
+- [ItemRendererMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/ItemRendererMixin.java): Low fire: renderFireInFirstPerson's vertical offset (-0.3) and alpha (0.9).
+- [MinecraftMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/MinecraftMixin.java)
+- [NetHandlerPlayClientMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/NetHandlerPlayClientMixin.java): Exploit Protection: server resource pack requests are checked first (ForgeExploitGuard).
+- [RenderManagerMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/RenderManagerMixin.java): Entity Culling on 1.8.9: after the frustum test passes, entities fully hidden behind blocks are skipped.
+- [RenderMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/RenderMixin.java): Tier Tagger on 1.8.9 nametags.
+- [RendererLivingEntityMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/RendererLivingEntityMixin.java): Hit colour (the four puts of the hurt tint: 1, 0, 0, 0.3) and show-own-nametag.
+- [ThreadLanServerPingAccessor.java](../legacy/src/main/java/dev/starlight/forge/mixin/ThreadLanServerPingAccessor.java)
+- [TileEntityRendererDispatcherMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/TileEntityRendererDispatcherMixin.java): Entity Culling for tile entities on 1.8.9: hidden chests, signs, banners and skulls are not drawn.
+- [WorldMixin.java](../legacy/src/main/java/dev/starlight/forge/mixin/WorldMixin.java): Clear Weather on 1.8.9: the client world reports no rain or thunder.
 
-## legacy · `dev.mw19.forge`
+## legacy · `dev.starlight.forge`
 
-- [ForgeBackend.java](../legacy/src/main/java/dev/mw19/forge/ForgeBackend.java): Immediate-mode backend for 1.8.9 (raw GL is fine on this target).
-- [ForgeExploitGuard.java](../legacy/src/main/java/dev/mw19/forge/ForgeExploitGuard.java): Exploit Protection on 1.8.9 (original implementation; DECISIONS D-021).
-- [ForgeHost.java](../legacy/src/main/java/dev/mw19/forge/ForgeHost.java): 1.8.9: opens the singleplayer world to LAN and edits its whitelist (on the server thread).
-- [ForgeItem.java](../legacy/src/main/java/dev/mw19/forge/ForgeItem.java): Reusable ItemRef view over a (possibly null) 1.8.9 ItemStack.
-- [ForgeMedia.java](../legacy/src/main/java/dev/mw19/forge/ForgeMedia.java): 1.8.9: textures from PNG bytes, the player model drawn from ModelPlayer's parts, and resource packs.
-- [ForgePanorama.java](../legacy/src/main/java/dev/mw19/forge/ForgePanorama.java): The title-screen panorama for the 1.8.9 home screen: the game's six panorama textures on a slowly turning cube, seen from its centre (1.8.9's own renderer is...
-- [ForgePlatform.java](../legacy/src/main/java/dev/mw19/forge/ForgePlatform.java): Platform for Forge 1.8.9 (MCP names).
-- [LwjglKeys.java](../legacy/src/main/java/dev/mw19/forge/LwjglKeys.java): LWJGL2 Keyboard codes <-> GLFW codes (core's canonical codes).
-- [Mw19Forge.java](../legacy/src/main/java/dev/mw19/forge/Mw19Forge.java)
-- [Mw19GuiScreen.java](../legacy/src/main/java/dev/mw19/forge/Mw19GuiScreen.java): 1.8.9 GuiScreen hosting a core Surface: the MW19 menu (GuiRoot) or the home screen (TitleUi).
+- [ForgeBackend.java](../legacy/src/main/java/dev/starlight/forge/ForgeBackend.java): Immediate-mode backend for 1.8.9 (raw GL is fine on this target).
+- [ForgeExploitGuard.java](../legacy/src/main/java/dev/starlight/forge/ForgeExploitGuard.java): Exploit Protection on 1.8.9 (original implementation; DECISIONS D-021).
+- [ForgeHost.java](../legacy/src/main/java/dev/starlight/forge/ForgeHost.java): 1.8.9: opens the singleplayer world to LAN and edits its whitelist (on the server thread).
+- [ForgeItem.java](../legacy/src/main/java/dev/starlight/forge/ForgeItem.java): Reusable ItemRef view over a (possibly null) 1.8.9 ItemStack.
+- [ForgeMedia.java](../legacy/src/main/java/dev/starlight/forge/ForgeMedia.java): 1.8.9: textures from PNG bytes, the player model drawn from ModelPlayer's parts, and resource packs.
+- [ForgePanorama.java](../legacy/src/main/java/dev/starlight/forge/ForgePanorama.java): The title-screen panorama for the 1.8.9 home screen: the game's six panorama textures on a slowly turning cube, seen from its centre (1.8.9's own renderer is...
+- [ForgePlatform.java](../legacy/src/main/java/dev/starlight/forge/ForgePlatform.java): Platform for Forge 1.8.9 (MCP names).
+- [LwjglKeys.java](../legacy/src/main/java/dev/starlight/forge/LwjglKeys.java): LWJGL2 Keyboard codes <-> GLFW codes (core's canonical codes).
+- [StarlightForge.java](../legacy/src/main/java/dev/starlight/forge/StarlightForge.java)
+- [StarlightGuiScreen.java](../legacy/src/main/java/dev/starlight/forge/StarlightGuiScreen.java): 1.8.9 GuiScreen hosting a core Surface: the Starlight menu (GuiRoot) or the home screen (TitleUi).
 
 ## legacy · build and resources
 
@@ -430,21 +444,23 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [gradle-daemon-jvm.properties](../legacy/gradle/gradle-daemon-jvm.properties): This file is generated by :updateDaemonJvm
 - [gradle-wrapper.properties](../legacy/gradle/wrapper/gradle-wrapper.properties)
 - [settings.gradle.kts](../legacy/settings.gradle.kts)
-- [mixins.mw19.json](../legacy/src/main/resources/mixins.mw19.json)
+- [mixins.starlight_client.json](../legacy/src/main/resources/mixins.starlight_client.json)
 
 ## scripts
 
 - [bench.sh](../scripts/bench.sh): Benchmark one target headless (core Bench): fixed scene, phases baseline / culling / fastchests / boost / all.
 - [docs-graph.py](../scripts/docs-graph.py): Keeps the docs a linked graph (the repo root is also an Obsidian vault; the links work on GitHub too).
-- [fast-chests.py](../scripts/fast-chests.py): Writes MW19's Fast Chests resource pack (fabric/src/main/resources/mw19packs/fast_chests): block models that draw
-- [mixin-audit.py](../scripts/mixin-audit.py): Proves MW19's injections were applied: disassembles the classes Mixin exported during a dev run
-- [modrinth.py](../scripts/modrinth.py): Updates MW19's Modrinth project from dist/: title, summary, description (docs/MODRINTH.md), icon, and one alpha
-- [mrpack.py](../scripts/mrpack.py): Builds "MW19 Performance" Modrinth packs (.mrpack) for Prism Launcher, the Modrinth app and ATLauncher.
-- [prodlaunch.py](../scripts/prodlaunch.py): Test-only production launch: starts real Fabric (Knot, intermediary-mapped game) with the distributed MW19 jar in a
+- [fast-chests.py](../scripts/fast-chests.py): Writes Starlight's Fast Chests resource pack (fabric/src/main/resources/starlightpacks/fast_chests): block models that draw
+- [icon.py](../scripts/icon.py): Draws Starlight's icon (core/src/main/resources/assets/starlight/icon.png, also the Modrinth icon): a night-sky tile
+- [mixin-audit.py](../scripts/mixin-audit.py): Proves Starlight's injections were applied: disassembles the classes Mixin exported during a dev run
+- [modrinth.py](../scripts/modrinth.py): Updates Starlight's Modrinth project from dist/: title, summary, description (docs/MODRINTH.md), icon, and one alpha
+- [mrpack.py](../scripts/mrpack.py): Builds "Starlight Performance" Modrinth packs (.mrpack) for Prism Launcher, the Modrinth app and ATLauncher.
+- [prodlaunch.py](../scripts/prodlaunch.py): Test-only production launch: starts real Fabric (Knot, intermediary-mapped game) with the distributed Starlight jar in a
 - [smoke-all.sh](../scripts/smoke-all.sh): Runs scripts/smoke.sh for each given version (default: every target in versions.json) and prints a summary.
 - [smoke.sh](../scripts/smoke.sh): Smoke test one target headless: title -> our GUI -> HUD editor -> world -> GUI -> N seconds -> quit.
 - [testmods.py](../scripts/testmods.py): Test-only: put other mods (e.g.
-- [vulkanmod-pin.py](../scripts/vulkanmod-pin.py): Pins the VulkanMod build bundled into each MW19 Fabric jar (fabric/bundled.json, read by fabric/build.gradle.kts):
+- [upgrade-test.sh](../scripts/upgrade-test.sh): Upgrade from MW19 to Starlight in production launches, in one game folder (DECISIONS D-033): a.
+- [vulkanmod-pin.py](../scripts/vulkanmod-pin.py): Pins the VulkanMod build bundled into each Starlight Fabric jar (fabric/bundled.json, read by fabric/build.gradle.kts):
 
 ## gradle
 

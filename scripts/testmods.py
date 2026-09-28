@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Test-only: put other mods (e.g. Sodium) into a dev run's mods folder to check compatibility and measure together.
 Downloads the newest Fabric release for the Minecraft version from Modrinth, verifies its SHA-512 and caches it.
-Never bundled with MW19. usage: scripts/testmods.py <mc> <dest-mods-dir> <slug> [<slug> ...]"""
+Never bundled with Starlight. usage: scripts/testmods.py <mc> <dest-mods-dir> <slug> [<slug> ...]"""
 import hashlib, json, os, sys, urllib.parse, urllib.request, zipfile
 
-UA = {"User-Agent": "itzslcs/mw19-tests/0.1.0"}
-CACHE = os.path.expanduser("~/.cache/mw19-test-mods")
+UA = {"User-Agent": "itzslcs/starlight-tests/0.1.0"}
+CACHE = os.path.expanduser("~/.cache/starlight-test-mods")
 
 def get(url):
     return urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=60).read()

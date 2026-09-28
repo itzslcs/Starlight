@@ -101,10 +101,10 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
   (between passes). The Mods page measures its category chips before anything else, so **every** click on the default
   page threw, and the guard swallowed it. This has been present since Phase 1. The smoke only rendered the menu and
   never clicked it, so it never saw the failure.
-- **Fix:** [`Gfx`](../core/src/main/java/dev/mw19/core/render/Gfx.java) keeps the last backend for measuring (`textWidth`/`lineHeight`); drawing still needs an active pass.
+- **Fix:** [`Gfx`](../core/src/main/java/dev/starlight/core/render/Gfx.java) keeps the last backend for measuring (`textWidth`/`lineHeight`); drawing still needs an active pass.
   Verified with xdotool on 1.21.11: toggle, category chip, every sidebar page and a settings page all respond, and
   there are 0 `GUI click failed`.
-- **Regression tests:** [`GfxMeasureTest`](../core/src/test/java/dev/mw19/core/GfxMeasureTest.java) (measuring after `end()`), and every smoke run now clicks the FPS toggle through
+- **Regression tests:** [`GfxMeasureTest`](../core/src/test/java/dev/starlight/core/GfxMeasureTest.java) (measuring after `end()`), and every smoke run now clicks the FPS toggle through
   real X11 input (`Smoke.requestClick` + the xdotool helper in `smoke.sh`) and fails unless the module flips. It passes
   through GLFW (1.21.11), SDL3 (26.3) and LWJGL 2 (1.8.9). xdotool's `--name` cannot read SDL3's UTF-8 window title,
   so the helper finds the window by `_NET_WM_PID` first.
@@ -125,7 +125,7 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
   off-screen, and chroma hues jumped roughly every two minutes instead of cycling every 4 s. Chroma had been broken
   since Phase 4.
 - **Fix:** relative time for the home screen (`now - start`), `double` arithmetic for chroma.
-- **Regression test:** [`ColorChromaTest`](../core/src/test/java/dev/mw19/core/ColorChromaTest.java) (the hue changes within 250 ms at a 2026 timestamp, and a cycle is 4 s).
+- **Regression test:** [`ColorChromaTest`](../core/src/test/java/dev/starlight/core/ColorChromaTest.java) (the hue changes within 250 ms at a 2026 timestamp, and a cycle is 4 s).
 
 ## 2026-09-26 · Benchmark phases capped at 30 FPS
 - **Repro:** `scripts/bench.sh 1.21.11`. Every phase after the first minute measured about 29.5 FPS, and the culling counters were
@@ -142,8 +142,8 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
 - **Hypothesis:** two writers used the same `.tmp` file at once: the smoke's `flush()` on the game thread and a
   debounced background save (or the shutdown hook's `flush()`). The first `move` took the tmp file; the second found
   none. A queued background save could also overwrite a newer `flush()` with an older snapshot.
-- **Isolate:** [`ConfigRaceTest`](../core/src/test/java/dev/mw19/core/ConfigRaceTest.java) runs `flush()` from 4 threads
-  40 times each. Against the 0.2.0 [`ConfigManager`](../core/src/main/java/dev/mw19/core/config/ConfigManager.java) it fails (errors logged); with the fix it passes.
+- **Isolate:** [`ConfigRaceTest`](../core/src/test/java/dev/starlight/core/ConfigRaceTest.java) runs `flush()` from 4 threads
+  40 times each. Against the 0.2.0 [`ConfigManager`](../core/src/main/java/dev/starlight/core/config/ConfigManager.java) it fails (errors logged); with the fix it passes.
 - **Fix:** `ConfigManager.writeBoth` writes under one lock and skips snapshots older than the last one written;
   profile writes take the same lock.
 - **Regression test:** `ConfigRaceTest`.
@@ -178,12 +178,12 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
 ## 2026-09-26 · 1.8.9 entity culling cast its rays from the player's feet
 - **Found by reading** (while adding block entity culling), not by a report. `RenderGlobal.renderEntities` (javap)
   passes `RenderManager.shouldRender` the render-view entity's interpolated `prevPos/pos` (feet), and MW19's
-  [`RenderManagerMixin`](../legacy/src/main/java/dev/mw19/forge/mixin/RenderManagerMixin.java) used that as the ray origin. The camera sits `eyeHeight` above it (and further back in third
+  [`RenderManagerMixin`](../legacy/src/main/java/dev/starlight/forge/mixin/RenderManagerMixin.java) used that as the ray origin. The camera sits `eyeHeight` above it (and further back in third
   person), so a mob visible over a one-block wall could be judged hidden and skipped. The Fabric targets were right:
   there `LevelRenderer` passes `Camera.getPosition()`.
 - **Fix:** 1.8.9 adds `ActiveRenderInfo.getPosition()` (the camera's offset from that interpolated position, updated
   every frame) to the origin, for entities and the new tile entity culling alike.
-- **Test:** covered by the smoke run's culling path only; the ray logic itself is unit-tested in [`OcclusionTest`](../core/src/test/java/dev/mw19/core/OcclusionTest.java).
+- **Test:** covered by the smoke run's culling path only; the ray logic itself is unit-tested in [`OcclusionTest`](../core/src/test/java/dev/starlight/core/OcclusionTest.java).
 
 ## 2026-09-26 · VulkanMod could not be tested headless (hang, then crash)
 - **Repro:** `WITH_MODS=vulkanmod smoke.sh 1.21.11` under Xvfb. Xvfb has no DRI3, so RADV's X11 presentation died
@@ -207,7 +207,7 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
   bottom). The rerun's zoom shows no line; the top view (`6c`/`6d`) matches vanilla's plank pattern and rims.
 
 ## 2026-09-27 · The renderer switch did not load in dev runs
-- **Repro:** after adding [`RendererSwitch`](../fabric/src/main/java/dev/mw19/fabric/RendererSwitch.java) as a language adapter, the dev smoke died at start: `Failed to instantiate
+- **Repro:** after adding [`RendererSwitch`](../fabric/src/main/java/dev/starlight/fabric/RendererSwitch.java) as a language adapter, the dev smoke died at start: `Failed to instantiate
   language adapter ... can't load class dev.mw19.fabric.RendererSwitch at .../build/classes/java/main as it hasn't been
   exposed to the game (yet? The system property fabric.classPathGroups may not be set correctly in-dev)`. Production
   launches had passed.
@@ -220,7 +220,7 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
   Vulkan has already been created.)`.
 - **Hypothesis:** something in the OpenGL session had already loaded LWJGL's Vulkan binding (GLFW's Vulkan support), so
   `VK.create()` refused a second time.
-- **Fix:** [`VulkanProbe`](../fabric/src/main/java/dev/mw19/fabric/VulkanProbe.java) shares an already created binding and leaves it loaded. Rerun: `no (llvmpipe ... is not
+- **Fix:** [`VulkanProbe`](../fabric/src/main/java/dev/starlight/fabric/VulkanProbe.java) shares an already created binding and leaves it loaded. Rerun: `no (llvmpipe ... is not
   enough)` on the CPU driver (correct: not a real GPU), and `ok llvmpipe ...` with `VK_SOFT=1`.
 
 ## 2026-09-27 · A crashed first start skipped the automatic preset
@@ -230,13 +230,13 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
 - **Hypothesis:** "fresh install" meant "no saved profile", and the shutdown hook saves the profile even when the game
   crashes, so the start after a crashed first start was no longer fresh.
 - **Fix:** a fresh install records `video.fresh` until the first-run step has actually run
-  ([`VideoPresets`](../core/src/main/java/dev/mw19/core/VideoPresets.java)). Regression test `aFirstStartThatCrashedStillGetsThePresetNextTime`; the two-start run
+  ([`VideoPresets`](../core/src/main/java/dev/starlight/core/VideoPresets.java)). Regression test `aFirstStartThatCrashedStillGetsThePresetNextTime`; the two-start run
   then passes. (The same run also showed smoke.sh overwrote `config.json` even with `KEEP_STATE`; it now merges.)
 
 ## 2026-09-27 · The bundled VulkanMod checks Modrinth for updates at every start
 - **Found by** searching the bundled jars for network code before writing [THIRD_PARTY](THIRD_PARTY.md): `UpdateChecker` sends a request
   to `api.modrinth.com` from VulkanMod's client initializer, unconditionally (its source at the pinned commits).
-- **Fix:** [`VulkanUpdateMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/VulkanUpdateMixin.java) (`@Pseudo`, only when VulkanMod runs) cancels it: MW19 uses the network only
+- **Fix:** [`VulkanUpdateMixin`](../fabric/src/main/java/dev/starlight/fabric/mixin/VulkanUpdateMixin.java) (`@Pseudo`, only when VulkanMod runs) cancels it: MW19 uses the network only
   when the player asks. Checked in the exported class of a Vulkan run (`checkForUpdates` calls `mw19$offline` first);
   [`scripts/mixin-audit.py`](../scripts/mixin-audit.py) checks it whenever VulkanMod was loaded.
 
@@ -246,7 +246,7 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
 - **Hypothesis:** on 1.21.9+ the module set vanilla's `ENTITY_HITBOXES` debug entry, and `DebugScreenEntryList.setStatus`
   saves the debug profile at once (javap: `rebuildCurrentList` then `save`). A game closed with the module on keeps
   hitboxes on for good, whatever MW19's config says later.
-- **Fix:** the module no longer changes the entry. [`HitboxesMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/HitboxesMixin.java) reports it as enabled while the module is on,
+- **Fix:** the module no longer changes the entry. [`HitboxesMixin`](../fabric/src/main/java/dev/starlight/fabric/mixin/HitboxesMixin.java) reports it as enabled while the module is on,
   and the platform refreshes the debug renderer's list on each toggle (`LevelRenderer.debugRenderer` up to 26.1,
   `levelExtractor.debugRenderer` on 26.2+). The player's own F3+B choice stays untouched. The mixin audit checks it.
 
@@ -339,8 +339,91 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
 - **Repro:** the 0.7.0 upload replaced all 18 versions (hashes match dist), but the project's summary and description
   stayed 0.5.0's. A re-run printed `project: 400 {"error":"request_error","description":"Slug collides with other
   project's id!"}`.
-- **Hypothesis:** `scripts/modrinth.py` sends `slug: "mw19"` in every project PATCH. Modrinth now validates the slug
+- **Hypothesis:** [`scripts/modrinth.py`](../scripts/modrinth.py) sends `slug: "mw19"` in every project PATCH. Modrinth now validates the slug
   even when it is the project's current one, and refuses it. The 400 drops the whole PATCH, so the title, summary and
   description go with it. The icon (a separate call) and the versions were unaffected.
 - **Fix:** the script reads the project first and sends the slug only when it differs. The re-run answered `project:
   204`, and the description on Modrinth now matches docs/MODRINTH.md byte for byte.
+
+## 2026-09-27 · 1.8.9 after the rename to Starlight: no mixin applied
+- **Repro:** the first 1.8.9 smoke run after the rename failed with `mixin audit 1.8.9: 0/15 wired` and `Error
+  encountered reading mixin config mixins.starlight_client.json: ... The specified resource
+  'mixins.starlight_client.json' was invalid`. The run then failed on the missing pause-menu backdrop.
+- **Hypothesis:** the legacy build names the mixin config after the mod id (`mixins.$modId.json`, in the jar manifest's
+  `MixinConfigs`). The mod id became `starlight_client` (not `starlight`, D-033), but the file was renamed to
+  `mixins.starlight.json`.
+- **Fix:** the file is [`mixins.starlight_client.json`](../legacy/src/main/resources/mixins.starlight_client.json). The next run: PASS, `mixin audit 1.8.9: 15/15 wired`.
+- **Regression test:** the smoke run's mixin audit already fails any run where a hook is not wired, which is how this
+  was caught.
+
+## 2026-09-27 · Bind profiles would have been lost under a Flatpak launcher (found before release)
+- **Found by:** checking where the owner's launchers let the game write. The owner runs Prism and Dawn as Flatpaks
+  (CLAUDE.md), and bind profiles were kept in `~/.starlight/`.
+- **Evidence:** `flatpak info --show-permissions org.prismlauncher.PrismLauncher` grants no home-folder access. In Prism's
+  sandbox (`flatpak run --command=sh`), `$HOME` is `/home/luna` but holds only `Downloads`. `mkdir ~/.starlight-sandbox-test`
+  succeeds there, yet the folder does not exist on the host afterwards: the sandbox's home is temporary. `Files.isWritable`
+  says yes, so the old fallback to the instance folder never triggered, and every profile would have been gone when the
+  game closed. `XDG_DATA_HOME` in the sandbox is `~/.var/app/org.prismlauncher.PrismLauncher/data`, which lasts.
+- **Fix:** profiles live in `$XDG_DATA_HOME/starlight/` when that is set, else `~/.starlight/`
+  ([`BindProfiles`](../core/src/main/java/dev/starlight/core/binds/BindProfiles.java)). Under a Flatpak launcher they are shared by that launcher's instances. The Keybinds page says
+  "Shared by your instances" or, when they had to stay in the instance, "This instance only".
+- **Checked in the sandbox:** a probe using the built core jar, run with Prism's own Java inside Prism's sandbox
+  (`flatpak run --filesystem=<probe>:ro --command=sh`), saved a profile to
+  `~/.var/app/org.prismlauncher.PrismLauncher/data/starlight/bind-profiles.json`, and the file was still there on the
+  host after the sandbox exited. The probe's file was then removed.
+- **Regression test:** `BindProfilesTest.aFlatpakLauncherKeepsThemInItsOwnDataFolder`. Not tested: the game itself
+  started from Prism (the tests never use the owner's launchers or accounts).
+
+## 2026-09-27 · 26.2+: no Starlight backdrop on the pause menu (since 0.7.0)
+- **Repro:** the 0.8.0 production screenshots of the pause menu (`x11-starlight-smoke-3b-pause.png`) show the night-sky
+  tint and stars over the world on 1.21–26.1, but on 26.2 and 26.3 only the world, with the HUD at full brightness
+  on top. The 0.7.0 run's 26.3 screenshot is the same, so this shipped in 0.7.0. The smoke check passed anyway.
+- **Hypothesis:** the Starlight backdrop hooks `Screen.extractBackground` (26.x) at HEAD. If 26.2's pause menu no longer
+  calls that method, the hook never runs for it. The smoke check read a flag that any earlier screen (the world-loading
+  screens) had already set.
+- **Evidence** (javap): 26.1's `PauseScreen.extractBackground` is `if (showPauseMenu) super.extractBackground(...)`.
+  26.2 and 26.3 replace the `super` call with their own `extractBlurredBackground` (when topmost) and
+  `extractMenuBackground`, then `hud.extractDeferredSubtitles()`. 26.2's `Screen.extractBackground` also ends with
+  `hud.extractDeferredSubtitles()`, and gives the new `isInGameUi()` screens (containers, signs, books, command, structure,
+  jigsaw and test blocks) a see-through background.
+- **Fix:**
+  - 26.2+: a `PauseScreen.extractBackground` hook ([`PauseScreenMixin`](../fabric/src/main/java/dev/starlight/fabric/mixin/PauseScreenMixin.java)) draws the backdrop when the menu is shown.
+  - A replaced background still draws the deferred subtitles. Before this, subtitles went missing under every screen
+    with the Starlight backdrop on 26.2+.
+  - `isInGameUi()` screens keep vanilla's see-through background ([`StarlightFabric`](../fabric/src/main/java/dev/starlight/fabric/StarlightFabric.java).backdrop).
+- **Regression test:** the smoke clears the flag when it opens the pause menu, so only the pause menu can set it. On
+  26.3 with the new hook removed, the run fails with "the pause menu did not draw the Starlight backdrop" (and the
+  mixin audit, which now expects the hook on 26.2+, reports 44/47). With the hook, it passes (47/47) and the screenshot
+  shows the backdrop.
+
+## 2026-09-28 · Production 1.21.3: "Player lost connection: Internal Exception: ClosedChannelException" at shutdown
+- **Repro:** one production run in the 0.8.0 round (1.21.3) failed only on this log record, after `Starlight SMOKE PASS`
+  with every check ok. The machine was under load (memory nearly full, the round at the lowest CPU priority).
+- **Hypothesis:** a vanilla shutdown race, not ours. The smoke quits with `Minecraft.stop()` (what closing the window
+  does) while the player is in the singleplayer world. Normally the integrated server reads the client's disconnect
+  first and logs `Player lost connection: Disconnected`. If it is still sending when the channel closes, it logs the
+  closed channel as the reason instead.
+- **Evidence:** in the log the record comes right after `[Render thread/INFO]: Stopping!` and is followed by `Player left
+  the game` and `Stopping singleplayer server as player logged out` (the world is saved as usual). Every other run
+  kept (26 dev, 14 production) logged `lost connection: Disconnected` at the same point.
+- **Fix** (test harness only): smoke.sh accepts exactly this record, and only after the client's `Stopping!`.
+- **Regression test:** the log check on this run's log now passes. On a copy with the same record moved before
+  `Stopping!` it still fails (`1 suspicious log record(s)`).
+
+## 2026-09-28 · After an upgrade from MW19, switching Fast Chests off did not take effect
+- **Repro:** the upgrade test (production 1.21.11). MW19 0.7.0 with Fast Chests on (`mw19/fast_chests` in options.txt),
+  then Starlight 0.8.0 in the same folder. At start vanilla logs `Removed resource pack mw19/fast_chests from options`,
+  and Starlight's pack is active at once (`SMOKE: fast chests ok`). But after the smoke switches Fast Chests off, the
+  resources never reload: `Fast Chests: resources did not reload within 90 s after turning it off`. Fresh installs pass
+  the same step.
+- **Hypothesis:** `FastChests.set` leaves the reload to vanilla's `Options.updateResourcePacks`, which reloads only
+  when the saved pack list changed. The Fast Chests pack is *required*, so at startup the pack repository selects it
+  without it ever being in that list. With the stale MW19 id dropped, the list is `["vanilla"]` before and after
+  switching the pack off, so nothing reloads. The chest models stay baked while the block entity renderer draws the
+  chests again, so every chest is drawn twice until the next reload.
+- **Evidence** (javap, 1.21.11 `Options`): `updateResourcePacks` copies `resourcePacks`, rebuilds it from the selected
+  packs, saves, and calls `Minecraft.reloadResourcePacks()` only `if (!new.equals(old))`. `loadSelectedResourcePacks`
+  removes unknown ids from `resourcePacks` and never adds the required packs the repository selects.
+- **Fix:** [`FastChests`](../fabric/src/main/java/dev/starlight/fabric/FastChests.java).set reloads resources itself when `updateResourcePacks` left the saved list unchanged.
+- **Regression test:** the upgrade test (MW19 0.7.0 → Starlight, Fast Chests on) runs the whole smoke, including Fast
+  Chests off and on again, in the upgraded folder.

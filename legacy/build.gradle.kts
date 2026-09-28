@@ -18,10 +18,10 @@ base.archivesName = modName
 // core/api are compiled ONCE by the main build (--release 8) and consumed as jars, so all 18 jars carry identical bytes.
 val coreJars = files("../core/build/libs/core.jar", "../api/build/libs/api.jar")
 
-// -Pmw19.smoke=<seconds> makes the dev client drive itself (see core Smoke + scripts/smoke.sh).
-val smokeSeconds: String? = providers.gradleProperty("mw19.smoke").orNull
-val smokeClicks = providers.gradleProperty("mw19.smokeClicks").isPresent
-val bench = providers.gradleProperty("mw19.bench").isPresent
+// -Pstarlight.smoke=<seconds> makes the dev client drive itself (see core Smoke + scripts/smoke.sh).
+val smokeSeconds: String? = providers.gradleProperty("starlight.smoke").orNull
+val smokeClicks = providers.gradleProperty("starlight.smokeClicks").isPresent
+val bench = providers.gradleProperty("starlight.bench").isPresent
 
 loom {
     runConfigs {
@@ -31,11 +31,11 @@ loom {
             property("mixin.debug.countInjections", "true")
             programArgs("--tweakClass", "org.spongepowered.asm.launch.MixinTweaker")
             if (smokeSeconds != null) {
-                property("mw19.smoke", "1")
-                property("mw19.smoke.seconds", smokeSeconds)
-                if (smokeClicks) property("mw19.smoke.clicks", "true")
+                property("starlight.smoke", "1")
+                property("starlight.smoke.seconds", smokeSeconds)
+                if (smokeClicks) property("starlight.smoke.clicks", "true")
             }
-            if (bench) property("mw19.bench", "1")
+            if (bench) property("starlight.bench", "1")
         }
         remove(getByName("server"))
     }
@@ -90,7 +90,7 @@ tasks.named<Jar>("jar") {
             "META-INF/services/org.spongepowered.tools.obfuscation.service.IObfuscationService")
     }
     // MIT notices travel with the code: ours, and Mixin's for the shaded copy (docs/THIRD_PARTY.md).
-    from(rootDir.resolve("../LICENSE")) { rename { "LICENSE_mw19" } }
+    from(rootDir.resolve("../LICENSE")) { rename { "LICENSE_starlight" } }
     from({ shade.map { zipTree(it) } }) {
         include("LICENSE.txt")
         rename { "LICENSE_mixin" }

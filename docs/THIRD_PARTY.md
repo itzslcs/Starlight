@@ -1,18 +1,18 @@
 # Third-party components and licenses
 
-MW19 itself is MIT ([`LICENSE`](../LICENSE), shipped in every jar as `LICENSE_mw19`). Licenses below were checked on 2026-09-25
+Starlight itself is MIT ([`LICENSE`](../LICENSE), shipped in every jar as `LICENSE_starlight`). Licenses below were checked on 2026-09-25
 from the artifact itself (POM `<licenses>` or a license file in the jar) or, if the artifact declares none, from the
 project's source repository. The *Evidence* column names the source.
 
-## Shipped inside MW19 jars
+## Shipped inside Starlight jars
 | Component | Version | Where | License | Evidence | How we comply |
 |---|---|---|---|---|---|
 | SpongePowered Mixin | 0.7.11-SNAPSHOT | shaded into the **1.8.9** jar only (`org/spongepowered/asm`) | MIT | POM: "MIT license"; jar: `LICENSE.txt` (The MIT License) | notice shipped as `LICENSE_mixin` in the jar; the build-only `org/spongepowered/tools` part is not shipped |
-| Marlow's Crystal Optimizer (by Bram and Marlow) | 2.0.0-SNAPSHOT, commit [62831e6](https://github.com/Bram1903/MarlowsCrystalOptimizer/tree/62831e69755797a1572e76d091af880584556653) | ported code in every 1.21+ jar ([`CrystalOptimizer`](../fabric/src/main/java/dev/mw19/fabric/port/CrystalOptimizer.java) and its mixins) | MIT, © 2026 Bram and Marlow | `LICENSE` at that commit (the repository's licence) | see "Ported optimizers" below ([DECISIONS](DECISIONS.md) D-028) |
-| HerosAnchorOptimizer (by HerobaneNair) | 1.1.3, commit [8e70b8a](https://github.com/HerobaneNair/herosanchoroptimizer/tree/8e70b8aba3f23d83805469b721725c6062b0d4c2) | ported code in every 1.21+ jar ([`AnchorOptimizer`](../fabric/src/main/java/dev/mw19/fabric/port/AnchorOptimizer.java) and its mixins) | MIT, © 2024 HerobaneNair | `LICENSE` at that commit; `"license": "MIT"` in its [`fabric.mod.json`](../fabric/src/main/resources/fabric.mod.json) | see "Ported optimizers" below (D-028) |
+| Marlow's Crystal Optimizer (by Bram and Marlow) | 2.0.0-SNAPSHOT, commit [62831e6](https://github.com/Bram1903/MarlowsCrystalOptimizer/tree/62831e69755797a1572e76d091af880584556653) | ported code in every 1.21+ jar ([`CrystalOptimizer`](../fabric/src/main/java/dev/starlight/fabric/port/CrystalOptimizer.java) and its mixins) | MIT, © 2026 Bram and Marlow | `LICENSE` at that commit (the repository's licence) | see "Ported optimizers" below ([DECISIONS](DECISIONS.md) D-028) |
+| HerosAnchorOptimizer (by HerobaneNair) | 1.1.3, commit [8e70b8a](https://github.com/HerobaneNair/herosanchoroptimizer/tree/8e70b8aba3f23d83805469b721725c6062b0d4c2) | ported code in every 1.21+ jar ([`AnchorOptimizer`](../fabric/src/main/java/dev/starlight/fabric/port/AnchorOptimizer.java) and its mixins) | MIT, © 2024 HerobaneNair | `LICENSE` at that commit; `"license": "MIT"` in its [`fabric.mod.json`](../fabric/src/main/resources/fabric.mod.json) | see "Ported optimizers" below (D-028) |
 | VulkanMod (by Collateral) | 0.6.8+1.21.11 (1.21.11 jar); 0.6.6 (1.21.9 and 1.21.10 jars) | nested unmodified as jar-in-jar (`META-INF/jars/vulkanmod-<modrinth id>.jar`); it nests its own Fabric API modules (Apache-2.0) and LWJGL Vulkan/VMA/shaderc bindings (BSD-3-Clause) | LGPL-3.0-only | Modrinth project licence; `LICENSE` at the source commits below; `LICENSE_VulkanMod` in its jar | see "VulkanMod" below ([DECISIONS](DECISIONS.md) D-024) |
 
-The Fabric jars otherwise contain only MW19 classes (`dev/mw19/{api,core,fabric}`) and resources, checked by listing
+The Fabric jars otherwise contain only Starlight classes (`dev/starlight/{api,core,fabric}`) and resources, checked by listing
 the built jars.
 
 ### Ported optimizers
@@ -30,13 +30,13 @@ the built jars.
   [`scripts/vulkanmod-pin.py`](../scripts/vulkanmod-pin.py) with their SHA-512 (the build fails on a mismatch):
   0.6.8+1.21.11 = [d3db079](https://github.com/xCollateral/VulkanMod/tree/d3db07925f60257433233409125a08d7c08bf023)
   ("Bump version", dev branch, 2026-06-14); 0.6.6 for 1.21.9/1.21.10 = tag
-  [0.6.6](https://github.com/xCollateral/VulkanMod/tree/67e20f1f359a3a0611e2312a8a72e47fc9a09737). Other MW19 jars
+  [0.6.6](https://github.com/xCollateral/VulkanMod/tree/67e20f1f359a3a0611e2312a8a72e47fc9a09737). Other Starlight jars
   bundle no VulkanMod (their upstream sources are not published, or Minecraft has its own Vulkan backend).
 - **How we comply with the LGPL:** the jar is not modified; `THIRD_PARTY_NOTICES.txt` in every jar that carries it
   names it, its licence and the source commit; `META-INF/licenses/` holds the LGPL-3.0 and GPL-3.0 texts
   ([`docs/licenses`](licenses/)); the About page shows the notice while the game runs (section 4(c)); `dist/sources/`
   holds the source zip of each bundled commit, published next to the jars; a player can use a different or modified
-  VulkanMod by putting it in the mods folder, where Fabric loads the newer version instead (section 4(d)). MW19 only
+  VulkanMod by putting it in the mods folder, where Fabric loads the newer version instead (section 4(d)). Starlight only
   decides at launch whether VulkanMod runs, through Fabric's own metadata (D-024); it does not link against or change it.
 
 ## Provided by the player's install (not shipped by us)
@@ -64,11 +64,11 @@ the built jars.
 | MCP mappings `stable_22` | 1.8.9 build | MCP terms (mod development use) | applied by Loom at build time and not redistributed |
 
 GPL-2.0 (pack200) and LGPL-3.0 (Stonecutter) apply only to the build tools themselves. We neither link them into nor
-ship them with our jars, so they place no obligations on MW19's output.
+ship them with our jars, so they place no obligations on Starlight's output.
 
-## Referenced by the MW19 Performance packs (not redistributed)
+## Referenced by the Starlight Performance packs (not redistributed)
 The `.mrpack` files ([`scripts/mrpack.py`](../scripts/mrpack.py)) list these by Modrinth CDN URL and hash, and the launcher downloads them from
-Modrinth when you import the pack. They are not included in MW19's jars.
+Modrinth when you import the pack. They are not included in Starlight's jars.
 
 | Mod | License (Modrinth) |
 |---|---|
@@ -87,23 +87,28 @@ Modrinth when you import the pack. They are not included in MW19's jars.
 | MCTiers API v2 `https://mctiers.com/api/v2/profile/{uuid}` (or SubTiers `https://subtiers.net/api/v2`, or a list the player enters) | Tier Tagger module | the module is on (off by default): one lookup per player per 4 hours, sending only the UUID |
 | The player's router (UPnP IGD: SSDP multicast, then SOAP on the local network) | Host World | the player switches on *Over the internet* |
 
-No other network access exists in MW19 (see [README](../README.md) → Privacy). The bundled VulkanMod's only network code
+No other network access exists in Starlight (see [README](../README.md) → Privacy). The bundled VulkanMod's only network code
 (its jars were searched for URLs and HTTP use) is an update check against `api.modrinth.com` at every start, which
-[`VulkanUpdateMixin`](../fabric/src/main/java/dev/mw19/fabric/mixin/VulkanUpdateMixin.java) turns off. Its options screen also has buttons that open its Modrinth and Ko-fi pages in the
+[`VulkanUpdateMixin`](../fabric/src/main/java/dev/starlight/fabric/mixin/VulkanUpdateMixin.java) turns off. Its options screen also has buttons that open its Modrinth and Ko-fi pages in the
 browser when clicked.
 
 ## KeyCPS (owner's own mod)
-[`core/.../modules/KeyCpsModule.java`](../core/src/main/java/dev/mw19/core/modules/KeyCpsModule.java) and [`InputRates.java`](../core/src/main/java/dev/mw19/core/modules/InputRates.java) port KeyCPS 1.6.1 (modrinth.com/mod/keycps). Its
-fabric.mod.json declares MIT, while the Modrinth page lists All Rights Reserved. KeyCPS's author is MW19's owner, who
-asked for the port ([DECISIONS](DECISIONS.md) D-018). No KeyCPS binary is bundled, and the ported code is covered by MW19's MIT licence.
+[`core/.../modules/KeyCpsModule.java`](../core/src/main/java/dev/starlight/core/modules/KeyCpsModule.java) and [`InputRates.java`](../core/src/main/java/dev/starlight/core/modules/InputRates.java) port KeyCPS 1.6.1 (modrinth.com/mod/keycps). Its
+fabric.mod.json declares MIT, while the Modrinth page lists All Rights Reserved. KeyCPS's author is Starlight's owner, who
+asked for the port ([DECISIONS](DECISIONS.md) D-018). No KeyCPS binary is bundled, and the ported code is covered by Starlight's MIT licence.
 
 ## ExploitPreventer (idea list only)
 Exploit Protection covers the exploits listed on [ExploitPreventer](https://modrinth.com/mod/exploitpreventer)'s Modrinth
-page (NikOverflow, MIT). Only that public description was read; the implementation is MW19's own ([DECISIONS](DECISIONS.md) D-021),
-so no ExploitPreventer code or licence notice ships with MW19.
+page (NikOverflow, MIT). Only that public description was read; the implementation is Starlight's own ([DECISIONS](DECISIONS.md) D-021),
+so no ExploitPreventer code or licence notice ships with Starlight.
 
 ## Original work
-Apart from the KeyCPS port above, all MW19 code, UI, icons (drawn from rectangles in code, [`core/.../gui/Icons.java`](../core/src/main/java/dev/mw19/core/gui/Icons.java), D-009), themes and texts are original. No code or
+Apart from the KeyCPS port above, all Starlight code, UI, icons (drawn from rectangles in code, [`core/.../gui/Icons.java`](../core/src/main/java/dev/starlight/core/gui/Icons.java), D-009), themes and texts are original. No code or
 assets were copied or decompiled from other clients or mods. The Fast Chests models are generated by
 [`scripts/fast-chests.py`](../scripts/fast-chests.py) from the layout of Minecraft's own chest textures, which they reference by name (D-025).
-MW19 renders text with Minecraft's own font and bundles no fonts.
+Starlight renders text with Minecraft's own font and bundles no fonts. The icon and logo are drawn by
+[`scripts/icon.py`](../scripts/icon.py) and [`TitleUi`](../core/src/main/java/dev/starlight/core/gui/TitleUi.java).
+
+**The name:** Spottedleaf's lighting engine mod is also called Starlight (mod id `starlight`, Modrinth `starlight`). It is
+unrelated. This client uses the mod id `starlight_client`, the Modrinth slug `starlight-client` and the full name
+"Starlight Client" so the two are never confused by a loader or on Modrinth ([DECISIONS](DECISIONS.md) D-033).

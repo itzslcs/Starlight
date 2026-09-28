@@ -27,7 +27,7 @@
 ## Phase 4: features (done 2026-09-25, commit dbeb9f1 + this commit)
 - Full module set, plugin API + loader with per-jar consent, the Tier Tags addon and the Session Stats sample, own nametag.
 - **KeyCPS** (the owner's own mod) replaced the CPS and Keystrokes modules ([DECISIONS](DECISIONS.md) D-018). It counts per
-  binding from input events ([`InputRates`](../core/src/main/java/dev/mw19/core/modules/InputRates.java)), and every smoke run feeds it 7 attack + 4 use presses and asserts the counts.
+  binding from input events ([`InputRates`](../core/src/main/java/dev/starlight/core/modules/InputRates.java)), and every smoke run feeds it 7 attack + 4 use presses and asserts the counts.
 - Docs: [README](../README.md) (hub + privacy/network list), PLUGIN_API (removed with plugins in 0.5.0), [THIRD_PARTY](THIRD_PARTY.md) (licences
   checked from artifacts/repos; Mixin's MIT notice now ships in the 1.8.9 jar), [PRISM](PRISM.md), and a generated
   [CODE_MAP](CODE_MAP.md). The docs are a linked graph (repo root = Obsidian vault; [`scripts/docs-graph.py`](../scripts/docs-graph.py)).
@@ -37,7 +37,7 @@
 - 26.x API seams from javap on the unobfuscated jars: GuiGraphics→GuiGraphicsExtractor (26.1), Gui→Hud and screen/chat
   moved under `mc.gui` (26.2), render-state extraction (lightmap, camera FOV/angles, damage tilt), private chat
   `addMessage` with GuiMessageSource, world clocks, and **26.3's switch from GLFW to SDL3** (scancodes, SDL_Keymod,
-  1-based mouse buttons). MW19 keeps GLFW codes as its canonical key space via [`SdlKeys`](../core/src/main/java/dev/mw19/core/SdlKeys.java), so profiles stay portable.
+  1-based mouse buttons). MW19 keeps GLFW codes as its canonical key space via [`SdlKeys`](../core/src/main/java/dev/starlight/core/SdlKeys.java), so profiles stay portable.
 - All 18 jars build. The dev smoke passes on 17 of 18 ([COMPAT_MATRIX](COMPAT_MATRIX.md)); mixin audits are fully wired.
 - **Open:** 26.1.1 hangs in JVM exit after a passing run (2/2 runs; [debug-log](debug-log.md)).
 
@@ -61,7 +61,7 @@
 - Every smoke run now opens the three new pages (screenshots), runs a live Modrinth search, opens the world to LAN and
   runs an exploit self-test (a sign editor must send back a mod-only key untranslated); the mixin audit covers the
   five new injections.
-- **Fixed:** a config save race at exit (debug-log, [`ConfigRaceTest`](../core/src/test/java/dev/mw19/core/ConfigRaceTest.java)); the 1.8.9 dev version label.
+- **Fixed:** a config save race at exit (debug-log, [`ConfigRaceTest`](../core/src/test/java/dev/starlight/core/ConfigRaceTest.java)); the 1.8.9 dev version label.
 - **Not built:** in-game account switching (reads other programs' stored logins; D-022).
 
 ## 2026-09-26: 0.4.0 (owner: max-FPS presets with auto-detection, smooth animations, the community suggestion list)
@@ -125,7 +125,7 @@
 - **Declined:** No Chat Restrictions (it bypasses Microsoft account chat restrictions; D-028).
 
 ## 2026-09-27: 0.7.0 (owner feedback on 1.21.11: skin changes do not show; menus look bland and generic)
-- **MW19's own look** (D-029, [`MenuStyle`](../core/src/main/java/dev/mw19/core/gui/MenuStyle.java)):
+- **MW19's own look** (D-029, [`MenuStyle`](../core/src/main/java/dev/starlight/core/gui/MenuStyle.java)):
   - Keycap buttons: notched pixel corners, a lit top edge, and a side that glows in the accent on hover. They are used
     for Minecraft's buttons (every version), the home screen and MW19's own menu buttons.
   - Keycap sliders (1.21+).
@@ -144,3 +144,40 @@
 - **Modrinth:** uploaded to the draft with a token the owner gave: 18 versions `0.7.0+mc<mc>`, every file's SHA-512 matching
   dist/, VulkanMod's embedded dependency and source zip on 1.21.9–1.21.11, and the listing text matching
   docs/MODRINTH.md. Still a draft.
+
+## 2026-09-28: 0.8.0 (owner requests: rename to Starlight, star themed, more themes, Tier Tagger back, bind profiles)
+- **MW19 is now Starlight** (D-033): mod id `starlight_client` and Modrinth slug `starlight-client`, because plain
+  "starlight" is Spottedleaf's lighting mod. New logo, icon ([`scripts/icon.py`](../scripts/icon.py)) and menu mark. An `MW19/` (or `Kestrel/`)
+  folder moves to `Starlight/` on first start, old theme names and profile codes carry over, and the Fabric jar
+  declares `breaks: mw19`.
+- **A scene per theme** (D-031, [`Scenes`](../core/src/main/java/dev/starlight/core/gui/Scenes.java)): ten themes, each with an animated pixel scene behind the menus; Starlight's night
+  sky is the default. The Themes page previews them live, and the HUD editor on the home screen shows the scene.
+- **Tier Tagger back** as a built-in module (D-030): MCTiers/SubTiers tiers on nametags and in the tab list, off by
+  default, off on Hypixel.
+- **Bind profiles** (D-032, [`BindProfiles`](../core/src/main/java/dev/starlight/core/binds/BindProfiles.java)): named sets of Minecraft's key binds, shared by every instance and
+  every version. The default one is applied to a new instance on its first start.
+- **Found on the way** (debug-log):
+  - After the rename, the 1.8.9 build asked for a mixin config under the new mod id.
+  - Under a Flatpak launcher (the owner's Prism), `~/.starlight` sits in a temporary home folder, so bind profiles now
+    go to `$XDG_DATA_HOME/starlight/` when that is set (checked inside Prism's sandbox).
+  - 26.2 and 26.3 drew no backdrop on the pause menu (since 0.7.0), and subtitles vanished under styled menus there.
+  - After an upgrade, switching Fast Chests off did not reload resources.
+  - Test harness: a vanilla shutdown log race, and a pause-menu check that any earlier screen could satisfy.
+- **Smoke run additions:**
+  - Every theme's scene on the home screen.
+  - A bind profile applied to Minecraft's bindings and back.
+  - A live MCTiers lookup whose tier must then show on the player's own nametag and in the tab list.
+  - The pause menu itself must draw the backdrop.
+  - New [`scripts/upgrade-test.sh`](../scripts/upgrade-test.sh): MW19 0.7.0 → Starlight in one production game folder.
+- **Results:**
+  - Dev smoke 18/18 on snapshot 45ad254, with the mixin audit fully wired (45–47 checks on Fabric, 15 on 1.8.9).
+  - Production 17/17, and the 3 VulkanMod jars on lavapipe. The dist jars are the ones those runs tested (SHA-256
+    checked after the runs).
+  - 1.21.11 beside the Performance pack mods and Fabric API.
+  - The upgrade from MW19 0.7.0 passes (COMPAT_MATRIX).
+  - 77 core tests.
+- **Owner's instances:** at the owner's request ("change it to Starlight instead of mw19"), their four Prism test
+  instances run Starlight 0.8.0, with the old MW19/Kestrel jars disabled.
+- **Modrinth:** not uploaded yet. The upload renames the project to "Starlight Client" (slug `starlight-client`) and
+  needs a fresh token from the owner.
+

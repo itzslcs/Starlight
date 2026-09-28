@@ -1,0 +1,27 @@
+{
+  "required": false,
+  "minVersion": "0.7",
+  "package": "dev.starlight.forge.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "EffectRendererMixin",
+    "EntityMixin",
+    "EntityRendererMixin",
+    "GuiButtonMixin",
+    "GuiPlayerTabOverlayMixin",
+    "GuiScreenMixin",
+    "IntegratedServerAccessor",
+    "ItemRendererMixin",
+    "MinecraftMixin",
+    "NetHandlerPlayClientMixin",
+    "RendererLivingEntityMixin",
+    "RenderManagerMixin",
+    "RenderMixin",
+    "ThreadLanServerPingAccessor",
+    "TileEntityRendererDispatcherMixin",
+    "WorldMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
