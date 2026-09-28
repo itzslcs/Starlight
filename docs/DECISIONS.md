@@ -413,3 +413,14 @@ icon ([`scripts/icon.py`](../scripts/icon.py)) and the default theme (D-031).
   theme names migrate (D-031), and `MW19-P1:`/`KESTREL-P1:` profile codes still import ([`RenameCompatTest`](../core/src/test/java/dev/starlight/core/RenameCompatTest.java)). The
   old jar must go: the Fabric build declares `breaks: mw19`, so Fabric names the conflict instead of loading both, and the
   1.8.9 build shows a warning.
+
+## D-034 In-game account switcher: only with Starlight's own approved sign-in (owner request, 2026-09-28)
+The owner asked for an in-game account switcher with Microsoft sign-in, accounts kept in Starlight's own file in the
+layout of Prism's `accounts.json`, like In-Game Account Switcher. That is fine in principle and revises the "account
+switcher" part of D-023. But Minecraft's login only accepts Microsoft app registrations that Mojang has approved for
+the Minecraft API, so it needs Starlight's own Entra (Azure) app with that approval.
+- **Declined:** signing in under another app's registration (the owner mentioned the Minecraft Android app's). That
+  impersonates the other app to get around Mojang's approval step.
+- **Parked:** the owner does not want to register and apply for now ("thats effort"). With an approved client ID, the
+  plan is an Accounts page, sign-in through Microsoft's page in the browser, `Starlight/accounts.json` kept local, and
+  opt-in network use listed in the [README](../README.md).
