@@ -27,7 +27,7 @@ replaceable).
 `origin` is [github.com/itzslcs/Starlight](https://github.com/itzslcs/Starlight) (private), first pushed on 2026-09-28. This machine keeps no GitHub
 login, so each push needs a token from the owner:
 
-1. github.com/settings/personal-access-tokens/new: a short expiry, **Only select repositories** → `Starlight`, and
+1. github.com/settings/personal-access-tokens/new: a short expiry, **Only select repositories** → [`Starlight`](../core/src/main/java/dev/starlight/core/Starlight.java), and
    under **Repository permissions** set **Contents** to **Read and write** (Read-only is refused with a 403).
 2. Claude pushes with it for that one command (`git -c http.https://github.com/.extraheader=... push`), so it is never
    written to `.git/config`, and the owner revokes it afterwards.
