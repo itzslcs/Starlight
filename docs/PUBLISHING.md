@@ -24,10 +24,13 @@ replaceable).
 6. Check the page, then **Submit for review** on Modrinth when you are happy with it.
 
 ## GitHub
-The repository has no remote yet.
+`origin` is [github.com/itzslcs/Starlight](https://github.com/itzslcs/Starlight) (private), first pushed on 2026-09-28. This machine keeps no GitHub
+login, so each push needs a token from the owner:
 
-1. Open github.com/new. Name the repository `starlight`, choose Private or Public, and leave "Add a [README](../README.md)", ".gitignore" and
-   "license" unticked (the project has all three). Click **Create repository**.
-2. The easy way to let Claude push: install the GitHub CLI (`sudo pacman -S github-cli`), then in Claude Code type
-   `! gh auth login` and follow the prompts (GitHub.com → HTTPS → log in with a web browser).
-3. Then Claude runs `git remote add origin https://github.com/<you>/starlight.git` and `git push -u origin main`.
+1. github.com/settings/personal-access-tokens/new: a short expiry, **Only select repositories** → `Starlight`, and
+   under **Repository permissions** set **Contents** to **Read and write** (Read-only is refused with a 403).
+2. Claude pushes with it for that one command (`git -c http.https://github.com/.extraheader=... push`), so it is never
+   written to `.git/config`, and the owner revokes it afterwards.
+
+Or, to push without tokens: install the GitHub CLI (`sudo pacman -S github-cli`) and type `! gh auth login` in Claude
+Code (GitHub.com → HTTPS → log in with a web browser).

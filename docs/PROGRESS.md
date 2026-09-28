@@ -182,6 +182,6 @@
   `starlight-client`) with the new icon, 18 versions `0.8.0+mc<mc>` whose files match dist/ by SHA-512, VulkanMod's
   embedded dependency and source zip on 1.21.9–1.21.11, and the listing text matching docs/MODRINTH.md. The 0.7.0
   versions were deleted. Still a draft.
-- **GitHub:** not pushed. The repository has no remote, and this machine has no GitHub credentials (no `gh`, SSH key
-  or credential helper); PUBLISHING has the steps.
+- **GitHub:** pushed to github.com/itzslcs/Starlight (private) with a token the owner gave; the machine keeps no GitHub
+  login (PUBLISHING).
 
