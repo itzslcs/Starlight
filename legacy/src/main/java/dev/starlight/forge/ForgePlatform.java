@@ -367,8 +367,8 @@ public final class ForgePlatform implements Platform, ScreenHost, ChatAccess, Mo
     @Override
     public void vanillaBindings(BindingSink sink) {
         for (KeyBinding kb : mc.gameSettings.keyBindings) {
-            int code = LwjglKeys.fromBinding(kb.getKeyCode());
-            if (code != Keys.NONE) sink.accept(I18n.format(kb.getKeyDescription()), code);
+            sink.accept(kb.getKeyDescription(), I18n.format(kb.getKeyDescription()), I18n.format(kb.getKeyCategory()),
+                    LwjglKeys.fromBinding(kb.getKeyCode()), LwjglKeys.fromBinding(kb.getKeyCodeDefault()));
         }
     }
 

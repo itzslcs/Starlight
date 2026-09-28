@@ -427,3 +427,14 @@ Every entry follows the protocol: reproduce, state a hypothesis (and what would 
 - **Fix:** [`FastChests`](../fabric/src/main/java/dev/starlight/fabric/FastChests.java).set reloads resources itself when `updateResourcePacks` left the saved list unchanged.
 - **Regression test:** the upgrade test (MW19 0.7.0 → Starlight, Fast Chests on) runs the whole smoke, including Fast
   Chests off and on again, in the upgraded folder.
+
+## 2026-09-28 · Upgrade test: both jars stuck before the title screen (test harness)
+- **Repro:** in the 0.8.1 round, [`scripts/upgrade-test.sh`](../scripts/upgrade-test.sh) failed with "title screen never appeared (screen=OTHER)"
+  for the old MW19 jar *and* for Starlight. The same script passed an hour earlier.
+- **Hypothesis:** smoke.sh's options block had just gained `guiScale:${GUI_SCALE:-2}`. The upgrade script copies that
+  block as raw text, so the game read the literal `${GUI_SCALE:-2}`.
+- **Evidence:** the MW19 run's log has `[Render thread/ERROR]: Failed to load options` at start: one bad value drops
+  the whole file. The saved options.txt then held Minecraft's defaults (`onboardAccessibility:true`,
+  `tutorialStep:movement`), so the accessibility onboarding screen stood where the title screen should be.
+- **Fix:** the script replaces each `${VAR:-default}` with its default when it copies the block.
+- **Regression test:** the rerun passes (MW19 0.7.0 → Starlight 0.8.1, COMPAT_MATRIX).

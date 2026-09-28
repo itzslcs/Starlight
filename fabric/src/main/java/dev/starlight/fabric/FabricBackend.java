@@ -130,6 +130,15 @@ public final class FabricBackend implements RenderBackend {
         FabricMedia.INSTANCE.player(g, x1, y1, x2, y2, skin, slim, yaw, pitch);
     }
 
+    @Override
+    public void face(float x1, float y1, float x2, float y2) {
+        push();
+        translate(x1, y1);
+        scale((x2 - x1) / 8f);
+        FabricMedia.INSTANCE.face(g);
+        pop();
+    }
+
     /** drawString was renamed to text in 26.1 (GuiGraphics became GuiGraphicsExtractor). */
     private void drawText(String text, int x, int y, int argb, boolean shadow) {
         //? if >=26.1 {

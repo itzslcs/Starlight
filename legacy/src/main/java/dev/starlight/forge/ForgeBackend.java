@@ -200,6 +200,12 @@ public final class ForgeBackend implements RenderBackend {
     }
 
     @Override
+    public void face(float x1, float y1, float x2, float y2) {
+        flush();
+        ForgeMedia.INSTANCE.face(x1, y1, x2, y2);
+    }
+
+    @Override
     public void player(float x1, float y1, float x2, float y2, int skin, boolean slim, float yaw, float pitch) {
         flush();
         ForgeMedia.INSTANCE.player(x1, y1, x2, y2, skin, slim, yaw, pitch);

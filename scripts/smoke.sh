@@ -50,7 +50,7 @@ maxFps:60
 enableVsync:false
 pauseOnLostFocus:false
 fullscreen:false
-guiScale:2
+guiScale:${GUI_SCALE:-2}
 soundCategory_master:0.0
 OPT
 cp "$RUN/options.txt" "$RUN/optionsof.txt" 2>/dev/null || true

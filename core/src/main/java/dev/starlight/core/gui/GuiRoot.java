@@ -49,7 +49,20 @@ public final class GuiRoot implements Surface {
     private float width, height, scale = 1;
     private long hoverSince;
     private String lastTooltip;
-    private final List<String[]> vanillaBinds = new ArrayList<String[]>();
+    /** Minecraft's bound keys (for conflict display): id, shown name, key, default key. */
+    private static final class VanillaBind {
+        final String id, name;
+        final int key, def;
+
+        VanillaBind(String id, String name, int key, int def) {
+            this.id = id;
+            this.name = name;
+            this.key = key;
+            this.def = def;
+        }
+    }
+
+    private final List<VanillaBind> vanillaBinds = new ArrayList<VanillaBind>();
 
     public GuiRoot(Starlight k) {
         this.k = k;
@@ -93,18 +106,7 @@ public final class GuiRoot implements Surface {
         open.snap(0);
         open.to(1, 200, System.currentTimeMillis());
         popup = popupOwner = captured = null;
-        vanillaBinds.clear();
-        Guard.run("vanilla binds", new Runnable() {
-            @Override
-            public void run() {
-                k.platform.vanillaBindings(new dev.starlight.core.platform.Platform.BindingSink() {
-                    @Override
-                    public void accept(String name, int key) {
-                        vanillaBinds.add(new String[]{name, Integer.toString(key)});
-                    }
-                });
-            }
-        });
+        refreshVanillaBinds();
         page.onShow();
     }
 
@@ -302,8 +304,15 @@ public final class GuiRoot implements Surface {
             g.text(p.title(), px + 28, ny + pad + 1, col, false);
             ny += step;
         }
+        // welcome, in the space between the page list and the HUD button: the player's face in a pixel circle, and their name
+        float by = py + ph - 26, listEnd = py + 40 + pages.size() * step;
+        welcomeH = by - listEnd >= 30 ? AVATAR : 0;
+        if (welcomeH > 0) {
+            welcomeX = px + 12;
+            welcomeY = Math.round(listEnd + (by - listEnd - AVATAR) / 2f);
+            welcome(g, t, px);
+        }
         // footer: HUD editor
-        float by = py + ph - 26;
         boolean hv = ui.hover(px + 8, by, SIDEBAR - 16, 18);
         g.roundRect(px + 8, by, SIDEBAR - 16, 18, 4, hv ? Colors.lerp(t.accent, 0xFFFFFFFF, 0.15f) : t.accent);
         Icons.draw(g, "hud", px + 16, by + 4, t.onAccent);
@@ -323,6 +332,49 @@ public final class GuiRoot implements Surface {
         g.popAlpha();
         g.popAlpha();
         g.pop();
+    }
+
+    private static final int AVATAR = 16;
+    /** Left and right edge of each row of a pixel circle: the accent ring (AVATAR + 2) and the face (AVATAR). */
+    private static final int[] RING = circle(AVATAR + 2), DISC = circle(AVATAR);
+    private float welcomeX, welcomeY, welcomeH;
+    private String welcomeFor = "", welcomeName = "";
+
+    /** "Welcome, <name>" with the player's face in a gold-ringed pixel circle; a click opens the Skins page. */
+    private void welcome(Gfx g, Theme t, float px) {
+        float x = welcomeX, y = welcomeY;
+        for (int r = 0; r < AVATAR + 2; r++) g.rect(x - 1 + RING[2 * r], y - 1 + r, x - 1 + RING[2 * r + 1], y + r, t.accent);
+        for (int r = 0; r < AVATAR; r++) { // one clipped strip per row: the face drawn as a circle over any background
+            g.pushClip(x + DISC[2 * r], y + r, DISC[2 * r + 1] - DISC[2 * r], 1);
+            g.face(x, y, AVATAR, AVATAR);
+            g.popClip();
+        }
+        String name = k.platform.playerName();
+        if (name == null) name = "";
+        if (!name.equals(welcomeFor)) {
+            welcomeFor = name;
+            welcomeName = g.ellipsize(name, px + SIDEBAR - 8 - (x + AVATAR + 6));
+        }
+        g.text("Welcome,", x + AVATAR + 6, y, t.textDim, false);
+        g.text(welcomeName, x + AVATAR + 6, y + 9, t.text, false);
+        if (ui.hover(x - 1, y - 1, SIDEBAR - 22, AVATAR + 2)) ui.tooltip = "Your skin: change it on the Skins page";
+    }
+
+    /** Smoke: the welcome line was drawn in the last frame (it needs room between the page list and the HUD button). */
+    public boolean welcomeShown() {
+        return welcomeH > 0;
+    }
+
+    /** Left and right edge (whole units) of each row of a pixel circle of diameter {@code d}. */
+    static int[] circle(int d) {
+        int[] out = new int[2 * d];
+        float r = d / 2f;
+        for (int i = 0; i < d; i++) {
+            float dy = i + 0.5f - r, half = (float) Math.sqrt(Math.max(0f, r * r - dy * dy));
+            out[2 * i] = Math.round(r - half);
+            out[2 * i + 1] = Math.round(r + half);
+        }
+        return out;
     }
 
     /** Sidebar row pitch: 19 when there is room, tighter on short windows so the list clears the HUD button. */
@@ -393,6 +445,22 @@ public final class GuiRoot implements Surface {
 
     // ------------------------------------------------------------------ key conflicts
 
+    /** Re-reads Minecraft's key bindings (id, name, key) for conflict display; after they change from our menu. */
+    public void refreshVanillaBinds() {
+        vanillaBinds.clear();
+        Guard.run("vanilla binds", new Runnable() {
+            @Override
+            public void run() {
+                k.platform.vanillaBindings(new dev.starlight.core.platform.Platform.BindingSink() {
+                    @Override
+                    public void accept(String id, String name, String category, int key, int defaultKey) {
+                        if (key != KeySetting.NONE) vanillaBinds.add(new VanillaBind(id, name, key, defaultKey));
+                    }
+                });
+            }
+        });
+    }
+
     /** Names of other bindings (ours or vanilla) on the same key, or null. */
     public String keyConflicts(KeySetting s) {
         int code = s.key();
@@ -405,10 +473,14 @@ public final class GuiRoot implements Surface {
                 sb.append(st.module.name()).append(": ").append(set.name());
             }
         }
-        for (String[] v : vanillaBinds) {
-            if (Integer.parseInt(v[1]) != code) continue;
+        // A Minecraft binding (a Keybinds page row) on its default key does not clash with another one on its default,
+        // as in Minecraft's Controls screen: 1.21.11's F3 debug keys share A, S, B... with movement by design
+        boolean ownDefault = false;
+        for (VanillaBind v : vanillaBinds) if (v.id.equals(s.id())) ownDefault = s.key() == s.defaultValue();
+        for (VanillaBind v : vanillaBinds) {
+            if (v.key != code || v.id.equals(s.id()) || ownDefault && v.key == v.def) continue;
             if (sb.length() > 0) sb.append(", ");
-            sb.append("Minecraft: ").append(v[0]);
+            sb.append("Minecraft: ").append(v.name);
         }
         return sb.length() == 0 ? null : sb.toString();
     }
@@ -466,6 +538,10 @@ public final class GuiRoot implements Surface {
         }
         if (ui.hover(px + 8, py + ph - 26, SIDEBAR - 16, 18)) {
             openHudEditor();
+            return true;
+        }
+        if (welcomeH > 0 && ui.hover(welcomeX - 1, welcomeY - 1, SIDEBAR - 22, AVATAR + 2)) {
+            openPage(dev.starlight.core.gui.page.SkinsPage.class);
             return true;
         }
         return page.mouseClicked(ui, button);

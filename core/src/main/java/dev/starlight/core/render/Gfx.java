@@ -355,6 +355,13 @@ public final class Gfx implements Renderer {
         b.player(ax(x), ay(y), ax(x + w), ay(y + h), skin, slim, yaw, pitch);
     }
 
+    /** The signed-in player's face, hat layer included, over the (square) rect. */
+    public void face(float x, float y, float w, float h) {
+        if (alpha < 0.5f) return;
+        b.flush();
+        b.face(ax(x), ay(y), ax(x + w), ay(y + h));
+    }
+
     // ---------------------------------------------------------------- clipping
 
     @Override

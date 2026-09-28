@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.1
+- **Minecraft's own keys on the Keybinds page:** every Minecraft key bind (movement, hotbar 1–9, inventory and the rest)
+  is listed by category, and you can change it right there, like in Minecraft's Controls. These are the keys bind
+  profiles save and switch. *Reset all* puts Minecraft's defaults back. Keys Minecraft binds twice on purpose (F3 + A
+  and A) are no longer marked as clashing.
+- **Welcome:** the menu's sidebar greets you by name, with your skin's face in a gold ring; click it for the Skins page.
+  It shows when the window has room for it.
+
 ## 0.8.0
 - **MW19 is now Starlight:** a new name, logo and icon, and a gold-on-night-blue theme as the default. Your settings
   come along: the `MW19/` folder becomes `Starlight/` on first start, and MW19 profile codes still import. Remove the

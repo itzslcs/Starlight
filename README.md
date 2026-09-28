@@ -66,7 +66,8 @@ Prism column of [COMPAT_MATRIX](docs/COMPAT_MATRIX.md).
   **Black** (OLED). The Themes page shows them live, and you can set your own accent colour. Menus animate (page cross-fades, a sliding sidebar highlight, a staggered home screen); set the animation speed to 0
   to turn that off.
 - **HUD Editor:** drag elements (they snap), drag a corner to scale, and right-click an element for its text colour and shadow.
-- **Bind profiles (Keybinds page):** save Minecraft's key binds as a named profile and switch between profiles in one
+- **Keybinds page:** all of Minecraft's key binds by category, changeable right there, and Starlight's own below them.
+  **Bind profiles:** save Minecraft's key binds as a named profile and switch between profiles in one
   click. The default profile (★) is applied to every new instance on its first start. Profiles are shared by all your
   instances and versions ([D-032](docs/DECISIONS.md)).
 - **Profiles:** one layout and module set per profile. They switch automatically per server and can be shared as a

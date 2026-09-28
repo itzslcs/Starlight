@@ -24,7 +24,7 @@ final class Smoke {
     private long clickTicks;
     private String guiClick = CLICKS ? "pending" : "skipped (no xdotool)";
     private String packs = "not run", packEnable = "not run", host = "not run", exploit = "not run", presets = "not run";
-    private String chests = "not run", pauseRow = "not run", optimizers = "not run", skinRefresh = "not run", tiers = "not run", names = "not run";
+    private String chests = "not run", pauseRow = "not run", optimizers = "not run", skinRefresh = "not run", tiers = "not run", names = "not run", welcome = "not run";
     private String startTheme = "Starlight", bindsCheck = "not run";
 
     /** Bind profiles against the real game: hotbar slot 1 moved to Z by a profile, then back, through Minecraft's options. */
@@ -348,6 +348,20 @@ final class Smoke {
                     shot("starlight-smoke-9f-keybinds");
                 } else if (stageTicks == 412) {
                     k.binds.delete("Smoke PvP");
+                    welcome = k.gui().welcomeShown() ? "shown" : "no room (GUI_SCALE=1 gives it room)";
+                    // Minecraft's own keys on the page: hotbar 1 set through its row reaches the game, and back
+                    dev.starlight.api.setting.KeySetting row = k.gui().page(dev.starlight.core.gui.page.KeybindsPage.class).minecraftKey("key.hotbar.1");
+                    Integer was = k.platform.vanillaBindingMap().get("key.hotbar.1");
+                    if (row == null || was == null) {
+                        fail("Keybinds page: no row for Minecraft's key.hotbar.1");
+                    } else {
+                        row.set(Keys.Z);
+                        Integer now = k.platform.vanillaBindingMap().get("key.hotbar.1");
+                        row.set(was);
+                        Integer back = k.platform.vanillaBindingMap().get("key.hotbar.1");
+                        bindsCheck += now != null && now == Keys.Z && was.equals(back) ? "; page row ok" : "; page row FAIL (" + now + ", back " + back + ")";
+                        if (!bindsCheck.endsWith("ok")) fail("Keybinds page: Minecraft's hotbar 1 set to " + now + ", then " + back + " (was " + was + ")");
+                    }
                 } else if (stageTicks == 420) {
                     exploit = k.platform.selfTest("exploit"); // last: its probe toast would cover the screenshots
                     Log.info("SMOKE: exploit protection " + exploit);
@@ -585,7 +599,7 @@ final class Smoke {
         }
         Log.info("SMOKE: top HUD costs " + costs.toString().trim());
         Log.info("Starlight SMOKE PASS hooks[" + k.hooks.describe() + "] guiClick[" + guiClick + "] keycps[" + keyCps + "] presets[" + presets + "] packs[" + packs + "] packEnable[" + packEnable + "] host[" + host
-                + "] exploit[" + exploit + "] pause[" + pauseRow + "] chests[" + chests + "] optimizers[" + optimizers + "] skin[" + skinRefresh + "] binds[" + bindsCheck + "] tiers[" + tiers + "] names[" + names + "] renderer[" + k.platform.rendererStatus() + "] modules["
+                + "] exploit[" + exploit + "] pause[" + pauseRow + "] chests[" + chests + "] optimizers[" + optimizers + "] skin[" + skinRefresh + "] binds[" + bindsCheck + "] tiers[" + tiers + "] names[" + names + "] welcome[" + welcome + "] renderer[" + k.platform.rendererStatus() + "] modules["
                 + k.modules.describeEnabled() + "] avgFrameMs=" + k.perf.avgFrameMs() + " ownUsPerFrame=" + k.perf.avgOwnUs());
         k.config.flush();
         shutdownWatchdog();

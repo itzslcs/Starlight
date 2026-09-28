@@ -411,8 +411,13 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
     @Override
     public void vanillaBindings(BindingSink sink) {
         for (KeyMapping km : mc.options.keyMappings) {
-            int code = FabricCompat.canonical(((KeyMappingAccessor) km).starlight$key());
-            if (code != Keys.NONE) sink.accept(Component.translatable(km.getName()).getString(), code);
+            //? if >=1.21.9 {
+            String category = km.getCategory().label().getString();
+            //?} else {
+            /*String category = Component.translatable(km.getCategory()).getString();
+            *///?}
+            sink.accept(km.getName(), Component.translatable(km.getName()).getString(), category,
+                    FabricCompat.canonical(((KeyMappingAccessor) km).starlight$key()), FabricCompat.canonical(km.getDefaultKey()));
         }
     }
 

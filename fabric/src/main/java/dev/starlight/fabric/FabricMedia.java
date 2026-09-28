@@ -175,6 +175,21 @@ public final class FabricMedia implements Skins, Packs {
         }
     }
 
+    /** The signed-in player's face and hat at (0, 0), 8 units wide (the backend scales it), as the tab list draws it. */
+    //? if >=26.1 {
+    /*void face(GuiGraphicsExtractor g) {
+    *///?} else {
+    void face(GuiGraphics g) {
+    //?}
+        PlayerSkin skin = ownSkin();
+        if (skin == null) return;
+        //? if >=26.1 {
+        /*net.minecraft.client.gui.components.PlayerFaceExtractor.extractRenderState(g, skin, 0, 0, 8);
+        *///?} else {
+        net.minecraft.client.gui.components.PlayerFaceRenderer.draw(g, skin, 0, 0, 8);
+        //?}
+    }
+
     /** The model in the rect (vanilla's widget fits it to the height), turned by yaw/pitch. */
     //? if >=26.1 {
     /*void player(GuiGraphicsExtractor g, float x1, float y1, float x2, float y2, int handle, boolean slim, float yaw, float pitch) {

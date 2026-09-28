@@ -185,3 +185,24 @@
 - **GitHub:** pushed to github.com/itzslcs/Starlight (private) with a token the owner gave; the machine keeps no GitHub
   login (PUBLISHING).
 
+## 2026-09-28: 0.8.1 (owner requests: bind profiles for Minecraft's own keys, a welcome line with their skin)
+- **Keybinds page** (D-032): "i meant actual minecraft binds, not just the starlight binds". Bind profiles already
+  saved and applied Minecraft's key bindings, but the page listed only Starlight's. It now lists Minecraft's bindings by
+  category, editable in place (applied and saved at once) with *Reset all*, above Starlight's. Clashes follow
+  Minecraft's rule, so 1.21.11's F3 debug keys on A, S, B... are no longer amber next to movement.
+- **Welcome line:** in the sidebar space between the page list and *Edit HUD*: "Welcome," and the player's name, with
+  their skin's face (hat layer included) in a gold-ringed pixel circle; a click opens the Skins page. It needs room,
+  so it shows on bigger windows or GUI scales. New render primitive `face()`: vanilla's face renderer up to 1.21.11,
+  its 26.x successor `PlayerFaceExtractor`, and the skin's face and hat UVs on 1.8.9.
+- **Smoke run additions:** Minecraft's hotbar 1 set through its Keybinds page row and back; `welcome[...]` reports the
+  line (dev runs at `GUI_SCALE=1`, new in smoke.sh, where the sidebar has room).
+- **Results:**
+  - Dev smoke 18/18 on snapshot e66d708 at GUI scale 1, with the welcome line shown and the mixin audit fully wired
+    everywhere.
+  - Production 17/17 and the 3 VulkanMod jars on lavapipe, with dist/ identical to what they tested.
+  - 1.21.11 beside the Performance pack mods.
+  - The MW19 0.7.0 → Starlight upgrade test passes.
+  - Core tests pass.
+- **Found on the way** (debug-log): the upgrade script copied smoke.sh's options with an unexpanded `${GUI_SCALE:-2}`,
+  which made Minecraft drop the whole options file.
+

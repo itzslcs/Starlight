@@ -24,7 +24,7 @@ build for Forge 1.8.9. `scripts/`: smoke/prod tests. `docs/`: all documentation.
 - `./gradlew :core:test`: unit tests.
 - `./gradlew :fabric:<mc>:build -Pstarlight.fabricTargets=<mc>`: one Fabric target (the property limits configuration to it).
 - `cd legacy && ./gradlew build`: 1.8.9 (needs `./gradlew :api:jar :core:jar` in the root first).
-- `scripts/smoke.sh <mc> [seconds]`: headless smoke (Xvfb + llvmpipe). Evidence goes to `smoke-out/<mc>/`
+- `scripts/smoke.sh <mc> [seconds]`: headless smoke (Xvfb + llvmpipe; `GUI_SCALE=1` for a roomier menu). Evidence goes to `smoke-out/<mc>/`
   (game screenshots plus `x11-*.png` screen grabs, which are the only evidence under VulkanMod).
 - `PROD=1 scripts/smoke.sh <mc>`: the built dist jar in a real Fabric production launch ([`scripts/prodlaunch.py`](scripts/prodlaunch.py),
   offline name, libraries cached in `~/.cache/starlight-prod`); needed for anything jar-in-jar (the bundled VulkanMod).

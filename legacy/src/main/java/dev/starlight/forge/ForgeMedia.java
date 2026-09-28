@@ -73,6 +73,18 @@ final class ForgeMedia implements Skins, Packs {
         Tex t = textures.get(handle);
         if (t == null) return;
         mc.getTextureManager().bindTexture(t.id);
+        quad(x1, y1, x2, y2, u0, v0, u1, v1, alpha);
+    }
+
+    /** The signed-in player's face (skin 8,8) and hat layer (40,8), 8x8 pixels each of the 64x64 skin, over the rect. */
+    void face(float x1, float y1, float x2, float y2) {
+        mc.getTextureManager().bindTexture(ownSkin());
+        quad(x1, y1, x2, y2, 8 / 64f, 8 / 64f, 16 / 64f, 16 / 64f, 1f);
+        quad(x1, y1, x2, y2, 40 / 64f, 8 / 64f, 48 / 64f, 16 / 64f, 1f);
+    }
+
+    /** The bound texture's UV rect over the rect, blended. */
+    private static void quad(float x1, float y1, float x2, float y2, float u0, float v0, float u1, float v1, float alpha) {
         GlStateManager.enableTexture2D();
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);

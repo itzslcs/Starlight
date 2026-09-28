@@ -15,7 +15,8 @@ U="$M/smoke-out/upgrade-$MC"; G="$U/game"
 NEW=$(ls "$M"/dist/Starlight-*+mc"$MC".jar | head -1)
 rm -rf "$U"; mkdir -p "$G"
 # Options as smoke.sh writes them (no onboarding, small view distance)
-sed -n "/^cat > \"\$RUN\/options.txt\" <<OPT$/,/^OPT$/p" "$M/scripts/smoke.sh" | sed '1d;$d' > "$G/options.txt"
+# (with each ${VAR:-default} replaced by its default: an unexpanded value makes Minecraft drop the whole file)
+sed -n "/^cat > \"\$RUN\/options.txt\" <<OPT$/,/^OPT$/p" "$M/scripts/smoke.sh" | sed '1d;$d' | sed 's/\${[A-Z_]*:-\([^}]*\)}/\1/g' > "$G/options.txt"
 # OpenGL throughout: otherwise MW19's first start probes this PC's GPU (RADV answers "ok"), and the Starlight start
 # after it switches to Vulkan, which cannot present on Xvfb (no DRI3) and takes the X server down
 mkdir -p "$G/MW19" && printf opengl > "$G/MW19/renderer.txt"

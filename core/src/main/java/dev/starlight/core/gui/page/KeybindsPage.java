@@ -2,6 +2,7 @@ package dev.starlight.core.gui.page;
 
 import dev.starlight.api.setting.KeySetting;
 import dev.starlight.api.setting.Setting;
+import dev.starlight.core.Guard;
 import dev.starlight.core.gui.GuiRoot;
 import dev.starlight.core.gui.Ui;
 import dev.starlight.core.gui.Widget;
@@ -10,13 +11,27 @@ import dev.starlight.core.gui.widget.KeybindButton;
 import dev.starlight.core.gui.widget.ScrollList;
 import dev.starlight.core.gui.widget.TextField;
 import dev.starlight.core.module.ModuleManager;
+import dev.starlight.core.platform.Platform;
 
 /**
- * Bind profiles (saved sets of Minecraft's own key bindings, shared by every instance), then every Starlight key binding in
- * one list; conflicts (with ours or vanilla) are outlined.
+ * Bind profiles (saved sets of Minecraft's own key bindings, shared by every instance), then Minecraft's key bindings by
+ * category (set here, they apply to the game at once), then Starlight's; conflicts (with ours or vanilla) are outlined.
  */
 public final class KeybindsPage extends Page {
     private final ScrollList list = new ScrollList();
+    /** Minecraft's bindings on this page, by id: read from the game, and setting one applies it to the game. */
+    private final java.util.Map<String, KeySetting> vanilla = new java.util.LinkedHashMap<String, KeySetting>();
+    private boolean syncing;
+    private final Button resetVanilla = new Button("Reset all", Button.Style.SECONDARY, new Runnable() {
+        @Override
+        public void run() {
+            java.util.Map<String, Integer> defaults = new java.util.LinkedHashMap<String, Integer>();
+            for (KeySetting s : vanilla.values()) defaults.put(s.id(), s.defaultValue());
+            int n = root.k.platform.applyVanillaBindings(defaults);
+            syncVanilla();
+            root.k.toast("Minecraft keys", "Back to Minecraft's defaults (" + n + (n == 1 ? " key" : " keys") + " changed).", root.k.theme.accent);
+        }
+    });
 
     public KeybindsPage(GuiRoot root) {
         super(root);
@@ -36,7 +51,34 @@ public final class KeybindsPage extends Page {
     @Override
     public void onShow() {
         list.clear();
+        vanilla.clear();
         if (root.k.binds != null) list.add(new ProfilesPanel());
+        list.add(new Header("Minecraft", "kept in bind profiles", resetVanilla));
+        final String[] category = {null};
+        Guard.run("keybinds page", new Runnable() {
+            @Override
+            public void run() {
+                root.k.platform.vanillaBindings(new Platform.BindingSink() {
+                    @Override
+                    public void accept(final String id, String name, String cat, int key, int def) {
+                        if (!cat.equals(category[0])) list.add(new Header(category[0] = cat, null, null));
+                        final KeySetting s = new KeySetting(id, name, "", def);
+                        s.set(key);
+                        s.addListener(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (syncing) return;
+                                root.k.platform.applyVanillaBindings(java.util.Collections.singletonMap(id, s.key()));
+                                root.refreshVanillaBinds();
+                            }
+                        });
+                        vanilla.put(id, s);
+                        list.add(new Row("", s));
+                    }
+                });
+            }
+        });
+        list.add(new Header("Starlight", null, null));
         list.add(new Row("Starlight", root.k.client.openGui));
         for (ModuleManager.State s : root.k.modules.all()) {
             if ((s.suspend() & ModuleManager.SUSPEND_UNAVAILABLE) != 0) continue;
@@ -46,9 +88,36 @@ public final class KeybindsPage extends Page {
         }
     }
 
+    /** Smoke: the row for Minecraft's binding {@code id} (its setting applies to the game when changed), or null. */
+    public KeySetting minecraftKey(String id) {
+        return vanilla.get(id);
+    }
+
+    /** The rows show the game's keys again (after a profile was applied or the keys were reset). */
+    private void syncVanilla() {
+        syncing = true;
+        try {
+            Guard.run("keybinds page", new Runnable() {
+                @Override
+                public void run() {
+                    root.k.platform.vanillaBindings(new Platform.BindingSink() {
+                        @Override
+                        public void accept(String id, String name, String cat, int key, int def) {
+                            KeySetting s = vanilla.get(id);
+                            if (s != null) s.set(key);
+                        }
+                    });
+                }
+            });
+        } finally {
+            syncing = false;
+        }
+        root.refreshVanillaBinds();
+    }
+
     @Override
     public void render(Ui ui) {
-        heading(ui, "Keybinds", "Bind profiles for Minecraft's own keys, then Starlight's: click one and press a key. Amber = also used elsewhere.");
+        heading(ui, "Keybinds", "Click a key and press a new one. Amber = shared key.");
         list.bounds(x, y + 28, w, h - 28);
         list.render(ui);
     }
@@ -100,7 +169,8 @@ public final class KeybindsPage extends Page {
                     java.util.Map<String, Integer> b = selected == null ? null : root.k.binds.get(selected);
                     if (b == null) return;
                     int n = root.k.platform.applyVanillaBindings(b);
-                    status = "Applied " + selected + ": " + n + (n == 1 ? " bind" : " binds") + " changed.";
+                    syncVanilla();
+                    status = "Applied " + selected + ": " + n + (n == 1 ? " Minecraft key" : " Minecraft keys") + " changed.";
                 }
             });
             makeDefault = new Button("Set default", Button.Style.SECONDARY, new Runnable() {
@@ -151,7 +221,7 @@ public final class KeybindsPage extends Page {
             yy += 14;
             float cx = x + 6;
             if (chips.isEmpty()) {
-                ui.g.text("None yet: set your binds in Minecraft's Controls, then save them here.", cx, yy + 4, ui.t.textDim, false);
+                ui.g.text("None yet: set your Minecraft keys below, then save them as a profile.", cx, yy + 4, ui.t.textDim, false);
                 yy += 18;
             } else {
                 java.util.List<String> names = root.k.binds.names();
@@ -211,14 +281,46 @@ public final class KeybindsPage extends Page {
         @Override
         public void render(Ui ui) {
             ui.g.roundRect(x, y, w, h, 3, ui.t.surface);
-            ui.g.text(owner, x + 7, y + 6, ui.t.textDim, false);
-            ui.g.text(setting.name(), x + 7 + ui.g.textWidth(owner) + 6, y + 6, ui.t.text, false);
+            float nx = x + 7;
+            if (!owner.isEmpty()) {
+                ui.g.text(owner, nx, y + 6, ui.t.textDim, false);
+                nx += ui.g.textWidth(owner) + 6;
+            }
+            ui.g.text(setting.name(), nx, y + 6, ui.t.text, false);
             button.bounds(x + w - 96, y + 2, 92, 16).render(ui);
         }
 
         @Override
         public boolean mouseClicked(Ui ui, int b) {
             return button.contains(ui.mx, ui.my) && button.mouseClicked(ui, b);
+        }
+    }
+
+    /** A section title (with a note and a button) or, without them, a category label. */
+    private static final class Header extends Widget {
+        private final String title, note;
+        private final Button action;
+
+        Header(String title, String note, Button action) {
+            this.title = title;
+            this.note = note;
+            this.action = action;
+            this.h = action != null || note != null ? 20 : 14;
+        }
+
+        @Override
+        public void render(Ui ui) {
+            boolean major = h == 20;
+            float ty = y + h - 11;
+            ui.g.text(title, x + 2, ty, major ? ui.t.accent : ui.t.textDim, false);
+            float bw = action == null ? 0 : ui.g.textWidth(action.label) + 14, nx = x + 2 + ui.g.textWidth(title) + 6;
+            if (note != null && nx + ui.g.textWidth(note) + 8 <= x + w - bw) ui.g.text(note, nx, ty, ui.t.textDim, false);
+            if (action != null) action.bounds(x + w - bw, y + 3, bw, 15).render(ui);
+        }
+
+        @Override
+        public boolean mouseClicked(Ui ui, int button) {
+            return action != null && action.mouseClicked(ui, button);
         }
     }
 }

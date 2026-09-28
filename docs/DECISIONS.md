@@ -395,6 +395,11 @@ Minecraft's own key bindings ([`BindProfiles`](../core/src/main/java/dev/starlig
 - **New instances:** one profile can be the default (★). A fresh install applies it once on first start, with a toast.
   Existing instances are never changed without the player pressing Apply.
 - Applying goes through Minecraft's own `KeyMapping.setKey` and saves `options.txt`, like the Controls screen.
+- **The page shows what a profile holds** (0.8.1; the owner: "i meant actual minecraft binds, not just the starlight
+  binds"). The page listed only Starlight's binds, so profiles looked like they were about those. It now lists
+  Minecraft's bindings by category, each editable in place (applied and saved at once), with *Reset all* for Minecraft's
+  defaults, above Starlight's own binds. Clashes follow Minecraft's rule: two Minecraft bindings on their default keys
+  never clash (1.21.11's F3 debug keys share A, S, B... with movement by design).
 
 ## D-033 Rename to Starlight (owner request, 2026-09-27)
 "change name to Starlight and make it like star themed." Everything was renamed from MW19: packages `dev.mw19` →

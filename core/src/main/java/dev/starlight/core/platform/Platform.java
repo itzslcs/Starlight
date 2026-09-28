@@ -39,7 +39,7 @@ public interface Platform extends Game {
 
     void setClipboard(String text);
 
-    /** Vanilla key bindings (name, GLFW code) for conflict display. */
+    /** Minecraft's own key bindings in its order, for the Keybinds page and conflict display. */
     void vanillaBindings(BindingSink sink);
 
     /** Minecraft's own key bindings by id ("key.hotbar.1") with canonical codes, in its order (bind profiles). */
@@ -102,7 +102,8 @@ public interface Platform extends Game {
     void openWorld(String folder, long seed);
 
     interface BindingSink {
-        void accept(String name, int key);
+        /** {@code id} as in bind profiles ("key.hotbar.1"), shown name and category, canonical key and default key. */
+        void accept(String id, String name, String category, int key, int defaultKey);
     }
 
     // ---- data for HUD / utility modules (Phase 4) ----

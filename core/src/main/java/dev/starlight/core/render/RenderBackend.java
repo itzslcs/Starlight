@@ -38,6 +38,9 @@ public interface RenderBackend {
      */
     default void player(float x1, float y1, float x2, float y2, int skin, boolean slim, float yaw, float pitch) {}
 
+    /** The signed-in player's face, the hat layer over it, stretched over the (square) rect. */
+    default void face(float x1, float y1, float x2, float y2) {}
+
     /** Submit anything batched (called at the end of every pass). */
     default void flush() {}
 }
