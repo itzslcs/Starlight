@@ -72,6 +72,7 @@ public final class GuiRoot implements Surface {
         pages.add(new ProfilesPage(this));
         pages.add(new KeybindsPage(this));
         pages.add(new dev.starlight.core.gui.page.SkinsPage(this));
+        pages.add(new dev.starlight.core.gui.page.AccountsPage(this));
         pages.add(new dev.starlight.core.gui.page.PacksPage(this));
         pages.add(new dev.starlight.core.gui.page.HostPage(this));
         pages.add(new RulesPage(this));

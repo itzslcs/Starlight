@@ -186,6 +186,35 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
         return mc.getUser().getProfileId();
     }
 
+    /**
+     * Account switch (D-034): the session goes in, and the game's cached profile with it, so the name and face in menus
+     * follow. The current connection keeps the identity it joined with; the switch lands on the next join.
+     */
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public boolean setSession(String name, UUID id, String token) {
+        try {
+            //? if >=1.21.9 {
+            net.minecraft.client.User user = new net.minecraft.client.User(name, id, token, java.util.Optional.empty(), java.util.Optional.empty());
+            //?} else {
+            /*net.minecraft.client.User user = new net.minecraft.client.User(name, id, token, java.util.Optional.empty(), java.util.Optional.empty(),
+                    token.isEmpty() ? net.minecraft.client.User.Type.LEGACY : net.minecraft.client.User.Type.MSA);
+            *///?}
+            ((dev.starlight.fabric.mixin.MinecraftUserAccessor) mc).starlight$setUser(user);
+            com.mojang.authlib.GameProfile profile = new com.mojang.authlib.GameProfile(id, name);
+            //? if >=26.3 {
+            /*Object result = new com.mojang.authlib.services.ProfileResult(profile);
+            *///?} else {
+            Object result = new com.mojang.authlib.yggdrasil.ProfileResult(profile);
+            //?}
+            ((java.util.concurrent.CompletableFuture) ((dev.starlight.fabric.mixin.MinecraftProfileAccessor) mc).starlight$profileFuture()).obtrudeValue(result);
+            return true;
+        } catch (RuntimeException e) {
+            dev.starlight.core.Log.error("account switch: could not put the session in", e);
+            return false;
+        }
+    }
+
     @Override
     public double x() {
         return mc.player == null ? 0 : mc.player.getX();

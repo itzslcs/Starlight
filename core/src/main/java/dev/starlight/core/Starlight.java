@@ -65,6 +65,8 @@ public final class Starlight {
     public volatile dev.starlight.core.modules.TierTaggerModule tierTagger;
     public final dev.starlight.core.host.WorldHost host = new dev.starlight.core.host.WorldHost(this);
     public final dev.starlight.core.skin.SkinLibrary skins;
+    /** Prism Launcher accounts the owner copied in, for the in-game switch (D-034). */
+    public final dev.starlight.core.account.Accounts accounts;
     /** Set by the home screen's Host World: open the Host page once a singleplayer world has loaded. */
     public boolean hostWhenWorldOpens;
     public Theme theme = Theme.preset("Starlight");
@@ -107,6 +109,7 @@ public final class Starlight {
         this.config = new ConfigManager(configDir(platform.gameDir()), modules, hud, client, scheduler);
         this.http = new dev.starlight.core.net.HttpClient(scheduler, modVersion);
         this.skins = new dev.starlight.core.skin.SkinLibrary(configDir(platform.gameDir()).resolve("skins"));
+        this.accounts = new dev.starlight.core.account.Accounts(configDir(platform.gameDir()).resolve("accounts.json"));
     }
 
     /** {@code <gameDir>/Starlight} (see {@link ConfigFolder}: older folders are moved over once). */

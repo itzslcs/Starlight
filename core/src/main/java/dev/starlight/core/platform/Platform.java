@@ -174,6 +174,15 @@ public interface Platform extends Game {
      */
     default void setFastChests(boolean on) {}
 
+    /**
+     * In-game account switch (D-034): makes {@code name}/{@code id} the signed-in session, with {@code token} as its
+     * session token ("" for an offline account). A server already joined keeps the old identity, so it takes effect on
+     * the next join. Returns false where the platform cannot switch. Never log the token. Game thread.
+     */
+    default boolean setSession(String name, java.util.UUID id, String token) {
+        return false;
+    }
+
     /** Smoke only: a platform self-check by name ("exploit"); "n/a" where it does not apply. */
     default String selfTest(String what) {
         return "n/a";

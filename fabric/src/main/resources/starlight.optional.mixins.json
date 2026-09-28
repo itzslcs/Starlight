@@ -27,6 +27,7 @@
     "LightTextureMixin",
     "LivingEntityRendererMixin",
     "MinecraftProfileAccessor",
+    "MinecraftUserAccessor",
     "MultiPlayerGameModeMixin",
     "NameTagMixin",
     "OverlayTextureAccessor",

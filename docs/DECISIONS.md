@@ -419,8 +419,10 @@ The owner asked for an in-game account switcher with Microsoft sign-in, accounts
 layout of Prism's `accounts.json`, like In-Game Account Switcher. That is fine in principle and revises the "account
 switcher" part of D-023. But Minecraft's login only accepts Microsoft app registrations that Mojang has approved for
 the Minecraft API, so it needs Starlight's own Entra (Azure) app with that approval.
-- **Declined:** signing in under another app's registration (the owner mentioned the Minecraft Android app's). That
-  impersonates the other app to get around Mojang's approval step.
-- **Parked:** the owner does not want to register and apply for now ("thats effort"). With an approved client ID, the
-  plan is an Accounts page, sign-in through Microsoft's page in the browser, `Starlight/accounts.json` kept local, and
-  opt-in network use listed in the [README](../README.md).
+- **Aproved** Use prisms accounts.json to ingame account switch (Only if owner puts it in manually)
+- **Shipped (2026-09-28)** The Accounts page reads `Starlight/accounts.json`, a copy of Prism's file the owner puts
+  there himself (or drops on the page), and switches the session to a chosen account: `dev.starlight.core.account.Accounts`
+  parses it, `Platform.setSession` puts the session and the game's cached profile in (Fabric: a `@Mutable` accessor on
+  Minecraft's `user` field; 1.8.9 keeps the default "cannot switch"). Starlight never writes that file, never refreshes
+  a token and never signs anyone in, so no Entra app is needed for this part. A server already joined keeps the old
+  identity: the switch lands on the next join, and an expired token only fails at that join.

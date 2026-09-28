@@ -19,6 +19,11 @@ public final class Icons {
         } else if ("profiles".equals(name)) {
             g.roundRect(x + 3, y, 4, 4, 2, c);
             g.roundRect(x + 1, y + 5, 8, 5, 2, c);
+        } else if ("accounts".equals(name)) {
+            g.roundRect(x + 5, y, 5, 4, 2, c);
+            g.roundRect(x + 4, y + 5, 6, 5, 2, c);
+            g.roundRect(x, y + 1, 4, 3, 1.5f, c);
+            g.roundRect(x, y + 5, 3, 5, 1.5f, c);
         } else if ("keys".equals(name)) {
             g.roundOutline(x, y + 2, 10, 7, 1.5f, 1, c);
             g.rect(x + 2, y + 4, x + 3, y + 5, c);

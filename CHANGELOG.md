@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.2
+- **Accounts page:** switch between the accounts Prism Launcher signed in, without leaving the game. Put your Prism
+  `accounts.json` in the `Starlight` folder (or drag it onto the page) and every account in it is listed; *Use* switches
+  to one. Starlight only reads that file: it never changes it, never refreshes a token and never signs you in, so
+  Microsoft sign-in still belongs to your launcher. A switch shows up on your next server join, not in the world you are
+  already in, and offline or expired accounts are marked as such.
+
 ## 0.8.1
 - **Minecraft's own keys on the Keybinds page:** every Minecraft key bind (movement, hotbar 1–9, inventory and the rest)
   is listed by category, and you can change it right there, like in Minecraft's Controls. These are the keys bind
