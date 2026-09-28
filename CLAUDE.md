@@ -55,5 +55,7 @@ build for Forge 1.8.9. `scripts/`: smoke/prod tests. `docs/`: all documentation.
 
 ## Environment facts
 - Prism (Flatpak) data: `~/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/`. Dawn (Flatpak) data: `~/.var/app/gg.dawn.Launcher/data/dawn/`.
-- Never use the user's launcher accounts (accounts.json/keyrings) and never read those files.
+- Never sign in as the owner and never read the launcher's own account files (Prism's `accounts.json`, keyrings).
+  The one exception is the in-game switcher (D-034): it reads only the copy of `accounts.json` the owner puts in
+  `Starlight/` himself, never writes it, never refreshes a token and never signs anyone in.
 - `grep` is aliased to ugrep, which rejects some complex regexes. Use python3 for heavy log parsing.

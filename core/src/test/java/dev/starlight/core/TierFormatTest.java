@@ -30,7 +30,27 @@ class TierFormatTest {
     @Test
     void bestPicksTheHighestTierAndMarksRetired() {
         assertEquals("§8[§cRHT1§8]", TierFormat.format(rankings(), "Best", true, false));
-        assertEquals("§8[§cRHT1 §7sword§8]", TierFormat.format(rankings(), "Best", true, true));
+        assertEquals("§8[§cRHT1 §7\u2694§8]", TierFormat.format(rankings(), "Best", true, true), "the gamemode shows as a glyph, not its name");
+    }
+
+    @Test
+    void everyModeOfTheSettingHasItsOwnGlyph() {
+        String[] modes = {"sword", "vanilla", "pot", "nethop", "smp", "uhc", "axe", "mace", "bed", "bow", "creeper",
+                "debuff", "dia_crystal", "dia_smp", "elytra", "manhunt", "minecart", "og_vanilla", "speed", "trident"};
+        java.util.Set<String> seen = new java.util.HashSet<String>();
+        for (String m : modes) {
+            Map<String, Object> one = Json.obj(Json.parse("{\"" + m + "\":{\"tier\":2,\"pos\":0,\"retired\":false}}"));
+            String tag = TierFormat.format(one, m, true, true);
+            String glyph = tag.substring(tag.indexOf("§7") + 2, tag.length() - 3);
+            assertEquals(1, glyph.length(), m + " has no single-character glyph: " + glyph);
+            assertTrue(seen.add(glyph), m + " reuses the glyph of another mode");
+        }
+    }
+
+    @Test
+    void anUnknownModeKeepsItsName() {
+        Map<String, Object> one = Json.obj(Json.parse("{\"ltms\":{\"tier\":2,\"pos\":0,\"retired\":false}}"));
+        assertEquals("§8[§6HT2 §7ltms§8]", TierFormat.format(one, "ltms", true, true), "a custom list's own mode has no glyph");
     }
 
     @Test

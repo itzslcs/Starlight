@@ -85,6 +85,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 
 ## core tests · `dev.starlight.core`
 
+- [AccountsTest.java](../core/src/test/java/dev/starlight/core/AccountsTest.java)
 - [BindProfilesTest.java](../core/src/test/java/dev/starlight/core/BindProfilesTest.java): Bind profiles: kept across restarts (the file other instances read), with the default for new instances.
 - [ColorChromaTest.java](../core/src/test/java/dev/starlight/core/ColorChromaTest.java): debug-log 2026-09-26: chroma hue was computed in float from epoch millis and only moved every ~2 minutes.
 - [ConfigManagerTest.java](../core/src/test/java/dev/starlight/core/ConfigManagerTest.java)
@@ -105,6 +106,10 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [TestPlatform.java](../core/src/test/java/dev/starlight/core/TestPlatform.java): Headless Platform for tests: no world, no screen, everything inert.
 - [TierFormatTest.java](../core/src/test/java/dev/starlight/core/TierFormatTest.java): The Tier Tagger's reading of the MCTiers v2 profile schema (fixture captured from the live API).
 - [VideoPresetsTest.java](../core/src/test/java/dev/starlight/core/VideoPresetsTest.java): Presets keep the player's original options (first snapshot wins), Undo puts them back, and auto never raises distances.
+
+## core · `dev.starlight.core.account`
+
+- [Accounts.java](../core/src/main/java/dev/starlight/core/account/Accounts.java): The accounts Prism Launcher signed in (DECISIONS D-034).
 
 ## core · `dev.starlight.core.binds`
 
@@ -132,6 +137,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 ## core · `dev.starlight.core.gui.page`
 
 - [AboutPage.java](../core/src/main/java/dev/starlight/core/gui/page/AboutPage.java): Version, target, compatibility flags, hook health and the privacy statement.
+- [AccountsPage.java](../core/src/main/java/dev/starlight/core/gui/page/AccountsPage.java): Accounts (DECISIONS D-034): switching between the accounts Prism Launcher signed in.
 - [ChatSearchPage.java](../core/src/main/java/dev/starlight/core/gui/page/ChatSearchPage.java): Searches the in-memory chat history kept by Chat Tools (newest first).
 - [HostPage.java](../core/src/main/java/dev/starlight/core/gui/page/HostPage.java): Host World: open the singleplayer world to friends on the local network and, through the router, the internet.
 - [HudEditor.java](../core/src/main/java/dev/starlight/core/gui/page/HudEditor.java): Full-screen HUD layout editor.
@@ -314,6 +320,7 @@ for how the pieces fit see [ARCHITECTURE](ARCHITECTURE.md).
 - [LivingEntityRendererMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/LivingEntityRendererMixin.java): Show own nametag in third person (vanilla hides the camera entity's name).
 - [MinecraftMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/MinecraftMixin.java)
 - [MinecraftProfileAccessor.java](../fabric/src/main/java/dev/starlight/fabric/mixin/MinecraftProfileAccessor.java): Skin changes: the profile the game fetched once at start (FabricMedia.refreshOwnSkin puts the new one in).
+- [MinecraftUserAccessor.java](../fabric/src/main/java/dev/starlight/fabric/mixin/MinecraftUserAccessor.java): Account switch (D-034): the signed-in session and the two things the game derives from it, all final fields.
 - [MouseHandlerMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/MouseHandlerMixin.java)
 - [MultiPlayerGameModeMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/MultiPlayerGameModeMixin.java): The player's attacks and block uses: observed for the combo counter; the Crystal Optimizer acts after a hit went to the server, the Anchor Optimizer on a use...
 - [NameTagMixin.java](../fabric/src/main/java/dev/starlight/fabric/mixin/NameTagMixin.java): Tier Tagger: the tier after a player's name on nametags (Starlight.nameSuffix).

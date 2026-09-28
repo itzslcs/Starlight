@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.4
+- **Tier Tagger shows the gamemode as an icon:** with *Gamemode icon* on, the tag reads `[HT1 ⚔]` instead of
+  `[HT1 sword]` — a glyph per mode (⚔ sword, ⚗ pot, ♥ uhc, ⚡ speed, ♆ trident and the rest). The glyphs come from the font
+  Minecraft already ships, so they draw the same on every version. A mode from a custom list keeps its name.
+
 ## 0.8.3
 - **Account switch fix:** switching accounts and joining a server got you kicked with "Invalid signature for profile
   public key". The game keeps the chat signing key of the account it started with, and 0.8.2 left that key in place, so

@@ -354,6 +354,10 @@ is now a module ([`TierTaggerModule`](../core/src/main/java/dev/starlight/core/m
 - It shows a player's tier (e.g. `[HT1]`, `[RHT1]` for a retired player's peak) after their name on the nametag and in
   the tab list, from MCTiers, SubTiers or any list serving the MCTiers v2 API. The gamemode is the best tier by default,
   or one chosen mode.
+- **Gamemode icon (owner request, 2026-09-28):** *Show gamemode* draws the mode as a glyph rather than its name
+  (`[HT1 ⚔]`, not `[HT1 sword]`). The glyphs come from the font Minecraft itself ships (unifont, checked: all 20 are
+  in `unifont_all_no_pua-15.1.05.hex`), so nothing of ours has to be drawn into a vanilla nametag or the tab list, and
+  every version has them. A mode we have no glyph for (a custom list's own) keeps its name.
 - **Network:** only while the module is on (it is off by default): one HTTPS GET of `<list>/profile/<uuid>` per visible
   player with a real account (UUID v4; offline-mode UUIDs are never looked up), each answer (ranked or not) cached 4 hours. Nothing is sent but the UUID.
 - **Rules:** extra information about other players, so DISALLOWED on Hypixel ([`serverrules.json`](../core/src/main/resources/starlight/serverrules.json)) and off by default.

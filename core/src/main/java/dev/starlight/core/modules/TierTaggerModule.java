@@ -36,7 +36,7 @@ public final class TierTaggerModule extends Module {
     private final BoolSetting nametag = add(new BoolSetting("nametag", "Nametags", "Show the tier above players", true));
     private final BoolSetting tab = add(new BoolSetting("tab", "Tab list", "Show the tier in the player list", true));
     private final BoolSetting peak = add(new BoolSetting("peak", "Peak for retired", "Retired players show their peak tier (R prefix)", true));
-    private final BoolSetting showMode = add(new BoolSetting("show_mode", "Show gamemode", "Add the gamemode's name to the tag", false));
+    private final BoolSetting showMode = add(new BoolSetting("show_mode", "Gamemode icon", "Add a small icon for the gamemode to the tag (\u2694 sword, \u2697 pot, \u2665 uhc \u2026)", false));
 
     /** One player's lookup. The tag (with its leading space) is formatted again only when the settings change. */
     private static final class Result {
