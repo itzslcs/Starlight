@@ -205,4 +205,6 @@
   - Core tests pass.
 - **Found on the way** (debug-log): the upgrade script copied smoke.sh's options with an unexpanded `${GUI_SCALE:-2}`,
   which made Minecraft drop the whole options file.
+- **Published:** Modrinth draft updated to 18 versions `0.8.1+mc<mc>` (SHA-512 matching dist/, VulkanMod embedded and
+  its source zip on 1.21.9–1.21.11), replacing 0.8.0; still a draft. GitHub: pushed to itzslcs/Starlight.
 
