@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.3
+- **Account switch fix:** switching accounts and joining a server got you kicked with "Invalid signature for profile
+  public key". The game keeps the chat signing key of the account it started with, and 0.8.2 left that key in place, so
+  servers saw a key that did not match the new profile. The switch now replaces it: the key is cleared at once and the
+  new account's own key is fetched in the background. Joining a moment after a switch works; only servers that require
+  a secure profile may need a second try, once the key has arrived.
+
 ## 0.8.2
 - **Accounts page:** switch between the accounts Prism Launcher signed in, without leaving the game. Put your Prism
   `accounts.json` in the `Starlight` folder (or drag it onto the page) and every account in it is listed; *Use* switches

@@ -189,6 +189,11 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
     /**
      * Account switch (D-034): the session goes in, and the game's cached profile with it, so the name and face in menus
      * follow. The current connection keeps the identity it joined with; the switch lands on the next join.
+     *
+     * <p>The chat signing key the game holds was fetched for the account that started it. Sending that key under a new
+     * profile is what servers answer with "Invalid signature for profile public key", so the key manager is emptied here
+     * and the new account's own key is fetched on a thread (authlib's services do HTTP). Until it arrives the player
+     * joins without a signing key, which servers that do not enforce secure profiles accept, rather than with a wrong one.
      */
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -200,7 +205,9 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
             /*net.minecraft.client.User user = new net.minecraft.client.User(name, id, token, java.util.Optional.empty(), java.util.Optional.empty(),
                     token.isEmpty() ? net.minecraft.client.User.Type.LEGACY : net.minecraft.client.User.Type.MSA);
             *///?}
-            ((dev.starlight.fabric.mixin.MinecraftUserAccessor) mc).starlight$setUser(user);
+            dev.starlight.fabric.mixin.MinecraftUserAccessor in = (dev.starlight.fabric.mixin.MinecraftUserAccessor) mc;
+            in.starlight$setUser(user);
+            in.starlight$setProfileKeyPairManager(net.minecraft.client.multiplayer.ProfileKeyPairManager.EMPTY_KEY_MANAGER);
             com.mojang.authlib.GameProfile profile = new com.mojang.authlib.GameProfile(id, name);
             //? if >=26.3 {
             /*Object result = new com.mojang.authlib.services.ProfileResult(profile);
@@ -208,11 +215,46 @@ public final class FabricPlatform implements Platform, ScreenHost, ChatAccess, M
             Object result = new com.mojang.authlib.yggdrasil.ProfileResult(profile);
             //?}
             ((java.util.concurrent.CompletableFuture) ((dev.starlight.fabric.mixin.MinecraftProfileAccessor) mc).starlight$profileFuture()).obtrudeValue(result);
+            if (!token.isEmpty()) fetchSigningKey(user, token);
             return true;
         } catch (RuntimeException e) {
             dev.starlight.core.Log.error("account switch: could not put the session in", e);
             return false;
         }
+    }
+
+    /** The new account's chat signing key, off the game thread; it goes in only while that account is still the one signed in. */
+    private void fetchSigningKey(final net.minecraft.client.User user, final String token) {
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    //? if >=26.3 {
+                    /*com.mojang.authlib.minecraft.UserApiService api =
+                            com.mojang.authlib.services.MinecraftServicesDiscoveryService.create(mc.getProxy()).createUserApiService(token);
+                    *///?} else {
+                    com.mojang.authlib.minecraft.UserApiService api =
+                            new com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService(mc.getProxy()).createUserApiService(token);
+                    //?}
+                    final net.minecraft.client.multiplayer.ProfileKeyPairManager keys =
+                            net.minecraft.client.multiplayer.ProfileKeyPairManager.create(api, user, mc.gameDirectory.toPath());
+                    mc.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mc.getUser() != user) return; // switched again in the meantime
+                            dev.starlight.fabric.mixin.MinecraftUserAccessor in = (dev.starlight.fabric.mixin.MinecraftUserAccessor) mc;
+                            in.starlight$setUserApiService(api);
+                            in.starlight$setProfileKeyPairManager(keys);
+                        }
+                    });
+                } catch (Exception e) {
+                    // The account stays usable without a signing key: only servers that enforce secure profiles refuse it.
+                    dev.starlight.core.Log.warn("account switch: no chat signing key for this account (" + e + ")");
+                }
+            }
+        }, "Starlight account keys");
+        t.setDaemon(true);
+        t.start();
     }
 
     @Override

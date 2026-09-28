@@ -426,3 +426,8 @@ the Minecraft API, so it needs Starlight's own Entra (Azure) app with that appro
   Minecraft's `user` field; 1.8.9 keeps the default "cannot switch"). Starlight never writes that file, never refreshes
   a token and never signs anyone in, so no Entra app is needed for this part. A server already joined keeps the old
   identity: the switch lands on the next join, and an expired token only fails at that join.
+- **0.8.3 fix** A switched account was kicked with "Invalid signature for profile public key": Minecraft holds the chat
+  signing key (`Minecraft.profileKeyPairManager`) and the `UserApiService` of the account that started the game, both
+  derived from the session, so `setSession` replaces them too. The key is emptied on the switch (no key is accepted by
+  servers that do not enforce secure profiles; a key from the wrong profile is refused by all of them) and the new
+  account's key is fetched off the game thread, then installed only if that account is still signed in.
